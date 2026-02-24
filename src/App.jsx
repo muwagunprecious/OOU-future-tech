@@ -1369,7 +1369,7 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
         try {
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             const apiBase = isLocal ? 'http://localhost:3001' : '';
-            await fetch(`${apiBase}/api/send-ticket`, {
+            const response = await fetch(`${apiBase}/api/send-ticket`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1379,6 +1379,13 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
                     type: formData.type
                 })
             });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('📧 Mailer API Error:', response.status, errorData);
+            } else {
+                console.log('📧 Email ticket delivered successfully!');
+            }
         } catch (emailErr) {
             console.warn('Email Delivery failed (server might be down):', emailErr);
             // We don't block the UI if email fails, as the DB registration was successful

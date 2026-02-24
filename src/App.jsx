@@ -1253,7 +1253,8 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
 
         // Send Email Ticket
         try {
-            await fetch('http://localhost:3001/send-ticket', {
+            const apiBase = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
+            await fetch(`${apiBase}/api/send-ticket`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -1,27 +1,19 @@
-const express = require('express');
 const nodemailer = require('nodemailer');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const path = require('path');
 
-dotenv.config({ path: path.join(__dirname, '../.env') });
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+export default async function handler(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
     }
-});
 
-app.post('/api/send-ticket', async (req, res) => {
     const { email, name, ticketId, type } = req.body;
 
-    console.log(`📧 Attempting to send ticket to: ${email}`);
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
 
     const mailOptions = {
         from: `"OOU Future Tech" <${process.env.EMAIL_USER}>`,
@@ -78,15 +70,9 @@ app.post('/api/send-ticket', async (req, res) => {
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log(`✅ Ticket sent to ${email}`);
         res.status(200).json({ message: 'Email sent successfully' });
     } catch (error) {
-        console.error('❌ Email error:', error);
+        console.error('Email error:', error);
         res.status(500).json({ error: 'Failed to send email' });
     }
-});
-
-const PORT = 3001;
-app.listen(PORT, () => {
-    console.log(`🚀 Email proxy server running on http://localhost:${PORT}`);
-});
+}

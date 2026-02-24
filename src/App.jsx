@@ -7,7 +7,7 @@ import {
     ChevronRight, Github, Twitter, Linkedin, Mail,
     MapPin, Calendar, Users, Cpu, Shield, Globe, Award,
     Zap, Code2, Mic, Network, Lightbulb, Rocket,
-    Download, CheckCircle, Ticket, X, Trash2, Store
+    Download, CheckCircle, Ticket, X, Trash2, Store, Menu
 } from 'lucide-react';
 
 /* ───────────────────────────────────────────
@@ -32,6 +32,7 @@ const GlobalStyle = () => (
         --shadow: 3px 3px 0 #1a1a1a;
         --shadow-lg: 5px 5px 0 #1a1a1a;
       }
+      .container { padding: 0 1rem; }
     }
     * { margin:0; padding:0; box-sizing:border-box; }
     html { scroll-behavior: smooth; }
@@ -54,7 +55,7 @@ const GlobalStyle = () => (
     img { display: block; max-width: 100%; }
 
     .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
-    .section { padding: 7rem 0; border-bottom: 2px solid #eee; }
+    .section { padding: clamp(4rem, 10vw, 7rem) 0; border-bottom: 2px solid #eee; }
     @media(max-width:768px){ .section { padding: 4rem 0; } }
 
     /* NAV */
@@ -107,11 +108,75 @@ const GlobalStyle = () => (
     @media(max-width:1024px){
       .nav-menu-pill { display: none; }
     }
+    
+    .mobile-menu-btn {
+      display: none;
+      background: #fff;
+      border: 2px solid #1a1a1a;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 3px 3px 0 #1a1a1a;
+      z-index: 1001;
+    }
+
+    @media(max-width: 1024px) {
+      .mobile-menu-btn { display: flex; }
+    }
+
+    .mobile-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5rem;
+      padding: 2rem;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-20px);
+    }
+    .mobile-overlay.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .mobile-nav-links {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+    .mobile-nav-links a {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 2rem;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .mobile-nav-close {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      padding: 0.5rem;
+    }
+
     @media(max-width:480px){
-      .nav-wrap { padding: 0 3vw; top: 1rem; }
-      .nav-logo-text { font-size: 0.75rem; }
-      .nav-logo-pill { padding: 0.5rem 1rem; }
-      .nav-cta-pill .btn-nav { padding: 0.6rem 1.2rem; font-size: 0.75rem; }
+      .nav-wrap { padding: 0 4vw; top: 1rem; }
+      .nav-logo-text { font-size: 0.8rem; }
+      .nav-logo-pill { padding: 0.5rem 0.8rem; gap: 0.5rem; }
+      .nav-cta-pill .btn-nav { padding: 0.6rem 1rem; font-size: 0.7rem; }
+      .mobile-menu-btn { width: 40px; height: 40px; }
     }
 
     /* ══════════════════════════════════════════
@@ -136,7 +201,7 @@ const GlobalStyle = () => (
     }
     .hero-content {
       max-width: 900px;
-      padding: 0 2rem;
+      padding: 0 1.5rem;
       z-index: 2;
     }
     .hero-label {
@@ -149,7 +214,7 @@ const GlobalStyle = () => (
       font-size: 1.1rem;
     }
     .hero-h1 {
-      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-size: clamp(2.2rem, 8vw, 6.5rem);
       line-height: 0.95;
       margin-bottom: 2rem;
       color: #fff;
@@ -226,8 +291,8 @@ const GlobalStyle = () => (
     .vision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
     @media(max-width: 768px){ .vision-grid { grid-template-columns: 1fr; gap: 2.5rem; } }
     .section-label { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent-r); margin-bottom: 1.2rem; }
-    .section-h2 { font-size: clamp(2.5rem,5vw,5rem); margin-bottom: 1.5rem; }
-    .body-text { color: #52525b; font-size: 1.1rem; line-height: 1.75; margin-bottom: 2rem; }
+    .section-h2 { font-size: clamp(2rem, 5vw, 5rem); margin-bottom: 1.5rem; line-height: 1.1; }
+    .body-text { color: #52525b; font-size: clamp(1rem, 2vw, 1.1rem); line-height: 1.75; margin-bottom: 2rem; }
     .feature-list { display: flex; flex-direction: column; gap: 1.5rem; }
     .feature-item { display: flex; gap: 1.2rem; align-items: flex-start; }
     .feature-icon { width: 3rem; height: 3rem; border-radius: 0.875rem; background: #f3f4f6; border: 2px solid #1a1a1a; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -247,7 +312,7 @@ const GlobalStyle = () => (
     @media(max-width:768px){ .vision-badge { display: none; } }
 
     /* TICKETS */
-    .tickets { background: var(--bg); padding: 8rem 0; }
+    .tickets { background: var(--bg); }
     .section-header { text-align: center; margin-bottom: 5rem; }
     .section-header p { color: #52525b; max-width: 38rem; margin: 1rem auto 0; font-size: 1.1rem; line-height: 1.6; }
     .tickets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
@@ -257,6 +322,9 @@ const GlobalStyle = () => (
       background: #fff; border: 3px solid #000; border-radius: 2.5rem;
       padding: 3rem; display: flex; flex-direction: column; position: relative;
       box-shadow: 8px 8px 0 #000; transition: all 0.3s;
+    }
+    @media(max-width: 640px) {
+      .ticket-card-v2 { padding: 1.25rem 1rem; border-radius: 1.5rem; }
     }
     .ticket-card-v2:hover { transform: translate(-4px, -4px); box-shadow: 12px 12px 0 #000; }
     
@@ -324,11 +392,12 @@ const GlobalStyle = () => (
       display: flex; align-items: center; justify-content: space-between; gap: 1rem;
     }
     @media(max-width:400px){
-      .ticket-graphic { padding: 1rem 0.8rem; }
+      .ticket-graphic { padding: 1rem 0.5rem; }
+      .ticket-graphic-inner { gap: 0.5rem; }
       .ticket-conference-name { display: none; }
       .ticket-logo-area { gap: 0.2rem; }
-      .ticket-badge-wrap { padding-left: 0.5rem; }
-      .ticket-barcode { padding-left: 0.5rem; }
+      .ticket-badge-wrap { padding-left: 0.4rem; }
+      .ticket-barcode { padding-left: 0.4rem; }
     }
     .ticket-logo-area { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
     .ticket-logo-dots {
@@ -339,11 +408,11 @@ const GlobalStyle = () => (
     .ticket-badge-wrap { flex: 1; text-align: center; border-left: 1px dashed rgba(0,0,0,0.2); padding-left: 1rem; }
     .ticket-badge-label {
       font-family: 'Outfit', sans-serif; font-weight: 900;
-      font-size: 1.1rem; text-transform: uppercase;
+      font-size: clamp(0.7rem, 2.5vw, 1.1rem); text-transform: uppercase;
       color: #000; letter-spacing: -0.02em;
       line-height: 1;
       display: inline-block;
-      padding: 0.3rem 1rem;
+      padding: 0.3rem 0.8rem;
     }
     .ticket-badge-std { background: #000; color: #fff; }
     .ticket-badge-pro { background: var(--accent-r); color: #fff; }
@@ -485,8 +554,9 @@ const GlobalStyle = () => (
     /* CTA BANNER */
     .cta-banner { background: var(--accent-r); color: #fff; padding: 7rem 0; text-align: center; border-top: var(--border); border-bottom: var(--border); }
     @media(max-width: 640px){ .cta-banner { padding: 4.5rem 0; } }
-    .cta-h2 { font-size: clamp(3rem, 8vw, 7rem); margin-bottom: 3rem; letter-spacing: -0.04em; color: #fff; }
-    .cta-btns { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+    .cta-h2 { font-size: clamp(2.5rem, 8vw, 7rem); margin-bottom: 3rem; letter-spacing: -0.04em; color: #fff; line-height: 1; }
+    .cta-btns { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    @media(max-width: 480px){ .cta-btns { flex-direction: column; padding: 0 2rem; } }
     .btn-cta-dark {
       background: #000; color: #fff; padding: 1.3rem 3rem;
       border-radius: 1.5rem; font-size: 1.2rem; font-weight: 900;
@@ -565,12 +635,30 @@ const GlobalStyle = () => (
       border: 2px solid #000; display: inline-block; margin-bottom: 1rem;
       letter-spacing: 0.1em;
     }
-    .dt-user-name { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 3rem; line-height: 0.9; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: -0.02em; color: #000; }
-    .dt-user-email { color: #52525b; font-weight: 600; font-size: 1rem; }
+    .dt-user-name { 
+      font-family: 'Outfit', sans-serif; 
+      font-weight: 900; 
+      font-size: clamp(1.8rem, 6vw, 3rem); 
+      line-height: 1; 
+      text-transform: uppercase; 
+      margin-bottom: 0.75rem; 
+      letter-spacing: -0.02em; 
+      color: #000; 
+    }
+    .dt-user-email { color: #52525b; font-weight: 600; font-size: 0.9rem; word-break: break-all; }
     
-    .dt-event-details { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; border-top: 1px dashed #ccc; padding-top: 2rem; }
-    .dt-detail { display: flex; flex-direction: column; gap: 0.4rem; }
-    .dt-detail:last-child { grid-column: span 2; }
+    .dt-event-details { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 1.5rem; 
+      border-top: 1px dashed #ccc; 
+      padding-top: 2rem; 
+    }
+    @media(max-width: 400px) {
+      .dt-event-details { grid-template-columns: 1fr; gap: 1rem; }
+      .dt-detail:last-child { grid-column: span 1; }
+      .dt-body { padding: 2rem 1.5rem; }
+    }
     .dt-detail-label { font-size: 0.65rem; text-transform: uppercase; font-weight: 900; color: #a1a1aa; letter-spacing: 0.1em; display: flex; align-items: center; gap: 0.4rem; }
     .dt-detail-val { font-family: 'Outfit', sans-serif; font-weight: 900; text-transform: uppercase; font-size: 0.95rem; color: #000; }
     
@@ -629,30 +717,56 @@ const GlobalStyle = () => (
 /* ───────────────────────────────────────────
    NAVBAR
 ─────────────────────────────────────────── */
-const Navbar = ({ onRegister }) => (
-    <div className="nav-wrap">
-        <div className="nav-logo-pill">
-            <div className="nav-logo-icon">
-                <div style={{ display: 'flex', gap: '2px' }}>
-                    <div style={{ width: '8px', height: '8px', background: 'var(--accent-r)', borderRadius: '1px' }} />
-                    <div style={{ width: '8px', height: '8px', background: '#000', borderRadius: '1px' }} />
+const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen }) => (
+    <>
+        <div className="nav-wrap">
+            <div className="nav-logo-pill">
+                <div className="nav-logo-icon">
+                    <div style={{ display: 'flex', gap: '2px' }}>
+                        <div style={{ width: '8px', height: '8px', background: 'var(--accent-r)', borderRadius: '1px' }} />
+                        <div style={{ width: '8px', height: '8px', background: '#000', borderRadius: '1px' }} />
+                    </div>
                 </div>
+                <span className="nav-logo-text">OOU Future Tech</span>
             </div>
-            <span className="nav-logo-text">OOU Future Tech</span>
+
+            <div className="nav-menu-pill">
+                <nav className="nav-links">
+                    {['Schedule', 'Speakers', 'FAQs', 'Team'].map(l => (
+                        <a key={l} href={`#${l.toLowerCase()}`}>{l}</a>
+                    ))}
+                </nav>
+            </div>
+
+            <div className="nav-cta-pill" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <button className="btn-nav" onClick={() => onRegister()}>Register Now</button>
+                <button className="mobile-menu-btn" onClick={() => setIsMenuOpen(true)}>
+                    <Menu size={20} />
+                </button>
+            </div>
         </div>
 
-        <div className="nav-menu-pill">
-            <nav className="nav-links">
+        <div className={`mobile-overlay ${isMenuOpen ? 'active' : ''}`}>
+            <button className="mobile-nav-close" onClick={() => setIsMenuOpen(false)}>
+                <X size={28} />
+            </button>
+            <nav className="mobile-nav-links">
                 {['Schedule', 'Speakers', 'FAQs', 'Team'].map(l => (
-                    <a key={l} href={`#${l.toLowerCase()}`}>{l}</a>
+                    <a key={l} href={`#${l.toLowerCase()}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
                 ))}
             </nav>
+            <button
+                className="btn-primary"
+                style={{ padding: '1.2rem 3rem', fontSize: '1.1rem' }}
+                onClick={() => {
+                    setIsMenuOpen(false);
+                    onRegister();
+                }}
+            >
+                Register Now
+            </button>
         </div>
-
-        <div className="nav-cta-pill">
-            <button className="btn-nav" onClick={() => onRegister()}>Register Now</button>
-        </div>
-    </div>
+    </>
 );
 
 /* ───────────────────────────────────────────
@@ -1665,8 +1779,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
     );
 
     return (
-        <div style={{ background: '#f8f8f8', minHeight: '100vh', padding: '4rem 2rem' }}>
-            <div className="container" style={{ maxWidth: '1000px' }}>
+        <div className="admin-dashboard-wrap" style={{ background: '#f8f8f8', minHeight: '100vh', padding: 'clamp(2rem, 5vw, 4rem) clamp(1rem, 3vw, 2rem)' }}>
+            <div className="container" style={{ maxWidth: '1000px', padding: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                     <div>
                         <h1 className="section-h2" style={{ margin: 0 }}>Terminal Access</h1>
@@ -2060,6 +2174,7 @@ export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isRegModalOpen, setIsRegModalOpen] = useState(false);
     const [selectedTicketType, setSelectedTicketType] = useState('Standard');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Dynamic CMS State
     const [dynamicSpeakers, setDynamicSpeakers] = useState([]);
@@ -2144,7 +2259,12 @@ export default function App() {
     return (
         <>
             <GlobalStyle />
-            <Navbar onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
+            <Navbar
+                onRegister={openModal}
+                isRegistrationOpen={isRegistrationOpen}
+                isMenuOpen={isMenuOpen}
+                setIsMenuOpen={setIsMenuOpen}
+            />
             <Hero onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
             <Partners />
             <Vision />

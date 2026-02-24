@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-app.post('/api/send-ticket', async (req, res) => {
+app.post(['/send-ticket', '/api/send-ticket'], async (req, res) => {
     const { email, name, ticketId, type } = req.body;
 
     console.log(`📧 Attempting to send ticket to: ${email}`);

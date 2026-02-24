@@ -7,6 +7,17 @@ export default async function handler(req, res) {
 
     const { email, name, ticketId, type } = req.body;
 
+    if (!email || !name || !ticketId || !type) {
+        console.error('❌ Missing required fields:', { email, name, ticketId, type });
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Verify Env Vars
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.error('❌ Missing Email Credentials in Vercel Environment Variables.');
+        return res.status(500).json({ error: 'Server configuration error (missing credentials)' });
+    }
+
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -14,6 +25,8 @@ export default async function handler(req, res) {
             pass: process.env.EMAIL_PASS
         }
     });
+
+    console.log(`📧 Vercel: Attempting to send ticket to: ${email}`);
 
     const mailOptions = {
         from: `"OOU Future Tech" <${process.env.EMAIL_USER}>`,
@@ -70,9 +83,14 @@ export default async function handler(req, res) {
 
     try {
         await transporter.sendMail(mailOptions);
-        res.status(200).json({ message: 'Email sent successfully' });
+        console.log(`✅ Vercel: Ticket sent successfully to ${email}`);
+        return res.status(200).json({ message: 'Email sent successfully' });
     } catch (error) {
-        console.error('Email error:', error);
-        res.status(500).json({ error: 'Failed to send email' });
+        console.error('❌ Vercel Email Error:', error);
+        return res.status(500).json({
+            error: 'Failed to send email',
+            details: error.message,
+            code: error.code
+        });
     }
 }

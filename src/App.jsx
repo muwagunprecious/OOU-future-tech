@@ -706,21 +706,75 @@ const GlobalStyle = () => (
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes modalSlideUp { from { opacity: 0; transform: translateY(50px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
+      /* VOLUNTEER SECTION */
+    .vol-section { background: #fdfcfb; padding: clamp(4rem, 10vw, 7rem) 0; border-top: var(--border); }
+    .vol-container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 400px; gap: 4rem; align-items: start; }
+    @media(max-width: 960px) { .vol-container { grid-template-columns: 1fr; gap: 3rem; } }
+    
+    .vol-form-card { background: #fff; border: var(--border); border-radius: 2rem; padding: 3rem; box-shadow: var(--shadow); }
+    @media(max-width: 480px) { .vol-form-card { padding: 1.5rem; } }
+
+    .id-card-preview-wrap { position: sticky; top: 100px; display: flex; flex-direction: column; align-items: center; gap: 2rem; }
+    
+    /* THE ID CARD DESIGN */
+    .id-card-canonical {
+      width: 320px; height: 500px; background: #fff; border: 4px solid #000; border-radius: 1.5rem;
+      position: relative; overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: 15px 15px 0 rgba(0,0,0,0.1); font-family: 'Inter', sans-serif;
+    }
+    .id-card-header { 
+      background: #000; color: #fff; padding: 1.5rem; text-align: center; border-bottom: 4px solid #000;
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    }
+    .id-card-logo-text { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    
+    .id-card-photo-area { 
+      flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem;
+      background: radial-gradient(circle at center, #f8f8f8 0%, #fff 100%);
+      position: relative;
+    }
+    .id-card-photo-frame { 
+      width: 180px; height: 180px; border: 4px solid #000; border-radius: 1rem; overflow: hidden;
+      background: #f0f0f0; box-shadow: 8px 8px 0 rgba(0,0,0,0.05); transform: rotate(-2deg);
+    }
+    .id-card-photo { width: 100%; height: 100%; object-fit: cover; }
+    
+    .id-card-info { 
+      padding: 1.5rem; text-align: center; background: #fff; border-top: 4px dashed #000;
+      display: flex; flex-direction: column; gap: 0.5rem; position: relative;
+    }
+    .id-card-name { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.5rem; text-transform: uppercase; color: #000; line-height: 1.1; }
+    .id-card-sector { 
+      background: var(--accent-r); color: #fff; padding: 0.4rem 1rem; border-radius: 0.5rem;
+      font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.75rem; text-transform: uppercase;
+      border: 2px solid #000; display: inline-block; width: fit-content; margin: 0 auto;
+    }
+    .id-card-footer { 
+      background: #f0f0f0; padding: 0.8rem; text-align: center; border-top: 2px solid #000;
+      font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.2em;
+    }
+    
+    .id-card-watermark {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
+      font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 5rem; color: rgba(0,0,0,0.03);
+      white-space: nowrap; pointer-events: none; z-index: 0;
+    }
+
     /* ANIMATIONS */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
     }
   `}</style>
-);
+)
 
 /* ───────────────────────────────────────────
    NAVBAR
 ─────────────────────────────────────────── */
-const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen }) => (
+const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentView }) => (
     <>
         <div className="nav-wrap">
-            <div className="nav-logo-pill">
+            <div className="nav-logo-pill" onClick={() => onViewChange('site')} style={{ cursor: 'pointer' }}>
                 <div className="nav-logo-icon">
                     <div style={{ display: 'flex', gap: '2px' }}>
                         <div style={{ width: '8px', height: '8px', background: 'var(--accent-r)', borderRadius: '1px' }} />
@@ -732,9 +786,17 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen }) => (
 
             <div className="nav-menu-pill">
                 <nav className="nav-links">
-                    {['Schedule', 'Speakers', 'FAQs', 'Team'].map(l => (
-                        <a key={l} href={`#${l.toLowerCase()}`}>{l}</a>
-                    ))}
+                    {currentView === 'site' ? (
+                        ['Schedule', 'Speakers', 'Volunteers', 'FAQs', 'Team'].map(l => (
+                            l === 'Volunteers' ? (
+                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange('volunteers'); }}>{l}</a>
+                            ) : (
+                                <a key={l} href={`#${l.toLowerCase()}`}>{l}</a>
+                            )
+                        ))
+                    ) : (
+                        <a href="#" onClick={(e) => { e.preventDefault(); onViewChange('site'); }}>Home</a>
+                    )}
                 </nav>
             </div>
 
@@ -751,9 +813,17 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen }) => (
                 <X size={28} />
             </button>
             <nav className="mobile-nav-links">
-                {['Schedule', 'Speakers', 'FAQs', 'Team'].map(l => (
-                    <a key={l} href={`#${l.toLowerCase()}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
-                ))}
+                {currentView === 'site' ? (
+                    ['Schedule', 'Speakers', 'Volunteers', 'FAQs', 'Team'].map(l => (
+                        l === 'Volunteers' ? (
+                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange('volunteers'); }}>{l}</a>
+                        ) : (
+                            <a key={l} href={`#${l.toLowerCase()}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
+                        )
+                    ))
+                ) : (
+                    <a href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange('site'); }}>Home</a>
+                )}
             </nav>
             <button
                 className="btn-primary"
@@ -816,22 +886,111 @@ const Hero = ({ onRegister }) => {
 /* ───────────────────────────────────────────
    PARTNERS STRIP
 ─────────────────────────────────────────── */
-const Partners = () => (
-    <section id="partners" className="partners-strip">
+const Partners = ({ dynamicPartners }) => {
+    const defaultPartners = [
+        { name: 'OOUtech Community', icon: null },
+        { name: 'OOU Web 3', icon: null },
+        { name: 'OOU Official', icon: <Award size={18} color="#facc15" /> },
+        { name: 'NACOS', icon: null },
+        { name: 'GDSC OOU', icon: null },
+        { name: 'OOU Innovators', icon: null },
+    ];
+
+    const hasDynamic = dynamicPartners && dynamicPartners.length > 0;
+
+    return (
+        <section id="partners" className="partners-strip">
+            <div className="container">
+                <p className="partners-label">{hasDynamic ? 'Our Community Partners' : 'Our Partners & Collaborators'}</p>
+                <div className="partners-track" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '3rem' }}>
+                    {hasDynamic ? (
+                        dynamicPartners.map((p, i) => (
+                            <div key={i} className="partner-logo-item" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                <div style={{ width: p.width || 'fit-content', minWidth: '50px', height: '50px', background: '#fff', padding: '5px', borderRadius: '10px', border: '2px solid #000' }}>
+                                    <img src={p.logo_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                </div>
+                                <span style={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.8rem' }}>{p.name}</span>
+                            </div>
+                        ))
+                    ) : (
+                        defaultPartners.map((p, i) => (
+                            <React.Fragment key={i}>
+                                <span className="partner-logo">
+                                    {p.icon} {p.name}
+                                </span>
+                                {i < defaultPartners.length - 1 && <div className="partners-sep" />}
+                            </React.Fragment>
+                        ))
+                    )}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+/* ───────────────────────────────────────────
+   EVENT STATISTICS
+─────────────────────────────────────────── */
+const EventStats = () => (
+    <section className="event-stats" style={{ background: 'var(--accent-gray)', padding: '5rem 0' }}>
         <div className="container">
-            <p className="partners-label">Our Partners &amp; Collaborators</p>
-            <div className="partners-track">
-                <span className="partner-logo"><Award size={18} color="#facc15" /> OOU Official</span>
-                <div className="partners-sep" />
-                <span className="partner-logo">NACOS</span>
-                <div className="partners-sep" />
-                <span className="partner-logo">GDSC OOU</span>
-                <div className="partners-sep" />
-                <span className="partner-logo">OOU Innovators</span>
-                <div className="partners-sep" />
-                <span className="partner-logo">TechHub NG</span>
-                <div className="partners-sep" />
-                <span className="partner-logo">OOU SIWES</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', textAlign: 'center' }}>
+                <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+                    <div style={{ fontSize: '4.5rem', fontWeight: 900, fontFamily: 'Outfit', color: 'var(--accent-r)', marginBottom: '0.5rem', lineHeight: 1 }}>2000+</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 900, textTransform: 'uppercase', color: '#000', letterSpacing: '0.1em' }}>Attendees</div>
+                </div>
+                <div style={{ animation: 'fadeIn 0.5s ease-out', animationDelay: '0.2s' }}>
+                    <div style={{ fontSize: '4.5rem', fontWeight: 900, fontFamily: 'Outfit', color: 'var(--accent-r)', marginBottom: '0.5rem', lineHeight: 1 }}>8+</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 900, textTransform: 'uppercase', color: '#000', letterSpacing: '0.1em' }}>Expert Speakers</div>
+                </div>
+                <div style={{ animation: 'fadeIn 0.5s ease-out', animationDelay: '0.4s' }}>
+                    <div style={{ fontSize: '4.5rem', fontWeight: 900, fontFamily: 'Outfit', color: 'var(--accent-r)', marginBottom: '0.5rem', lineHeight: 1 }}>10+</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 900, textTransform: 'uppercase', color: '#000', letterSpacing: '0.1em' }}>Strategic Delegates</div>
+                </div>
+            </div>
+        </div>
+    </section>
+);
+
+/* ───────────────────────────────────────────
+   PROSPECTUS SECTION
+─────────────────────────────────────────── */
+const ProspectusSection = () => (
+    <section className="prospectus-section" style={{ background: 'var(--fg)', color: '#fff', padding: '4rem 0', borderTop: '3px solid #000', borderBottom: '3px solid #000' }}>
+        <div className="container">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
+                <div style={{ maxWidth: '600px' }}>
+                    <h2 className="section-h2" style={{ color: '#fff', marginBottom: '1rem', textAlign: 'left' }}>Event Prospectus</h2>
+                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.1rem', fontWeight: 500, lineHeight: 1.6 }}>
+                        Dive deep into the #OOUFutureTech2026 roadmap. Download our official prospectus to explore the full event agenda, guest speakers, sponsorship opportunities, and our vision for the future.
+                    </p>
+                </div>
+                <div style={{ flexShrink: 0 }}>
+                    <a
+                        href="/prospectus.pdf"
+                        download="OOU_FutureTech_2026_Prospectus.pdf"
+                        className="btn-primary"
+                        style={{
+                            background: 'var(--accent-r)',
+                            color: '#fff',
+                            border: '3px solid #fff',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            padding: '1.2rem 2.5rem',
+                            fontSize: '1.1rem',
+                            fontWeight: 900,
+                            borderRadius: '1rem',
+                            boxShadow: '6px 6px 0 #fff',
+                            transition: 'transform 0.2s ease'
+                        }}
+                        onMouseOver={e => e.currentTarget.style.transform = 'translate(-2px, -2px)'}
+                        onMouseOut={e => e.currentTarget.style.transform = 'none'}
+                    >
+                        <Download size={24} /> Download Prospectus
+                    </a>
+                </div>
             </div>
         </div>
     </section>
@@ -996,6 +1155,174 @@ const Tickets = ({ onRegister, isRegistrationOpen }) => (
 );
 
 /* ───────────────────────────────────────────
+   VOLUNTEERS
+─────────────────────────────────────────── */
+const VolunteerIDCard = ({ name, sector, photo, cardRef }) => (
+    <div className="id-card-canonical" ref={cardRef}>
+        <div className="id-card-header">
+            <div style={{ display: 'flex', gap: '4px' }}>
+                <div style={{ width: '12px', height: '12px', background: 'var(--accent-r)', borderRadius: '2px' }} />
+                <div style={{ width: '12px', height: '12px', background: '#fff', borderRadius: '2px' }} />
+            </div>
+            <span className="id-card-logo-text">OOU Future Tech 2026</span>
+        </div>
+
+        <div className="id-card-photo-area">
+            <div className="id-card-watermark">VOLUNTEER</div>
+            <div className="id-card-photo-frame">
+                {photo ? (
+                    <img src={photo} alt="Profile" className="id-card-photo" />
+                ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8' }}>
+                        <Users size={60} color="#ccc" />
+                    </div>
+                )}
+            </div>
+        </div>
+
+        <div className="id-card-info">
+            <h2 className="id-card-name">{name || "Your Name"}</h2>
+            <div className="id-card-sector">{sector || "Sector"}</div>
+        </div>
+
+        <div className="id-card-footer">
+            Official Conference Volunteer
+        </div>
+    </div>
+);
+
+const VolunteerSection = () => {
+    const [volData, setVolData] = useState({ name: '', sector: 'Technical', photo: null });
+    const cardRef = useRef(null);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const sectors = ['Technical', 'Logistics', 'Protocol', 'Media', 'Welfare', 'Security'];
+
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setVolData({ ...volData, photo: reader.result });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleDownloadID = async () => {
+        if (!volData.name) {
+            alert("Please enter your name first!");
+            return;
+        }
+        setIsDownloading(true);
+        try {
+            const node = cardRef.current;
+            const dataUrl = await toPng(node, {
+                quality: 1.0,
+                pixelRatio: 2,
+                backgroundColor: '#fff'
+            });
+            download(dataUrl, `OOU-Volunteer-${volData.name.replace(/\s+/g, '-')}.png`);
+        } catch (err) {
+            console.error('Download failed', err);
+            alert("Failed to generate ID card. Please try again.");
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+    return (
+        <section id="volunteers" className="vol-section">
+            <div className="container">
+                <div className="section-header">
+                    <p className="section-label">Join the Crew</p>
+                    <h2 className="section-h2">Volunteer Portal</h2>
+                    <p>Enter your details below to generate your official volunteer ID card.</p>
+                </div>
+
+                <div className="vol-container">
+                    <div className="vol-form-card">
+                        <div className="form-group">
+                            <label className="form-label">Full Name</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                placeholder="e.g. Jane Doe"
+                                value={volData.name}
+                                onChange={(e) => setVolData({ ...volData, name: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Sector</label>
+                            <select
+                                className="form-select"
+                                value={volData.sector}
+                                onChange={(e) => setVolData({ ...volData, sector: e.target.value })}
+                            >
+                                {sectors.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Profile Picture</label>
+                            <div style={{
+                                border: '2px dashed #ccc',
+                                borderRadius: '1rem',
+                                padding: '1.5rem',
+                                textAlign: 'center',
+                                background: '#f9fafb'
+                            }}>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handlePhotoChange}
+                                    id="photo-upload"
+                                    style={{ display: 'none' }}
+                                />
+                                <label htmlFor="photo-upload" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                    <div style={{ background: '#fff', padding: '1rem', borderRadius: '50%', border: '2px solid #eee' }}>
+                                        <Code2 size={24} color="var(--accent-r)" />
+                                    </div>
+                                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>
+                                        {volData.photo ? 'Change Photo' : 'Upload Profile Photo'}
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button
+                            className="btn-download"
+                            onClick={handleDownloadID}
+                            disabled={isDownloading}
+                            style={{
+                                marginTop: '1rem',
+                                background: 'var(--accent-r)',
+                                color: '#fff',
+                                boxShadow: isDownloading ? 'none' : '6px 6px 0 #000',
+                                opacity: isDownloading ? 0.7 : 1
+                            }}
+                        >
+                            <Download size={20} /> {isDownloading ? 'Generating...' : 'Download My ID Card'}
+                        </button>
+                    </div>
+
+                    <div className="id-card-preview-wrap">
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '1.5rem', color: '#71717a', letterSpacing: '0.1em' }}>
+                                LIVE PRODUCTION PREVIEW
+                            </p>
+                            <VolunteerIDCard name={volData.name} sector={volData.sector} photo={volData.photo} cardRef={cardRef} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+
+/* ───────────────────────────────────────────
    SPEAKERS
 ─────────────────────────────────────────── */
 const TypingText = ({ text, delay = 100 }) => {
@@ -1077,22 +1404,29 @@ const Speakers = ({ dynamicSpeakers, speakersMode = 'live', comingSoonText = 'Ex
 ─────────────────────────────────────────── */
 const Schedule = () => {
     const events = [
-        { time: '8:00 AM – 9:00 AM', title: 'Registration & Breakfast Networking', desc: 'Arrive, get your badge, and meet fellow innovators over breakfast.', tag: 'Networking' },
-        { time: '9:00 AM – 10:30 AM', title: 'Opening Keynote: OOU Tech Future', desc: 'The VC and Student Union President set the tone for the day.', tag: 'Keynote' },
-        { time: '10:30 AM – 12:00 PM', title: 'Web3 & Blockchain Deep Dive', desc: 'Hands-on session exploring decentralized technologies and NFTs.', tag: 'Workshop' },
-        { time: '12:00 PM – 1:00 PM', title: 'Cybersecurity Masterclass', desc: 'How to identify, prevent, and respond to modern cyber threats.', tag: 'Masterclass' },
-        { time: '1:00 PM – 2:00 PM', title: 'Lunch & Innovation Showcase', desc: 'Student projects and startup demos on display. Vote for your favourite!', tag: 'Demo Day' },
-        { time: '2:00 PM – 3:30 PM', title: 'Startup Pitch Competition', desc: 'Student startups pitch live to an investor panel. Grand prize awaits!', tag: 'Pitch' },
-        { time: '3:30 PM – 5:00 PM', title: 'Mentorship Speed Rounds', desc: 'One-on-one 10-minute sessions with industry mentors.', tag: 'Mentorship' },
-        { time: '5:00 PM – 6:00 PM', title: 'Closing Ceremony & Awards', desc: 'Recognizing excellence and announcing the OOU Tech Hub launch.', tag: 'Ceremony' },
+        { time: '8:00 AM – 9:00 AM', title: 'Registration & Check-In', desc: 'Participant registration, badge collection, media coverage, and morning networking.', tag: 'Registration' },
+        { time: '9:00 AM – 9:15 AM', title: 'Opening Ceremony', desc: 'National Anthem, welcome remarks from the Conference Host, and introduction of guests.', tag: 'Ceremony' },
+        { time: '9:15 AM – 9:35 AM', title: 'Opening Address', desc: 'Vision for ethical technology innovation and shaping Africa’s digital economy.', tag: 'Vision' },
+        { time: '9:35 AM – 10:00 AM', title: 'Keynote Address', desc: 'The Vice Chancellor of OOU on building Africa’s next generation of tech innovators.', tag: 'Keynote' },
+        { time: '10:00 AM – 10:30 AM', title: 'Industry Keynote', desc: 'Industry leaders from Selar, 9mobile, and more on building global products from Nigeria.', tag: 'Industry' },
+        { time: '10:30 AM – 11:15 AM', title: 'Panel Discussion', desc: '“From Campus to Startup”: How students can build the next big tech companies.', tag: 'Panel' },
+        { time: '11:15 AM – 11:30 AM', title: 'Networking & Coffee Break', desc: 'Informal networking, media interviews, and social media engagement.', tag: 'Break' },
+        { time: '11:30 AM – 12:15 PM', title: 'Tech Skill Sessions', desc: 'Practical talks on Web3, AI, and starting tech careers as a student.', tag: 'Skills' },
+        { time: '12:15 PM – 1:00 PM', title: 'Workshop Session', desc: 'Hands-on demos on open source, internships, and global opportunities.', tag: 'Workshop' },
+        { time: '1:00 PM – 1:30 PM', title: 'Guinness World Record Launch', desc: 'Launching the Largest Collaborative Nigerian Story with Adetunwase Adenle.', tag: 'GWR Launch' },
+        { time: '1:30 PM – 2:00 PM', title: 'Lunch Break & Networking', desc: 'Speaker meet-and-greets, informal networking, and media coverage.', tag: 'Lunch' },
+        { time: '2:00 PM – 3:30 PM', title: 'Future Opportunities Session', desc: 'Investors Forum announcement, startup incubation, and innovation pathways.', tag: 'Opportunities' },
+        { time: '3:30 PM – 4:00 PM', title: 'Recognition of Exceptional Students', desc: 'Awards for outstanding student innovators and top contributors.', tag: 'Awards' },
+        { time: '4:00 PM – 4:30 PM', title: 'Closing Remarks', desc: 'Appreciating sponsors, announcement of next steps, and group photos.', tag: 'Closing' },
+        { time: '4:30 PM – 5:30 PM', title: 'Networking & Media Session', desc: 'Final speaker interactions, sponsor networking, and press interviews.', tag: 'Networking' },
     ];
     return (
         <section id="schedule" className="schedule section">
             <div className="container">
                 <div className="section-header">
-                    <p className="section-label">27 March 2026</p>
+                    <p className="section-label">March 27, 2026 • OGD Hall, OOU</p>
                     <h2 className="section-h2">Event Schedule</h2>
-                    <p>A full day packed with talks, workshops, demos, and networking.</p>
+                    <p>Expected Attendance: 2,000+ Students • Venue: OGD Hall</p>
                 </div>
                 <div className="schedule-grid">
                     {events.map((e, i) => (
@@ -1642,19 +1976,24 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
    ADMIN DASHBOARD
 ─────────────────────────────────────────── */
 const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, comingSoonText, dynamicSpeakers, dynamicTeam }) => {
-    const [registrations, setRegistrations] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState('standard'); // 'standard', 'pro', 'speakers', 'team', 'settings'
+    const [activeTab, setActiveTab] = useState('standard'); // 'standard', 'pro', 'partners', 'speakers', 'team', 'settings'
+    const [partners, setPartners] = useState([]);
 
     // Form states for adding content
     const [newSpeaker, setNewSpeaker] = useState({ name: '', role: '', expertise: '', image_url: '', bg_class: 'speaker-img-bg-1' });
+    const [newPartner, setNewPartner] = useState({ name: '', logo_url: '' });
     const [newMember, setNewMember] = useState({ name: '', role: '', bio: '', image_url: '' });
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         fetchRegistrations();
+        fetchPartners();
     }, []);
+
+    const fetchPartners = async () => {
+        const { data, error } = await supabase.from('partners').select('*').order('created_at', { ascending: true });
+        if (!error) setPartners(data);
+    };
 
     const handleImageUpload = async (file, type) => {
         if (!file) return;
@@ -1684,11 +2023,13 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
 
             if (type === 'speakers') {
                 setNewSpeaker(prev => ({ ...prev, image_url: publicUrl }));
+            } else if (type === 'partners') {
+                setNewPartner(prev => ({ ...prev, logo_url: publicUrl }));
             } else {
                 setNewMember(prev => ({ ...prev, image_url: publicUrl }));
             }
         } catch (error) {
-            alert('Error uploading image: ' + error.message + '\nMake sure "cms-images" bucket exists and is public.');
+            alert('Error uploading image: ' + error.message);
         } finally {
             setUploading(false);
         }
@@ -1705,6 +2046,21 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
             setRegistrations(data);
         }
         setLoading(false);
+    };
+
+    const handleDeleteRegistration = async (id) => {
+        if (confirm('Are you sure you want to delete this registration?')) {
+            const { error } = await supabase
+                .from('registrations')
+                .delete()
+                .eq('id', id);
+
+            if (!error) {
+                fetchRegistrations();
+            } else {
+                alert('Error deleting registration: ' + error.message);
+            }
+        }
     };
 
     const toggleRegistration = async () => {
@@ -1724,6 +2080,26 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
             setNewSpeaker({ name: '', role: '', expertise: '', image_url: '', bg_class: 'speaker-img-bg-1' });
             onRefresh();
         } else alert('Error adding speaker. Check if speakers table exists.');
+    };
+
+    const handleAddPartner = async (e) => {
+        e.preventDefault();
+        const { error } = await supabase.from('partners').insert([newPartner]);
+        if (!error) {
+            setNewPartner({ name: '', logo_url: '' });
+            fetchPartners();
+            onRefresh();
+        } else alert('Error adding partner.');
+    };
+
+    const handleDeletePartner = async (id) => {
+        if (confirm('Are you sure you want to delete this partner?')) {
+            const { error } = await supabase.from('partners').delete().eq('id', id);
+            if (!error) {
+                fetchPartners();
+                onRefresh();
+            } else alert('Error deleting partner.');
+        }
     };
 
     const handleAddMember = async (e) => {
@@ -1801,6 +2177,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
                     <TabButton id="standard" label="Standard Passes" icon={Users} />
                     <TabButton id="pro" label="Stand Requests" icon={Users} />
+                    <TabButton id="partners" label="Partners CMS" icon={Store} />
                     <TabButton id="speakers" label="Speakers CMS" icon={Mic} />
                     <TabButton id="team" label="Team CMS" icon={Users} />
                     <TabButton id="settings" label="Site Controls" icon={Zap} />
@@ -1843,6 +2220,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
                                                 <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Type</th>
                                                 <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>ID</th>
                                                 <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Date</th>
+                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1866,6 +2244,14 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
                                                     </td>
                                                     <td style={{ padding: '1rem', fontFamily: 'monospace', fontWeight: 700 }}>{r.ticket_id}</td>
                                                     <td style={{ padding: '1rem', fontSize: '0.8rem' }}>{new Date(r.created_at).toLocaleDateString()}</td>
+                                                    <td style={{ padding: '1rem' }}>
+                                                        <button
+                                                            onClick={() => handleDeleteRegistration(r.id)}
+                                                            style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -1876,218 +2262,274 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
                     </div>
                 )}
 
-                {activeTab === 'speakers' && (
-                    <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', alignItems: 'start' }}>
-                            <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
-                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '2rem' }}>Current Speakers</h3>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {dynamicSpeakers.length > 0 ? dynamicSpeakers.map((s, i) => {
-                                        const speakerImg = s.image_url?.replace('/object/cms-images/', '/object/public/cms-images/');
-                                        return (
-                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', border: '1px solid #eee', borderRadius: '1rem' }}>
-                                                <img src={speakerImg} alt={s.name} style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: 900 }}>{s.name}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{s.role} • {s.expertise}</div>
+                {
+                    activeTab === 'speakers' && (
+                        <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', alignItems: 'start' }}>
+                                <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '2rem' }}>Current Speakers</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        {dynamicSpeakers.length > 0 ? dynamicSpeakers.map((s, i) => {
+                                            const speakerImg = s.image_url?.replace('/object/cms-images/', '/object/public/cms-images/');
+                                            return (
+                                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', border: '1px solid #eee', borderRadius: '1rem' }}>
+                                                    <img src={speakerImg} alt={s.name} style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ fontWeight: 900 }}>{s.name}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{s.role} • {s.expertise}</div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleDeleteSpeaker(s.id)}
+                                                        style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleDeleteSpeaker(s.id)}
-                                                    style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        );
-                                    }) : <p style={{ textAlign: 'center', color: '#71717a' }}>No dynamic speakers yet. Site is using defaults.</p>}
-                                </div>
-                            </div>
-
-                            <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
-                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '1.5rem' }}>Add Speaker</h3>
-                                <form onSubmit={handleAddSpeaker}>
-                                    <input className="form-input" placeholder="Name" required value={newSpeaker.name} onChange={e => setNewSpeaker({ ...newSpeaker, name: e.target.value })} style={{ marginBottom: '1rem' }} />
-                                    <input className="form-input" placeholder="Role (e.g. Web3 Expert)" required value={newSpeaker.role} onChange={e => setNewSpeaker({ ...newSpeaker, role: e.target.value })} style={{ marginBottom: '1rem' }} />
-                                    <input className="form-input" placeholder="Expertise" required value={newSpeaker.expertise} onChange={e => setNewSpeaker({ ...newSpeaker, expertise: e.target.value })} style={{ marginBottom: '1rem' }} />
-
-                                    <div style={{ marginBottom: '1rem' }}>
-                                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, marginBottom: '0.5rem', textTransform: 'uppercase' }}>Speaker Image</label>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => handleImageUpload(e.target.files[0], 'speakers')}
-                                            style={{ fontSize: '0.8rem' }}
-                                        />
-                                        {newSpeaker.image_url && (
-                                            <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: '#059669', fontWeight: 700 }}>✅ Image Ready</div>
-                                        )}
+                                            );
+                                        }) : <p style={{ textAlign: 'center', color: '#71717a' }}>No dynamic speakers yet. Site is using defaults.</p>}
                                     </div>
+                                </div>
 
-                                    <button type="submit" className="btn-primary" disabled={uploading} style={{ width: '100%', justifyContent: 'center', opacity: uploading ? 0.7 : 1 }}>
-                                        {uploading ? 'Uploading...' : 'Add Speaker Profile'}
-                                    </button>
-                                </form>
+                                <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '1.5rem' }}>Add Speaker</h3>
+                                    <form onSubmit={handleAddSpeaker}>
+                                        <input className="form-input" placeholder="Name" required value={newSpeaker.name} onChange={e => setNewSpeaker({ ...newSpeaker, name: e.target.value })} style={{ marginBottom: '1rem' }} />
+                                        <input className="form-input" placeholder="Role (e.g. Web3 Expert)" required value={newSpeaker.role} onChange={e => setNewSpeaker({ ...newSpeaker, role: e.target.value })} style={{ marginBottom: '1rem' }} />
+                                        <input className="form-input" placeholder="Expertise" required value={newSpeaker.expertise} onChange={e => setNewSpeaker({ ...newSpeaker, expertise: e.target.value })} style={{ marginBottom: '1rem' }} />
+
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, marginBottom: '0.5rem', textTransform: 'uppercase' }}>Speaker Image</label>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => handleImageUpload(e.target.files[0], 'speakers')}
+                                                style={{ fontSize: '0.8rem' }}
+                                            />
+                                            {newSpeaker.image_url && (
+                                                <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: '#059669', fontWeight: 700 }}>✅ Image Ready</div>
+                                            )}
+                                        </div>
+
+                                        <button type="submit" className="btn-primary" disabled={uploading} style={{ width: '100%', justifyContent: 'center', opacity: uploading ? 0.7 : 1 }}>
+                                            {uploading ? 'Uploading...' : 'Add Speaker Profile'}
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
-                {activeTab === 'team' && (
-                    <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', alignItems: 'start' }}>
-                            <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
-                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '2rem' }}>Team Members</h3>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {dynamicTeam.length > 0 ? dynamicTeam.map((m, i) => {
-                                        const memberImg = m.image_url?.replace('/object/cms-images/', '/object/public/cms-images/');
-                                        return (
-                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', border: '1px solid #eee', borderRadius: '1rem' }}>
-                                                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#f4f4f5', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                                                    {memberImg ? <img src={memberImg} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Users size={20} />}
+                {
+                    activeTab === 'team' && (
+                        <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', alignItems: 'start' }}>
+                                <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '2rem' }}>Team Members</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        {dynamicTeam.length > 0 ? dynamicTeam.map((m, i) => {
+                                            const memberImg = m.image_url?.replace('/object/cms-images/', '/object/public/cms-images/');
+                                            return (
+                                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', border: '1px solid #eee', borderRadius: '1rem' }}>
+                                                    <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#f4f4f5', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                                        {memberImg ? <img src={memberImg} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Users size={20} />}
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ fontWeight: 900 }}>{m.name}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{m.role}</div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleDeleteMember(m.id)}
+                                                        style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
                                                 </div>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: 900 }}>{m.name}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{m.role}</div>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleDeleteMember(m.id)}
-                                                    style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        );
-                                    }) : <p style={{ textAlign: 'center', color: '#71717a' }}>No dynamic team yet. Site is using defaults.</p>}
-                                </div>
-                            </div>
-
-                            <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '1rem', boxShadow: '8px 8px 0 #000' }}>
-                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '1.5rem' }}>Add Team Member</h3>
-                                <form onSubmit={handleAddMember}>
-                                    <input className="form-input" placeholder="Name" required value={newMember.name} onChange={e => setNewMember({ ...newMember, name: e.target.value })} style={{ marginBottom: '1rem' }} />
-                                    <input className="form-input" placeholder="Role" required value={newMember.role} onChange={e => setNewMember({ ...newMember, role: e.target.value })} style={{ marginBottom: '1rem' }} />
-                                    <textarea className="form-input" placeholder="Bio (optional)" value={newMember.bio} onChange={e => setNewMember({ ...newMember, bio: e.target.value })} style={{ marginBottom: '1rem', minHeight: '80px' }} />
-
-                                    <div style={{ marginBottom: '1.5rem' }}>
-                                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, marginBottom: '0.5rem', textTransform: 'uppercase' }}>Member Photo</label>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => handleImageUpload(e.target.files[0], 'team')}
-                                            style={{ fontSize: '0.8rem' }}
-                                        />
-                                        {newMember.image_url && (
-                                            <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: '#059669', fontWeight: 700 }}>✅ Photo Ready</div>
-                                        )}
+                                            );
+                                        }) : <p style={{ textAlign: 'center', color: '#71717a' }}>No dynamic team yet. Site is using defaults.</p>}
                                     </div>
+                                </div>
 
-                                    <button type="submit" className="btn-primary" disabled={uploading} style={{ width: '100%', justifyContent: 'center', opacity: uploading ? 0.7 : 1 }}>
-                                        {uploading ? 'Uploading...' : 'Add to Team'}
-                                    </button>
-                                </form>
+                                <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '1rem', boxShadow: '8px 8px 0 #000' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '1.5rem' }}>Add Team Member</h3>
+                                    <form onSubmit={handleAddMember}>
+                                        <input className="form-input" placeholder="Name" required value={newMember.name} onChange={e => setNewMember({ ...newMember, name: e.target.value })} style={{ marginBottom: '1rem' }} />
+                                        <input className="form-input" placeholder="Role" required value={newMember.role} onChange={e => setNewMember({ ...newMember, role: e.target.value })} style={{ marginBottom: '1rem' }} />
+                                        <textarea className="form-input" placeholder="Bio (optional)" value={newMember.bio} onChange={e => setNewMember({ ...newMember, bio: e.target.value })} style={{ marginBottom: '1rem', minHeight: '80px' }} />
+
+                                        <div style={{ marginBottom: '1.5rem' }}>
+                                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, marginBottom: '0.5rem', textTransform: 'uppercase' }}>Member Photo</label>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => handleImageUpload(e.target.files[0], 'team')}
+                                                style={{ fontSize: '0.8rem' }}
+                                            />
+                                            {newMember.image_url && (
+                                                <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: '#059669', fontWeight: 700 }}>✅ Photo Ready</div>
+                                            )}
+                                        </div>
+
+                                        <button type="submit" className="btn-primary" disabled={uploading} style={{ width: '100%', justifyContent: 'center', opacity: uploading ? 0.7 : 1 }}>
+                                            {uploading ? 'Uploading...' : 'Add to Team'}
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
-                {activeTab === 'settings' && (
-                    <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                        <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '3rem', boxShadow: '12px 12px 0 #000', maxWidth: '600px', margin: '0 auto' }}>
-                            <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                                <div style={{ display: 'inline-flex', background: isRegistrationOpen ? '#ecfdf5' : '#fef2f2', color: isRegistrationOpen ? '#059669' : '#dc2626', padding: '1rem', borderRadius: '1.5rem', marginBottom: '1.5rem', border: '3px solid currentColor' }}>
-                                    <Zap size={40} />
-                                </div>
-                                <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '2rem' }}>Registration Control</h2>
-                                <p style={{ color: '#71717a', marginTop: '1rem' }}>Toggle the ticket registration system on or off for the entire website.</p>
-                            </div>
-
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '2rem', borderRadius: '1.5rem', border: '3px solid #000' }}>
-                                <div>
-                                    <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.8rem' }}>Current Status</div>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 900, color: isRegistrationOpen ? '#059669' : '#dc2626' }}>
-                                        {isRegistrationOpen ? 'OPEN & SECURE' : 'CLOSED TO PUBLIC'}
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={toggleRegistration}
-                                    style={{
-                                        background: isRegistrationOpen ? '#dc2626' : '#059669',
-                                        color: '#fff', padding: '1rem 2rem', borderRadius: '1rem', border: '3px solid #000',
-                                        fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer',
-                                        boxShadow: '4px 4px 0 #000', transition: 'all 0.2s'
-                                    }}
-                                >
-                                    {isRegistrationOpen ? 'Close Ticket Sales' : 'Open Ticket Sales'}
-                                </button>
-                            </div>
-
-                            <div style={{ marginTop: '3rem', borderTop: '2px dashed #eee', paddingTop: '3rem' }}>
-                                <h4 style={{ fontWeight: 900, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.2rem', textTransform: 'uppercase' }}>
-                                    <Mic size={24} /> Speakers Section
-                                </h4>
-
-                                <div style={{ marginBottom: '2rem' }}>
-                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 900, marginBottom: '1rem', textTransform: 'uppercase' }}>Display Mode</label>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <button
-                                            onClick={async () => {
-                                                const { error } = await supabase.from('site_settings').upsert({ key: 'speakers_mode', value: 'live' });
-                                                if (!error) onRefresh();
-                                            }}
-                                            style={{
-                                                flex: 1, padding: '1rem', borderRadius: '1rem', border: '3px solid #000',
-                                                background: speakersMode === 'live' ? '#000' : '#fff',
-                                                color: speakersMode === 'live' ? '#fff' : '#000',
-                                                fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer',
-                                                boxShadow: speakersMode === 'live' ? 'none' : '4px 4px 0 #000'
-                                            }}
-                                        >
-                                            Live
-                                        </button>
-                                        <button
-                                            onClick={async () => {
-                                                const { error } = await supabase.from('site_settings').upsert({ key: 'speakers_mode', value: 'coming_soon' });
-                                                if (!error) onRefresh();
-                                            }}
-                                            style={{
-                                                flex: 1, padding: '1rem', borderRadius: '1rem', border: '3px solid #000',
-                                                background: speakersMode === 'coming_soon' ? '#000' : '#fff',
-                                                color: speakersMode === 'coming_soon' ? '#fff' : '#000',
-                                                fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer',
-                                                boxShadow: speakersMode === 'coming_soon' ? 'none' : '4px 4px 0 #000'
-                                            }}
-                                        >
-                                            Coming Soon
-                                        </button>
+                {
+                    activeTab === 'partners' && (
+                        <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', alignItems: 'start' }}>
+                                <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '2rem' }}>Community Partners</h3>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
+                                        {partners.length > 0 ? partners.map((p, i) => (
+                                            <div key={i} style={{ width: '150px', background: '#f8fafc', border: '2px solid #000', borderRadius: '1.5rem', padding: '1rem', textAlign: 'center', position: 'relative' }}>
+                                                <button
+                                                    onClick={() => handleDeletePartner(p.id)}
+                                                    style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: '#fee2e2', color: '#dc2626', border: 'none', padding: '0.3rem', borderRadius: '0.4rem', cursor: 'pointer' }}
+                                                >
+                                                    <Trash2 size={12} />
+                                                </button>
+                                                <img src={p.logo_url} alt={p.name} style={{ width: '100%', height: '60px', objectFit: 'contain', marginBottom: '0.8rem' }} />
+                                                <div style={{ fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase' }}>{p.name}</div>
+                                            </div>
+                                        )) : <p style={{ color: '#71717a' }}>No dynamic partners yet.</p>}
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 900, marginBottom: '0.8rem', textTransform: 'uppercase' }}>Announcement Text</label>
-                                    <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
-                                        <input
-                                            className="form-input"
-                                            placeholder="e.g. Exciting lineup coming soon!"
-                                            defaultValue={comingSoonText}
-                                            style={{ border: '3px solid #000', borderRadius: '1rem', padding: '1rem' }}
-                                            onBlur={async (e) => {
-                                                const val = e.target.value;
-                                                if (val === comingSoonText) return;
-                                                const { error } = await supabase.from('site_settings').upsert({ key: 'speakers_coming_soon_text', value: val });
-                                                if (!error) onRefresh();
-                                            }}
-                                        />
-                                        <div style={{ display: 'flex', alignItems: 'center', color: '#71717a', fontSize: '0.7rem', fontWeight: 700 }}>
-                                            <CheckCircle size={14} style={{ marginRight: '6px' }} /> Updates automatically on blur
+                                <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '1.5rem' }}>Add Partner</h3>
+                                    <form onSubmit={handleAddPartner}>
+                                        <input className="form-input" placeholder="Organization Name" required value={newPartner.name} onChange={e => setNewPartner({ ...newPartner, name: e.target.value })} style={{ marginBottom: '1rem' }} />
+
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, marginBottom: '0.5rem', textTransform: 'uppercase' }}>Partner Logo</label>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => handleImageUpload(e.target.files[0], 'partners')}
+                                                style={{ fontSize: '0.8rem' }}
+                                            />
+                                            {newPartner.logo_url && (
+                                                <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: '#059669', fontWeight: 700 }}>✅ Logo Ready</div>
+                                            )}
+                                        </div>
+
+                                        <button type="submit" className="btn-primary" disabled={uploading} style={{ width: '100%', justifyContent: 'center', opacity: uploading ? 0.7 : 1 }}>
+                                            {uploading ? 'Uploading...' : 'Add Partner'}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+
+                {
+                    activeTab === 'settings' && (
+                        <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                            <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '3rem', boxShadow: '12px 12px 0 #000', maxWidth: '600px', margin: '0 auto' }}>
+                                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                                    <div style={{ display: 'inline-flex', background: isRegistrationOpen ? '#ecfdf5' : '#fef2f2', color: isRegistrationOpen ? '#059669' : '#dc2626', padding: '1rem', borderRadius: '1.5rem', marginBottom: '1.5rem', border: '3px solid currentColor' }}>
+                                        <Zap size={40} />
+                                    </div>
+                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '2rem' }}>Registration Control</h2>
+                                    <p style={{ color: '#71717a', marginTop: '1rem' }}>Toggle the ticket registration system on or off for the entire website.</p>
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '2rem', borderRadius: '1.5rem', border: '3px solid #000' }}>
+                                    <div>
+                                        <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.8rem' }}>Current Status</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: isRegistrationOpen ? '#059669' : '#dc2626' }}>
+                                            {isRegistrationOpen ? 'OPEN & SECURE' : 'CLOSED TO PUBLIC'}
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={toggleRegistration}
+                                        style={{
+                                            background: isRegistrationOpen ? '#dc2626' : '#059669',
+                                            color: '#fff', padding: '1rem 2rem', borderRadius: '1rem', border: '3px solid #000',
+                                            fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer',
+                                            boxShadow: '4px 4px 0 #000', transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {isRegistrationOpen ? 'Close Ticket Sales' : 'Open Ticket Sales'}
+                                    </button>
+                                </div>
+
+                                <div style={{ marginTop: '3rem', borderTop: '2px dashed #eee', paddingTop: '3rem' }}>
+                                    <h4 style={{ fontWeight: 900, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.2rem', textTransform: 'uppercase' }}>
+                                        <Mic size={24} /> Speakers Section
+                                    </h4>
+
+                                    <div style={{ marginBottom: '2rem' }}>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 900, marginBottom: '1rem', textTransform: 'uppercase' }}>Display Mode</label>
+                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                            <button
+                                                onClick={async () => {
+                                                    const { error } = await supabase.from('site_settings').upsert({ key: 'speakers_mode', value: 'live' });
+                                                    if (!error) onRefresh();
+                                                }}
+                                                style={{
+                                                    flex: 1, padding: '1rem', borderRadius: '1rem', border: '3px solid #000',
+                                                    background: speakersMode === 'live' ? '#000' : '#fff',
+                                                    color: speakersMode === 'live' ? '#fff' : '#000',
+                                                    fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer',
+                                                    boxShadow: speakersMode === 'live' ? 'none' : '4px 4px 0 #000'
+                                                }}
+                                            >
+                                                Live
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    const { error } = await supabase.from('site_settings').upsert({ key: 'speakers_mode', value: 'coming_soon' });
+                                                    if (!error) onRefresh();
+                                                }}
+                                                style={{
+                                                    flex: 1, padding: '1rem', borderRadius: '1rem', border: '3px solid #000',
+                                                    background: speakersMode === 'coming_soon' ? '#000' : '#fff',
+                                                    color: speakersMode === 'coming_soon' ? '#fff' : '#000',
+                                                    fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer',
+                                                    boxShadow: speakersMode === 'coming_soon' ? 'none' : '4px 4px 0 #000'
+                                                }}
+                                            >
+                                                Coming Soon
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 900, marginBottom: '0.8rem', textTransform: 'uppercase' }}>Announcement Text</label>
+                                        <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                                            <input
+                                                className="form-input"
+                                                placeholder="e.g. Exciting lineup coming soon!"
+                                                defaultValue={comingSoonText}
+                                                style={{ border: '3px solid #000', borderRadius: '1rem', padding: '1rem' }}
+                                                onBlur={async (e) => {
+                                                    const val = e.target.value;
+                                                    if (val === comingSoonText) return;
+                                                    const { error } = await supabase.from('site_settings').upsert({ key: 'speakers_coming_soon_text', value: val });
+                                                    if (!error) onRefresh();
+                                                }}
+                                            />
+                                            <div style={{ display: 'flex', alignItems: 'center', color: '#71717a', fontSize: '0.7rem', fontWeight: 700 }}>
+                                                <CheckCircle size={14} style={{ marginRight: '6px' }} /> Updates automatically on blur
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )}
-            </div>
-        </div>
+                    )
+                }
+            </div >
+        </div >
     );
 };
 
@@ -2186,6 +2628,7 @@ export default function App() {
 
     // Dynamic CMS State
     const [dynamicSpeakers, setDynamicSpeakers] = useState([]);
+    const [dynamicPartners, setDynamicPartners] = useState([]);
     const [dynamicTeam, setDynamicTeam] = useState([]);
     const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
     const [speakersMode, setSpeakersMode] = useState('live'); // 'live' or 'coming_soon'
@@ -2199,6 +2642,9 @@ export default function App() {
         try {
             const { data: speakers } = await supabase.from('speakers').select('*').order('created_at', { ascending: true });
             if (speakers) setDynamicSpeakers(speakers);
+
+            const { data: partners } = await supabase.from('partners').select('*').order('created_at', { ascending: true });
+            if (partners) setDynamicPartners(partners);
 
             const { data: team } = await supabase.from('team_members').select('*').order('created_at', { ascending: true });
             if (team) setDynamicTeam(team);
@@ -2252,6 +2698,7 @@ export default function App() {
                     speakersMode={speakersMode}
                     comingSoonText={comingSoonText}
                     dynamicSpeakers={dynamicSpeakers}
+                    dynamicPartners={dynamicPartners}
                     dynamicTeam={dynamicTeam}
                 />
             </>
@@ -2272,20 +2719,55 @@ export default function App() {
                 isRegistrationOpen={isRegistrationOpen}
                 isMenuOpen={isMenuOpen}
                 setIsMenuOpen={setIsMenuOpen}
+                onViewChange={(v) => {
+                    setView(v);
+                    window.scrollTo(0, 0);
+                }}
+                currentView={view}
             />
-            <Hero onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
-            <Partners />
-            <Vision />
-            <Tickets onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
-            <Speakers
-                dynamicSpeakers={dynamicSpeakers}
-                speakersMode={speakersMode}
-                comingSoonText={comingSoonText}
-            />
-            <Schedule />
-            <Experience />
-            <FAQ />
-            <Team dynamicTeam={dynamicTeam} />
+
+            {view === 'volunteers' ? (
+                <div style={{ paddingTop: '8rem' }}>
+                    <div className="container" style={{ marginBottom: '2rem' }}>
+                        <button
+                            onClick={() => setView('site')}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontWeight: 900,
+                                fontSize: '1rem',
+                                color: 'var(--accent-r)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
+                        </button>
+                    </div>
+                    <VolunteerSection />
+                </div>
+            ) : (
+                <>
+                    <Hero onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
+                    <Partners dynamicPartners={dynamicPartners} />
+                    <EventStats />
+                    <ProspectusSection />
+                    <Vision />
+                    <Tickets onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
+                    <Speakers
+                        dynamicSpeakers={dynamicSpeakers}
+                        speakersMode={speakersMode}
+                        comingSoonText={comingSoonText}
+                    />
+                    <Schedule />
+                    <Experience />
+                    <FAQ />
+                    <Team dynamicTeam={dynamicTeam} />
+                </>
+            )}
+
             <CTABanner onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
             <Footer onAdmin={() => setView('admin-login')} />
 

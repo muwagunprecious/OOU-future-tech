@@ -1734,32 +1734,42 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
 
     const handleDownload = async () => {
         if (!ticketRef.current) return;
+        setLoading(true);
         try {
-            const dataUrl = await toPng(ticketRef.current, {
+            const node = ticketRef.current;
+            const dataUrl = await toPng(node, {
                 quality: 1,
-                pixelRatio: 3,
+                pixelRatio: 2,
                 backgroundColor: '#fff',
-                cacheBust: true, // Forces reload of assets to bypass CORS/Security errors
+                cacheBust: true,
+                width: node.scrollWidth,
+                height: node.scrollHeight,
                 style: {
-                    transform: 'scale(1)', // Ensure no weird transforms during capture
+                    transform: 'scale(1)',
+                    margin: '0',
                 }
             });
 
-            // Create PDF
-            const pdf = new jsPDF({
-                orientation: 'landscape',
-                unit: 'px',
-                format: [500, 450] // Match ticket approximate dimensions
+            const img = new Image();
+            img.src = dataUrl;
+            await new Promise((resolve) => {
+                img.onload = resolve;
             });
 
-            const imgProps = pdf.getImageProperties(dataUrl);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            // Use pixels for dimensions to match format
+            const pdf = new jsPDF({
+                orientation: img.width > img.height ? 'landscape' : 'portrait',
+                unit: 'px',
+                format: [img.width, img.height]
+            });
 
-            pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.addImage(dataUrl, 'PNG', 0, 0, img.width, img.height);
             pdf.save(`OOU-FutureTech-Ticket-${formData.name.replace(/\s+/g, '-')}.pdf`);
         } catch (err) {
             console.error('Download failed:', err);
+            setError('Failed to download ticket. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -1923,8 +1933,8 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
                                                 </div>
                                             </div>
 
-                                            <button className="btn-download" onClick={handleDownload} style={{ background: 'var(--fg)', color: '#fff', border: 'none', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}>
-                                                <Download size={20} /> Save Ticket as Image
+                                            <button className="btn-download" onClick={handleDownload} disabled={loading} style={{ background: 'var(--fg)', color: '#fff', border: 'none', boxShadow: '0 10px 20px rgba(0,0,0,0.1)', opacity: loading ? 0.7 : 1 }}>
+                                                <Download size={20} /> {loading ? 'Preparing PDF...' : 'Download Ticket as PDF'}
                                             </button>
                                         </>
                                     ) : (

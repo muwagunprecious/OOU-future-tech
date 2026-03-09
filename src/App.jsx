@@ -1988,6 +1988,9 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
 const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, comingSoonText, dynamicSpeakers, dynamicTeam }) => {
     const [activeTab, setActiveTab] = useState('standard'); // 'standard', 'pro', 'partners', 'speakers', 'team', 'settings'
     const [partners, setPartners] = useState([]);
+    const [registrations, setRegistrations] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Form states for adding content
     const [newSpeaker, setNewSpeaker] = useState({ name: '', role: '', expertise: '', image_url: '', bg_class: 'speaker-img-bg-1' });

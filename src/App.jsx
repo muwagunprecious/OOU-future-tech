@@ -1629,6 +1629,69 @@ const Footer = ({ onAdmin }) => (
 );
 
 /* ───────────────────────────────────────────
+   PRO DISCLAIMER MODAL
+─────────────────────────────────────────── */
+const ProDisclaimerModal = ({ isOpen, onClose, onProceed }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal-overlay" style={{ zIndex: 1100 }}>
+            <div className="modal-content" style={{ maxWidth: '450px', padding: '3rem 2rem', textAlign: 'center' }}>
+                <button className="modal-close" onClick={onClose}><X size={20} /></button>
+
+                <div style={{
+                    display: 'inline-flex',
+                    background: '#fff7ed',
+                    color: '#c2410c',
+                    padding: '1.5rem',
+                    borderRadius: '2rem',
+                    marginBottom: '2rem',
+                    border: '3px solid #c2410c'
+                }}>
+                    <Store size={48} />
+                </div>
+
+                <h3 className="section-h2" style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>Business Access</h3>
+
+                <p style={{
+                    color: '#475569',
+                    fontSize: '1.1rem',
+                    lineHeight: '1.6',
+                    marginBottom: '2.5rem',
+                    fontWeight: 500
+                }}>
+                    Kindly note that this ticket is specifically for <strong style={{ color: '#000' }}>brands and companies</strong>. It is not a free admission ticket.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <button
+                        onClick={onProceed}
+                        className="btn-primary"
+                        style={{ width: '100%', justifyContent: 'center', py: '1.2rem' }}
+                    >
+                        I Understand, Proceed
+                    </button>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            textDecoration: 'underline',
+                            fontWeight: 900,
+                            textTransform: 'uppercase',
+                            fontSize: '0.8rem',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Go Back
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ───────────────────────────────────────────
    REGISTER MODAL
 ─────────────────────────────────────────── */
 const RegisterModal = ({ isOpen, onClose, initialType }) => {
@@ -2637,6 +2700,7 @@ export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isRegModalOpen, setIsRegModalOpen] = useState(false);
     const [selectedTicketType, setSelectedTicketType] = useState('Standard');
+    const [isProDisclaimerOpen, setIsProDisclaimerOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Dynamic CMS State
@@ -2720,6 +2784,10 @@ export default function App() {
 
 
     const openModal = (type = 'Standard') => {
+        if (type === 'Pro') {
+            setIsProDisclaimerOpen(true);
+            return;
+        }
         setSelectedTicketType(type);
         setIsRegModalOpen(true);
     };
@@ -2788,6 +2856,16 @@ export default function App() {
                 isOpen={isRegModalOpen}
                 onClose={() => setIsRegModalOpen(false)}
                 initialType={selectedTicketType}
+            />
+
+            <ProDisclaimerModal
+                isOpen={isProDisclaimerOpen}
+                onClose={() => setIsProDisclaimerOpen(false)}
+                onProceed={() => {
+                    setIsProDisclaimerOpen(false);
+                    setSelectedTicketType('Pro');
+                    setIsRegModalOpen(true);
+                }}
             />
         </>
     );

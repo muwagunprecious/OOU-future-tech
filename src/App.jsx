@@ -7,7 +7,7 @@ import {
     ChevronRight, Github, Twitter, Linkedin, Mail,
     MapPin, Calendar, Users, Cpu, Shield, Globe, Award,
     Zap, Code2, Mic, Network, Lightbulb, Rocket,
-    Download, CheckCircle, Ticket, X, Trash2, Store, Menu, Camera
+    Download, CheckCircle, Ticket, X, Trash2, Store, Menu, Camera as CameraIcon
 } from 'lucide-react';
 
 /* ───────────────────────────────────────────
@@ -270,13 +270,30 @@ const GlobalStyle = () => (
     }
     .btn-outline:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #000; }
 
-    /* PARTNERS STRIP */
-    .partners-strip { padding: 3rem 0; border-top: 2px solid #eee; border-bottom: 2px solid #eee; overflow: hidden; background: #fff; }
-    .partners-label { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; color: #1a1a1a; margin-bottom: 2rem; text-align: center; }
-    .partners-track { display: flex; align-items: center; justify-content: center; gap: 3.5rem; flex-wrap: wrap; opacity: 1; }
-    @media(max-width: 600px){ .partners-track { gap: 1.5rem; } }
-    .partner-logo { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.1rem; color: #1a1a1a; letter-spacing: -0.02em; display: flex; align-items: center; gap: 0.5rem; }
-    .partners-sep { width: 5px; height: 5px; background: #facc15; border-radius: 50%; flex-shrink: 0; }
+    /* PARTNERS STRIP - Gliding Carousel */
+    .partners-strip { padding: 4rem 0; background: #fff; overflow: hidden; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; }
+    .partners-label { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent-r); margin-bottom: 3rem; text-align: center; }
+    
+    .partners-carousel { overflow: hidden; white-space: nowrap; position: relative; width: 100%; padding: 1rem 0; }
+    .partners-track { display: inline-flex; animation: glide 40s linear infinite; gap: 4rem; width: max-content; }
+    
+    @keyframes glide {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(calc(-50% - 2rem)); }
+    }
+
+    .partner-logo-item {
+      display: flex; align-items: center; gap: 1rem;
+      background: #fff; padding: 0.5rem 1.5rem;
+      border-radius: 999px; border: 2px solid #000;
+      box-shadow: 4px 4px 0 #000;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .partner-logo-item:hover { transform: scale(1.05) rotate(-1deg); box-shadow: 6px 6px 0 var(--accent-r); }
+    .partner-logo-box { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 8px; flex-shrink: 0; }
+    .partner-logo-img { width: 100%; height: 100%; object-fit: contain; }
+    .partner-name { font-family: 'Outfit', sans-serif; font-weight: 950; font-size: 0.9rem; text-transform: uppercase; color: #000; letter-spacing: -0.01em; }
+    .partners-sep { width: 8px; height: 8px; background: var(--accent-r); border-radius: 50%; opacity: 0.2; }
 
     /* VISION – Wrap in a card */
     .vision { background: var(--bg); }
@@ -856,40 +873,39 @@ const Hero = ({ onRegister }) => {
 ─────────────────────────────────────────── */
 const Partners = ({ dynamicPartners }) => {
     const defaultPartners = [
-        { name: 'OOUtech Community', icon: null },
-        { name: 'OOU Web 3', icon: null },
-        { name: 'OOU Official', icon: <Award size={18} color="#facc15" /> },
-        { name: 'NACOS', icon: null },
-        { name: 'GDSC OOU', icon: null },
-        { name: 'OOU Innovators', icon: null },
+        { name: 'OOUtech Community', icon: <Cpu size={20} color="var(--accent-r)" /> },
+        { name: 'OOU Web 3', icon: <Globe size={20} color="#3b82f6" /> },
+        { name: 'OOU Official', icon: <Award size={20} color="#facc15" /> },
+        { name: 'NACOS', icon: <Code2 size={20} color="#10b981" /> },
+        { name: 'GDSC OOU', icon: <Rocket size={20} color="#f87171" /> },
+        { name: 'OOU Innovators', icon: <Lightbulb size={20} color="#fbbf24" /> },
     ];
 
     const hasDynamic = dynamicPartners && dynamicPartners.length > 0;
+    const partnersToRender = hasDynamic ? dynamicPartners : defaultPartners;
+
+    // Duplicate the list 3 times to ensure no gaps even on huge screens
+    const tripledPartners = [...partnersToRender, ...partnersToRender, ...partnersToRender];
 
     return (
         <section id="partners" className="partners-strip">
-            <div className="container">
-                <p className="partners-label">{hasDynamic ? 'Our Community Partners' : 'Our Partners & Collaborators'}</p>
-                <div className="partners-track" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '3rem' }}>
-                    {hasDynamic ? (
-                        dynamicPartners.map((p, i) => (
-                            <div key={i} className="partner-logo-item" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                <div style={{ width: p.width || 'fit-content', minWidth: '50px', height: '50px', background: '#fff', padding: '5px', borderRadius: '10px', border: '2px solid #000' }}>
-                                    <img src={p.logo_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                                </div>
-                                <span style={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.8rem' }}>{p.name}</span>
+            <div className="container" style={{ textAlign: 'center' }}>
+                <p className="partners-label">{hasDynamic ? 'Featured Partners & Sponsors' : 'Our Partners & Collaborators'}</p>
+            </div>
+            <div className="partners-carousel">
+                <div className="partners-track">
+                    {tripledPartners.map((p, i) => (
+                        <div key={i} className="partner-logo-item">
+                            <div className="partner-logo-box">
+                                {hasDynamic ? (
+                                    <img src={p.logo_url} alt={p.name} className="partner-logo-img" />
+                                ) : (
+                                    p.icon
+                                )}
                             </div>
-                        ))
-                    ) : (
-                        defaultPartners.map((p, i) => (
-                            <React.Fragment key={i}>
-                                <span className="partner-logo">
-                                    {p.icon} {p.name}
-                                </span>
-                                {i < defaultPartners.length - 1 && <div className="partners-sep" />}
-                            </React.Fragment>
-                        ))
-                    )}
+                            <span className="partner-name">{p.name}</span>
+                        </div>
+                    ))}
                 </div>
             </div>
         </section>
@@ -1402,15 +1418,16 @@ const EventTagsSection = () => {
                                     <div style={{ fontSize: '0.9rem', color: '#15803d', fontWeight: 600 }}>ID: {attendee.ticket_id}</div>
                                 </div>
 
-                                <div className="form-group">
-                                    <label className="form-label">Upload Your Photo</label>
+                                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                                    <label className="form-label">Step 2: Upload Your Photo</label>
                                     <div style={{
-                                        border: '3px dashed #000',
+                                        border: photo ? '3px solid #16a34a' : '3px dashed #000',
                                         borderRadius: '1.5rem',
                                         padding: '2rem',
                                         textAlign: 'center',
-                                        background: '#f8fafc',
-                                        cursor: 'pointer'
+                                        background: photo ? '#f0fdf4' : '#f8fafc',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease'
                                     }}>
                                         <input
                                             type="file"
@@ -1420,14 +1437,21 @@ const EventTagsSection = () => {
                                             style={{ display: 'none' }}
                                         />
                                         <label htmlFor="tag-photo-upload" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem' }}>
-                                            <div style={{ background: '#000', color: '#fff', padding: '1rem', borderRadius: '1rem' }}>
-                                                <Camera size={24} />
+                                            <div style={{
+                                                background: photo ? '#16a34a' : '#000',
+                                                color: '#fff',
+                                                padding: '1rem',
+                                                borderRadius: '1rem',
+                                                transition: 'background 0.3s'
+                                            }}>
+                                                {photo ? <CheckCircle size={24} /> : <CameraIcon size={24} />}
                                             </div>
                                             <span style={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.85rem' }}>
-                                                {photo ? 'Change Profile Photo' : 'Upload Profile Photo'}
+                                                {photo ? 'Success! Change Photo?' : 'Click to Upload Profile Photo'}
                                             </span>
                                         </label>
                                     </div>
+                                    {!photo && <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem', fontWeight: 600 }}>* You must upload a photo to enable the download button</p>}
                                 </div>
 
                                 <button
@@ -1437,13 +1461,24 @@ const EventTagsSection = () => {
                                     style={{
                                         width: '100%',
                                         marginTop: '1.5rem',
-                                        background: 'var(--accent-r)',
-                                        color: '#fff',
-                                        boxShadow: isDownloading || !photo ? 'none' : '6px 6px 0 #000',
-                                        opacity: isDownloading || !photo ? 0.7 : 1
+                                        background: photo ? 'var(--accent-r)' : '#e2e8f0',
+                                        color: photo ? '#fff' : '#94a3b8',
+                                        boxShadow: (isDownloading || !photo) ? 'none' : '6px 6px 0 #000',
+                                        opacity: isDownloading ? 0.7 : 1,
+                                        cursor: photo ? 'pointer' : 'not-allowed',
+                                        border: photo ? '3px solid #000' : '3px solid #cbd5e1',
+                                        transform: photo && !isDownloading ? 'scale(1.02)' : 'scale(1)',
+                                        transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                                     }}
                                 >
-                                    <Download size={20} /> {isDownloading ? 'Generating...' : 'Download My Tag'}
+                                    {isDownloading ? (
+                                        <>Generating PNG...</>
+                                    ) : (
+                                        <>
+                                            <Download size={20} />
+                                            <span style={{ marginLeft: '0.5rem' }}>{photo ? 'Download My Event Tag' : 'Upload Photo First'}</span>
+                                        </>
+                                    )}
                                 </button>
 
                                 <button
@@ -2314,7 +2349,10 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
             setNewPartner({ name: '', logo_url: '' });
             fetchPartners();
             onRefresh();
-        } else alert('Error adding partner.');
+        } else {
+            console.error('Partner error:', error);
+            alert('Error adding partner. Please ensure the "partners" table exists in your Supabase database.');
+        }
     };
 
     const handleDeletePartner = async (id) => {

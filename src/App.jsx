@@ -1805,7 +1805,7 @@ const CTABanner = ({ onRegister, isRegistrationOpen }) => (
                 >
                     {isRegistrationOpen ? 'Register Now' : 'Closed'}
                 </button>
-                <button className="btn-cta-outline">Partner With Us</button>
+                <a href="mailto:ooufuturetech@gmail.com" className="btn-cta-outline" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Partner With Us</a>
             </div>
         </div>
     </section>
@@ -1829,7 +1829,7 @@ const Footer = ({ onAdmin }) => (
                 </div>
                 <div>
                     <p className="footer-heading">Contact</p>
-                    <div className="footer-contact-item"><Mail size={15} /> info@ooufuturetech.com</div>
+                    <div className="footer-contact-item"><Mail size={15} /> ooufuturetech@gmail.com</div>
                     <div className="footer-contact-item"><MapPin size={15} /> Ago-Iwoye, Ogun State</div>
                     <div className="footer-contact-item"><Calendar size={15} /> 27 March, 2026</div>
                 </div>

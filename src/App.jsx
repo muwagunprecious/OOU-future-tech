@@ -1311,7 +1311,7 @@ const EventTagCard = ({ name, ticketId, photo, cardRef }) => {
     );
 };
 
-const EventTagsSection = () => {
+const EventTagsSection = ({ isOpen }) => {
     const [email, setEmail] = useState('');
     const [isVerified, setIsVerified] = useState(false);
     const [attendee, setAttendee] = useState(null);
@@ -1375,6 +1375,48 @@ const EventTagsSection = () => {
             setIsDownloading(false);
         }
     };
+
+    if (!isOpen) {
+        return (
+            <section className="vol-section" style={{ background: '#fff', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="container" style={{ textAlign: 'center' }}>
+                    <div style={{
+                        background: '#fef2f2',
+                        border: '4px solid #dc2626',
+                        padding: '4rem 2rem',
+                        borderRadius: '3rem',
+                        boxShadow: '12px 12px 0 #000',
+                        maxWidth: '700px',
+                        margin: '0 auto',
+                        animation: 'fadeIn 0.5s ease-out'
+                    }}>
+                        <div style={{
+                            background: '#dc2626',
+                            color: '#fff',
+                            display: 'inline-flex',
+                            padding: '1rem',
+                            borderRadius: '1.5rem',
+                            marginBottom: '2rem',
+                            animation: 'bounce 2s infinite'
+                        }}>
+                            <Zap size={48} />
+                        </div>
+                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: '#000', marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '-1px' }}>
+                            Event Tags <br /><span style={{ color: '#dc2626' }}>Coming Soon</span>
+                        </h2>
+                        <p style={{ fontSize: '1.1rem', color: '#4b5563', fontWeight: 600, maxWidth: '500px', margin: '0 auto 2.5rem' }}>
+                            We are finalizing the attendee portal. Check back shortly to create your customized conference badge!
+                        </p>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                            <div style={{ background: '#000', color: '#fff', padding: '0.8rem 1.5rem', borderRadius: '1rem', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase' }}>
+                                🚀 Stay Tuned
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="vol-section" style={{ background: '#fff' }}>
@@ -2232,7 +2274,7 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
 /* ───────────────────────────────────────────
    ADMIN DASHBOARD
 ─────────────────────────────────────────── */
-const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, comingSoonText, dynamicSpeakers, dynamicTeam }) => {
+const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen, speakersMode, comingSoonText, dynamicSpeakers, dynamicTeam }) => {
     const [activeTab, setActiveTab] = useState('standard'); // 'standard', 'pro', 'partners', 'speakers', 'team', 'settings'
     const [partners, setPartners] = useState([]);
     const [registrations, setRegistrations] = useState([]);
@@ -2331,6 +2373,16 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
 
         if (!error) onRefresh();
         else alert('Failed to update settings. Make sure site_settings table exists.');
+    };
+
+    const toggleEventTags = async () => {
+        const newValue = !isEventTagsOpen;
+        const { error } = await supabase
+            .from('site_settings')
+            .upsert({ key: 'event_tags_open', value: newValue.toString(), updated_at: new Date() });
+
+        if (!error) onRefresh();
+        else alert('Failed to update Event Tags settings.');
     };
 
     const handleAddSpeaker = async (e) => {
@@ -2725,6 +2777,26 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, speakersMode, c
                                     </button>
                                 </div>
 
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '2rem', borderRadius: '1.5rem', border: '3px solid #000', marginTop: '1.5rem' }}>
+                                    <div>
+                                        <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.8rem' }}>Event Tags Status</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: isEventTagsOpen ? '#059669' : '#dc2626' }}>
+                                            {isEventTagsOpen ? 'LIVE & ACCESSIBLE' : 'HIDDEN / COMING SOON'}
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={toggleEventTags}
+                                        style={{
+                                            background: isEventTagsOpen ? '#dc2626' : '#059669',
+                                            color: '#fff', padding: '1rem 2rem', borderRadius: '1rem', border: '3px solid #000',
+                                            fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer',
+                                            boxShadow: '4px 4px 0 #000', transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {isEventTagsOpen ? 'Disable Event Tags' : 'Enable Event Tags'}
+                                    </button>
+                                </div>
+
                                 <div style={{ marginTop: '3rem', borderTop: '2px dashed #eee', paddingTop: '3rem' }}>
                                     <h4 style={{ fontWeight: 900, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.2rem', textTransform: 'uppercase' }}>
                                         <Mic size={24} /> Speakers Section
@@ -2897,6 +2969,7 @@ export default function App() {
     const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
     const [speakersMode, setSpeakersMode] = useState('live'); // 'live' or 'coming_soon'
     const [comingSoonText, setComingSoonText] = useState('Exciting lineup coming soon! Stay tuned.');
+    const [isEventTagsOpen, setIsEventTagsOpen] = useState(true);
 
     useEffect(() => {
         fetchCMSData();
@@ -2923,6 +2996,9 @@ export default function App() {
 
                 const textSetting = settings.find(s => s.key === 'speakers_coming_soon_text');
                 if (textSetting) setComingSoonText(textSetting.value);
+
+                const etSetting = settings.find(s => s.key === 'event_tags_open');
+                if (etSetting) setIsEventTagsOpen(etSetting.value === 'true');
             }
         } catch (err) {
             console.warn('CMS Fetch failed (tables might not exist yet):', err);
@@ -2959,6 +3035,7 @@ export default function App() {
                     onBack={() => setView('site')}
                     onRefresh={fetchCMSData}
                     isRegistrationOpen={isRegistrationOpen}
+                    isEventTagsOpen={isEventTagsOpen}
                     speakersMode={speakersMode}
                     comingSoonText={comingSoonText}
                     dynamicSpeakers={dynamicSpeakers}
@@ -3014,7 +3091,7 @@ export default function App() {
                             <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
                         </button>
                     </div>
-                    <EventTagsSection />
+                    <EventTagsSection isOpen={isEventTagsOpen} />
                 </div>
             ) : (
                 <>
@@ -3038,6 +3115,7 @@ export default function App() {
 
             <CTABanner onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
             <Footer onAdmin={() => setView('admin-login')} />
+
 
             <RegisterModal
                 isOpen={isRegModalOpen}

@@ -7,7 +7,7 @@ import {
     ChevronRight, Github, Twitter, Linkedin, Mail,
     MapPin, Calendar, Users, Cpu, Shield, Globe, Award,
     Zap, Code2, Mic, Network, Lightbulb, Rocket,
-    Download, CheckCircle, Ticket, X, Trash2, Store, Menu
+    Download, CheckCircle, Ticket, X, Trash2, Store, Menu, Camera
 } from 'lucide-react';
 
 /* ───────────────────────────────────────────
@@ -716,50 +716,18 @@ const GlobalStyle = () => (
 
     .id-card-preview-wrap { position: sticky; top: 100px; display: flex; flex-direction: column; align-items: center; gap: 2rem; }
     
-    /* THE ID CARD DESIGN */
+    /* EVENT TAG CARD (Container styles) */
     .id-card-canonical {
-      width: 320px; height: 500px; background: #fff; border: 4px solid #000; border-radius: 1.5rem;
-      position: relative; overflow: hidden; display: flex; flex-direction: column;
-      box-shadow: 15px 15px 0 rgba(0,0,0,0.1); font-family: 'Inter', sans-serif;
-    }
-    .id-card-header { 
-      background: #000; color: #fff; padding: 1.5rem; text-align: center; border-bottom: 4px solid #000;
-      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-    }
-    .id-card-logo-text { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; }
-    
-    .id-card-photo-area { 
-      flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem;
-      background: radial-gradient(circle at center, #f8f8f8 0%, #fff 100%);
       position: relative;
+      margin: 0 auto;
+      transition: transform 0.3s;
     }
-    .id-card-photo-frame { 
-      width: 180px; height: 180px; border: 4px solid #000; border-radius: 1rem; overflow: hidden;
-      background: #f0f0f0; box-shadow: 8px 8px 0 rgba(0,0,0,0.05); transform: rotate(-2deg);
-    }
-    .id-card-photo { width: 100%; height: 100%; object-fit: cover; }
+    .id-card-canonical:hover { transform: translateY(-5px); }
     
-    .id-card-info { 
-      padding: 1.5rem; text-align: center; background: #fff; border-top: 4px dashed #000;
-      display: flex; flex-direction: column; gap: 0.5rem; position: relative;
+    @media(max-width: 480px) {
+      .vol-container { grid-template-columns: 1fr; }
+      .id-card-canonical { width: 100% !important; height: auto !important; aspect-ratio: 380/560; }
     }
-    .id-card-name { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.5rem; text-transform: uppercase; color: #000; line-height: 1.1; }
-    .id-card-sector { 
-      background: var(--accent-r); color: #fff; padding: 0.4rem 1rem; border-radius: 0.5rem;
-      font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.75rem; text-transform: uppercase;
-      border: 2px solid #000; display: inline-block; width: fit-content; margin: 0 auto;
-    }
-    .id-card-footer { 
-      background: #f0f0f0; padding: 0.8rem; text-align: center; border-top: 2px solid #000;
-      font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.2em;
-    }
-    
-    .id-card-watermark {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
-      font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 5rem; color: rgba(0,0,0,0.03);
-      white-space: nowrap; pointer-events: none; z-index: 0;
-    }
-
     /* ANIMATIONS */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(30px); }
@@ -787,11 +755,11 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             <div className="nav-menu-pill">
                 <nav className="nav-links">
                     {currentView === 'site' ? (
-                        ['Schedule', 'Speakers', 'Volunteers', 'FAQs', 'Team'].map(l => (
-                            l === 'Volunteers' ? (
-                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange('volunteers'); }}>{l}</a>
+                        ['Schedule', 'Speakers', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                            l === 'Event Tags' ? (
+                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange('event-tags'); }}>{l}</a>
                             ) : (
-                                <a key={l} href={`#${l.toLowerCase()}`}>{l}</a>
+                                <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`}>{l}</a>
                             )
                         ))
                     ) : (
@@ -814,11 +782,11 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             </button>
             <nav className="mobile-nav-links">
                 {currentView === 'site' ? (
-                    ['Schedule', 'Speakers', 'Volunteers', 'FAQs', 'Team'].map(l => (
-                        l === 'Volunteers' ? (
-                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange('volunteers'); }}>{l}</a>
+                    ['Schedule', 'Speakers', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                        l === 'Event Tags' ? (
+                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange('event-tags'); }}>{l}</a>
                         ) : (
-                            <a key={l} href={`#${l.toLowerCase()}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
+                            <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
                         )
                     ))
                 ) : (
@@ -1155,65 +1123,226 @@ const Tickets = ({ onRegister, isRegistrationOpen }) => (
 );
 
 /* ───────────────────────────────────────────
-   VOLUNTEERS
+   EVENT TAGS
 ─────────────────────────────────────────── */
-const VolunteerIDCard = ({ name, sector, photo, cardRef }) => (
-    <div className="id-card-canonical" ref={cardRef}>
-        <div className="id-card-header">
-            <div style={{ display: 'flex', gap: '4px' }}>
-                <div style={{ width: '12px', height: '12px', background: 'var(--accent-r)', borderRadius: '2px' }} />
-                <div style={{ width: '12px', height: '12px', background: '#fff', borderRadius: '2px' }} />
+const EventTagCard = ({ name, ticketId, photo, cardRef }) => {
+    // Geometric shapes for the background
+    const GeometricPatterns = () => (
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+            {/* Top Right Triangle */}
+            <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'var(--accent-r)', transform: 'rotate(15deg)', clipPath: 'polygon(0 0, 100% 0, 100% 100%)', opacity: 0.2 }} />
+            {/* Bottom Left Circle */}
+            <div style={{ position: 'absolute', bottom: '40px', left: '-30px', width: '120px', height: '120px', borderRadius: '50%', background: 'var(--accent-r)', opacity: 0.15 }} />
+            {/* Mid Right Square */}
+            <div style={{ position: 'absolute', top: '40%', right: '10px', width: '40px', height: '40px', background: 'var(--accent-r)', transform: 'rotate(45deg)', opacity: 0.1 }} />
+            {/* Dot Grid */}
+            <div style={{ position: 'absolute', bottom: '20px', right: '20px', opacity: 0.3 }}>
+                {[...Array(9)].map((_, i) => (
+                    <div key={i} style={{ display: 'inline-block', width: '4px', height: '4px', background: '#000', borderRadius: '50%', margin: '4px' }} />
+                ))}
             </div>
-            <span className="id-card-logo-text">OOU Future Tech 2026</span>
+            {/* Squiggle */}
+            <svg style={{ position: 'absolute', top: '150px', left: '20px', opacity: 0.2 }} width="60" height="20" viewBox="0 0 60 20">
+                <path d="M0 10 Q15 0 30 10 T60 10" fill="none" stroke="var(--accent-r)" strokeWidth="4" />
+            </svg>
         </div>
+    );
 
-        <div className="id-card-photo-area">
-            <div className="id-card-watermark">VOLUNTEER</div>
-            <div className="id-card-photo-frame">
-                {photo ? (
-                    <img src={photo} alt="Profile" className="id-card-photo" />
-                ) : (
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8' }}>
-                        <Users size={60} color="#ccc" />
+    const SplashDesign = ({ children }) => (
+        <div style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.5rem 2.5rem',
+            minWidth: '220px',
+            minHeight: '80px'
+        }}>
+            {/* Custom SVG Splash Background */}
+            <svg style={{ position: 'absolute', inset: 0, zIndex: 0, width: '100%', height: '100%' }} viewBox="0 0 200 100" preserveAspectRatio="none">
+                <path
+                    d="M10,50 Q20,10 50,20 T100,10 T150,30 T190,50 T150,80 T100,90 T50,80 T10,50"
+                    fill="var(--accent-r)"
+                />
+                <circle cx="20" cy="20" r="5" fill="var(--accent-r)" opacity="0.6" />
+                <circle cx="180" cy="80" r="8" fill="var(--accent-r)" opacity="0.4" />
+                <circle cx="160" cy="15" r="4" fill="var(--accent-r)" opacity="0.5" />
+            </svg>
+            <div style={{
+                position: 'relative',
+                zIndex: 1,
+                color: '#fff',
+                fontWeight: 950,
+                fontSize: '1.3rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                textAlign: 'center',
+                lineHeight: 1
+            }}>
+                {children}
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="id-card-canonical" ref={cardRef} style={{
+            width: '380px',
+            height: '720px',
+            background: '#fff',
+            border: '2px solid #e2e8f0',
+            padding: '0',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+            borderRadius: '0.5rem',
+            position: 'relative'
+        }}>
+            <GeometricPatterns />
+
+            {/* Header Area */}
+            <div style={{ padding: '2.5rem 2.5rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--accent-r)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                        FUTURE TECH
                     </div>
-                )}
+                    <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#000', opacity: 0.6 }}>
+                        OOU CONFERENCE 2026
+                    </div>
+                </div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#000', textAlign: 'right' }}>
+                    27 MARCH <br /> 2026
+                </div>
             </div>
-        </div>
 
-        <div className="id-card-info">
-            <h2 className="id-card-name">{name || "Your Name"}</h2>
-            <div className="id-card-sector">{sector || "Sector"}</div>
-        </div>
+            {/* Photo Area */}
+            <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '1.5rem 0' }}>
+                <div style={{
+                    width: '200px',
+                    height: '200px',
+                    border: '8px solid #fff',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                    background: '#f1f5f9',
+                    zIndex: 2
+                }}>
+                    {photo ? (
+                        <img src={photo} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Users size={100} color="#cbd5e1" />
+                        </div>
+                    )}
+                </div>
+            </div>
 
-        <div className="id-card-footer">
-            Official Conference Volunteer
-        </div>
-    </div>
-);
+            {/* Info Area */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '1rem 2rem 2rem', position: 'relative', zIndex: 1, justifyContent: 'space-between' }}>
+                <div>
+                    <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                        <SplashDesign>
+                            I will be attending
+                        </SplashDesign>
+                    </div>
 
-const VolunteerSection = () => {
-    const [volData, setVolData] = useState({ name: '', sector: 'Technical', photo: null });
+                    <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.4rem' }}>
+                            Attendee Name
+                        </div>
+                        <h2 style={{
+                            fontSize: name && name.length > 20 ? '1.8rem' : '2.5rem',
+                            fontWeight: 950,
+                            color: '#1a1a1a',
+                            lineHeight: 1.1,
+                            textTransform: 'uppercase',
+                            wordBreak: 'break-word',
+                            maxWidth: '300px'
+                        }}>
+                            {name || "Your Name"}
+                        </h2>
+                    </div>
+                </div>
+
+                <div style={{
+                    width: '100%',
+                    borderTop: '2px dashed #e2e8f0',
+                    paddingTop: '1.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                }}>
+                    <div style={{ color: '#000', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                        Registration ID: <span style={{ color: 'var(--accent-r)' }}>#{ticketId || "OOU-2026"}</span>
+                    </div>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>
+                        Olabisi Onabanjo University • Main Campus
+                    </div>
+                </div>
+            </div>
+
+            {/* Lanyard Cutout (Visual Only) */}
+            <div style={{
+                position: 'absolute',
+                top: '-15px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '60px',
+                height: '15px',
+                background: '#e2e8f0',
+                borderRadius: '5px'
+            }} />
+        </div>
+    );
+};
+
+const EventTagsSection = () => {
+    const [email, setEmail] = useState('');
+    const [isVerified, setIsVerified] = useState(false);
+    const [attendee, setAttendee] = useState(null);
+    const [photo, setPhoto] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const cardRef = useRef(null);
     const [isDownloading, setIsDownloading] = useState(false);
 
-    const sectors = ['Technical', 'Logistics', 'Protocol', 'Media', 'Welfare', 'Security'];
+    const handleVerify = async () => {
+        if (!email) return;
+        setLoading(true);
+        setError('');
+        try {
+            const { data, error: sbError } = await supabase
+                .from('registrations')
+                .select('name, ticket_id')
+                .eq('email', email.trim().toLowerCase())
+                .maybeSingle();
+
+            if (sbError) throw sbError;
+
+            if (data) {
+                setAttendee(data);
+                setIsVerified(true);
+            } else {
+                setError('Email not found or user not registered. Please ensure you use the email you registered with.');
+            }
+        } catch (err) {
+            console.error('Verification error:', err);
+            setError('An error occurred during verification. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handlePhotoChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setVolData({ ...volData, photo: reader.result });
-            };
+            reader.onloadend = () => setPhoto(reader.result);
             reader.readAsDataURL(file);
         }
     };
 
-    const handleDownloadID = async () => {
-        if (!volData.name) {
-            alert("Please enter your name first!");
-            return;
-        }
+    const handleDownloadTag = async () => {
+        if (!attendee) return;
         setIsDownloading(true);
         try {
             const node = cardRef.current;
@@ -1222,97 +1351,117 @@ const VolunteerSection = () => {
                 pixelRatio: 2,
                 backgroundColor: '#fff'
             });
-            download(dataUrl, `OOU-Volunteer-${volData.name.replace(/\s+/g, '-')}.png`);
+            download(dataUrl, `OOU-Attendee-Tag-${attendee.name.replace(/\s+/g, '-')}.png`);
         } catch (err) {
             console.error('Download failed', err);
-            alert("Failed to generate ID card. Please try again.");
+            alert("Failed to generate Tag. Please try again.");
         } finally {
             setIsDownloading(false);
         }
     };
 
     return (
-        <section id="volunteers" className="vol-section">
+        <section className="vol-section" style={{ background: '#fff' }}>
             <div className="container">
                 <div className="section-header">
-                    <p className="section-label">Join the Crew</p>
-                    <h2 className="section-h2">Volunteer Portal</h2>
-                    <p>Enter your details below to generate your official volunteer ID card.</p>
+                    <p className="section-label">Show Your presence</p>
+                    <h2 className="section-h2">Create Your Event Tag</h2>
+                    <p>Enter your registered email to generate your custom "I will be attending" shoutout card.</p>
                 </div>
 
                 <div className="vol-container">
                     <div className="vol-form-card">
-                        <div className="form-group">
-                            <label className="form-label">Full Name</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                placeholder="e.g. Jane Doe"
-                                value={volData.name}
-                                onChange={(e) => setVolData({ ...volData, name: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Sector</label>
-                            <select
-                                className="form-select"
-                                value={volData.sector}
-                                onChange={(e) => setVolData({ ...volData, sector: e.target.value })}
-                            >
-                                {sectors.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Profile Picture</label>
-                            <div style={{
-                                border: '2px dashed #ccc',
-                                borderRadius: '1rem',
-                                padding: '1.5rem',
-                                textAlign: 'center',
-                                background: '#f9fafb'
-                            }}>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handlePhotoChange}
-                                    id="photo-upload"
-                                    style={{ display: 'none' }}
-                                />
-                                <label htmlFor="photo-upload" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                                    <div style={{ background: '#fff', padding: '1rem', borderRadius: '50%', border: '2px solid #eee' }}>
-                                        <Code2 size={24} color="var(--accent-r)" />
-                                    </div>
-                                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>
-                                        {volData.photo ? 'Change Photo' : 'Upload Profile Photo'}
-                                    </span>
-                                </label>
+                        {!isVerified ? (
+                            <div style={{ animation: 'fadeIn 0.5s ease' }}>
+                                <div className="form-group">
+                                    <label className="form-label">Registered Email</label>
+                                    <input
+                                        type="email"
+                                        className="form-input"
+                                        placeholder="e.g. john@example.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleVerify()}
+                                    />
+                                    {error && <p style={{ color: '#dc2626', marginTop: '0.75rem', fontSize: '0.85rem', fontWeight: 700 }}>{error}</p>}
+                                </div>
+                                <button
+                                    className="btn-primary"
+                                    onClick={handleVerify}
+                                    disabled={loading}
+                                    style={{ width: '100%', justifyContent: 'center', marginTop: '1rem' }}
+                                >
+                                    {loading ? 'Verifying...' : 'Verify Registration'}
+                                </button>
                             </div>
-                        </div>
+                        ) : (
+                            <div style={{ animation: 'fadeIn 0.5s ease' }}>
+                                <div style={{ background: '#f0fdf4', border: '2px solid #16a34a', padding: '1.5rem', borderRadius: '1rem', marginBottom: '2rem' }}>
+                                    <div style={{ color: '#16a34a', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.75rem', marginBottom: '0.5rem' }}>Attendee Verified</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 900 }}>{attendee.name}</div>
+                                    <div style={{ fontSize: '0.9rem', color: '#15803d', fontWeight: 600 }}>ID: {attendee.ticket_id}</div>
+                                </div>
 
-                        <button
-                            className="btn-download"
-                            onClick={handleDownloadID}
-                            disabled={isDownloading}
-                            style={{
-                                marginTop: '1rem',
-                                background: 'var(--accent-r)',
-                                color: '#fff',
-                                boxShadow: isDownloading ? 'none' : '6px 6px 0 #000',
-                                opacity: isDownloading ? 0.7 : 1
-                            }}
-                        >
-                            <Download size={20} /> {isDownloading ? 'Generating...' : 'Download My ID Card'}
-                        </button>
+                                <div className="form-group">
+                                    <label className="form-label">Upload Your Photo</label>
+                                    <div style={{
+                                        border: '3px dashed #000',
+                                        borderRadius: '1.5rem',
+                                        padding: '2rem',
+                                        textAlign: 'center',
+                                        background: '#f8fafc',
+                                        cursor: 'pointer'
+                                    }}>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handlePhotoChange}
+                                            id="tag-photo-upload"
+                                            style={{ display: 'none' }}
+                                        />
+                                        <label htmlFor="tag-photo-upload" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem' }}>
+                                            <div style={{ background: '#000', color: '#fff', padding: '1rem', borderRadius: '1rem' }}>
+                                                <Camera size={24} />
+                                            </div>
+                                            <span style={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.85rem' }}>
+                                                {photo ? 'Change Profile Photo' : 'Upload Profile Photo'}
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button
+                                    className="btn-download"
+                                    onClick={handleDownloadTag}
+                                    disabled={isDownloading || !photo}
+                                    style={{
+                                        width: '100%',
+                                        marginTop: '1.5rem',
+                                        background: 'var(--accent-r)',
+                                        color: '#fff',
+                                        boxShadow: isDownloading || !photo ? 'none' : '6px 6px 0 #000',
+                                        opacity: isDownloading || !photo ? 0.7 : 1
+                                    }}
+                                >
+                                    <Download size={20} /> {isDownloading ? 'Generating...' : 'Download My Tag'}
+                                </button>
+
+                                <button
+                                    onClick={() => { setIsVerified(false); setAttendee(null); setPhoto(null); }}
+                                    style={{ width: '100%', background: 'none', border: 'none', marginTop: '1rem', textDecoration: 'underline', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+                                >
+                                    Verify a different email
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="id-card-preview-wrap">
                         <div style={{ textAlign: 'center' }}>
-                            <p style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '1.5rem', color: '#71717a', letterSpacing: '0.1em' }}>
-                                LIVE PRODUCTION PREVIEW
+                            <p style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '1.5rem', color: '#000', letterSpacing: '0.15em' }}>
+                                SHOUTOUT PREVIEW
                             </p>
-                            <VolunteerIDCard name={volData.name} sector={volData.sector} photo={volData.photo} cardRef={cardRef} />
+                            <EventTagCard name={attendee?.name} ticketId={attendee?.ticket_id} photo={photo} cardRef={cardRef} />
                         </div>
                     </div>
                 </div>
@@ -2807,7 +2956,7 @@ export default function App() {
                 currentView={view}
             />
 
-            {view === 'volunteers' ? (
+            {view === 'event-tags' ? (
                 <div style={{ paddingTop: '8rem' }}>
                     <div className="container" style={{ marginBottom: '2rem' }}>
                         <button
@@ -2827,7 +2976,7 @@ export default function App() {
                             <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
                         </button>
                     </div>
-                    <VolunteerSection />
+                    <EventTagsSection />
                 </div>
             ) : (
                 <>

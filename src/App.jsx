@@ -2286,6 +2286,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [newPartner, setNewPartner] = useState({ name: '', logo_url: '' });
     const [newMember, setNewMember] = useState({ name: '', role: '', bio: '', image_url: '' });
     const [uploading, setUploading] = useState(false);
+    const [totalStats, setTotalStats] = useState({ total: 0, standard: 0, pro: 0 });
 
     useEffect(() => {
         fetchRegistrations();
@@ -2339,6 +2340,24 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
 
     const fetchRegistrations = async () => {
         setLoading(true);
+
+        // Fetch accurate counts directly from DB to bypass 1000 row limit
+        try {
+            const [
+                { count: total },
+                { count: standard },
+                { count: pro }
+            ] = await Promise.all([
+                supabase.from('registrations').select('*', { count: 'exact', head: true }),
+                supabase.from('registrations').select('*', { count: 'exact', head: true }).eq('ticket_type', 'Standard'),
+                supabase.from('registrations').select('*', { count: 'exact', head: true }).eq('ticket_type', 'Pro')
+            ]);
+
+            setTotalStats({ total: total || 0, standard: standard || 0, pro: pro || 0 });
+        } catch (err) {
+            console.error('Error fetching stats:', err);
+        }
+
         const { data, error } = await supabase
             .from('registrations')
             .select('*')
@@ -2455,9 +2474,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     });
 
     const stats = {
-        total: registrations.length,
-        standard: registrations.filter(r => r.ticket_type === 'Standard').length,
-        pro: registrations.filter(r => r.ticket_type === 'Pro').length
+        total: Math.max(registrations.length, totalStats.total),
+        standard: Math.max(registrations.filter(r => r.ticket_type === 'Standard').length, totalStats.standard),
+        pro: Math.max(registrations.filter(r => r.ticket_type === 'Pro').length, totalStats.pro)
     };
 
     const TabButton = ({ id, label, icon: Icon }) => (

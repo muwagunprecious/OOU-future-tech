@@ -772,9 +772,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             <div className="nav-menu-pill">
                 <nav className="nav-links">
                     {currentView === 'site' ? (
-                        ['Schedule', 'Speakers', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                            l === 'Event Tags' ? (
-                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange('event-tags'); }}>{l}</a>
+                        ['Schedule', 'Speakers', 'Pitch', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                            l === 'Event Tags' || l === 'Pitch' ? (
+                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : 'event-tags'); }}>{l}</a>
                             ) : (
                                 <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`}>{l}</a>
                             )
@@ -799,9 +799,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             </button>
             <nav className="mobile-nav-links">
                 {currentView === 'site' ? (
-                    ['Schedule', 'Speakers', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                        l === 'Event Tags' ? (
-                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange('event-tags'); }}>{l}</a>
+                    ['Schedule', 'Speakers', 'Pitch', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                        l === 'Event Tags' || l === 'Pitch' ? (
+                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : 'event-tags'); }}>{l}</a>
                         ) : (
                             <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
                         )
@@ -1549,6 +1549,168 @@ const EventTagsSection = ({ isOpen }) => {
 
 
 /* ───────────────────────────────────────────
+   PITCH SECTION
+─────────────────────────────────────────── */
+const PitchSection = () => {
+    const [formData, setFormData] = useState({ name: '', email: '', startup_name: '', category: 'Student Startup', pitch_description: '', whatsapp_number: '' });
+    const [loading, setLoading] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [error, setError] = useState(null);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        const { data, error: sbError } = await supabase
+            .from('pitches')
+            .insert([formData]);
+
+        if (sbError) {
+            console.error('Pitch submission error:', sbError);
+            if (sbError.code === '42P01') {
+                setError('Database Error: The "pitches" table does not exist. Please contact admin to run the SQL setup script.');
+            } else {
+                setError('Failed to submit pitch: ' + sbError.message);
+            }
+            setLoading(false);
+            return;
+        }
+
+        setIsSubmitted(true);
+        setLoading(false);
+    };
+
+    if (isSubmitted) {
+        return (
+            <section className="reg-section" style={{ background: '#fff', minHeight: '60vh', display: 'flex', alignItems: 'center' }}>
+                <div className="container" style={{ textAlign: 'center' }}>
+                    <div style={{
+                        background: '#f0fdf4',
+                        border: '4px solid #16a34a',
+                        padding: '4rem 2rem',
+                        borderRadius: '3rem',
+                        boxShadow: '12px 12px 0 #000',
+                        maxWidth: '700px',
+                        margin: '0 auto',
+                        animation: 'fadeIn 0.5s ease-out'
+                    }}>
+                        <div style={{
+                            background: '#16a34a',
+                            color: '#fff',
+                            display: 'inline-flex',
+                            padding: '1rem',
+                            borderRadius: '1.5rem',
+                            marginBottom: '2rem'
+                        }}>
+                            <CheckCircle size={48} />
+                        </div>
+                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: '#000', marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '-1px' }}>
+                            Pitch Received!
+                        </h2>
+                        <p style={{ fontSize: '1.1rem', color: '#15803d', fontWeight: 600, maxWidth: '500px', margin: '0 auto 2.5rem' }}>
+                            Thank you for sharing your vision with us. Our team will review your pitch and get back to you shortly.
+                        </p>
+                        <button className="btn-primary" onClick={() => window.location.reload()} style={{ margin: '0 auto' }}>
+                            Return to Home
+                        </button>
+                    </div>
+                </div>
+            </section>
+        );
+    }
+
+    return (
+        <section className="reg-section" style={{ background: '#fff' }}>
+            <div className="container">
+                <div className="section-header">
+                    <p className="section-label">Future Builders</p>
+                    <h2 className="section-h2">Startup Pitch</h2>
+                    <p>Are you building the next big thing? Share your startup idea with us and get a chance to pitch to global investors.</p>
+                </div>
+
+                <div className="reg-container">
+                    <div className="reg-card">
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Your Name</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="e.g. Jane Doe"
+                                    required
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Email Address</label>
+                                <input
+                                    type="email"
+                                    className="form-input"
+                                    placeholder="e.g. jane@startup.com"
+                                    required
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Startup / Company Name</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="e.g. FutureTech AI"
+                                    required
+                                    value={formData.startup_name}
+                                    onChange={(e) => setFormData({ ...formData, startup_name: e.target.value })}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Category</label>
+                                <select
+                                    className="form-select"
+                                    required
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                >
+                                    <option value="Student Startup">Student Startup</option>
+                                    <option value="Company">Company</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Pitch Description</label>
+                                <textarea
+                                    className="form-input"
+                                    placeholder="Briefly describe your startup and what problem it solves..."
+                                    required
+                                    style={{ minHeight: '150px', resize: 'vertical', paddingTop: '0.8rem' }}
+                                    value={formData.pitch_description}
+                                    onChange={(e) => setFormData({ ...formData, pitch_description: e.target.value })}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">WhatsApp Number (Optional)</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="e.g. +234..."
+                                    value={formData.whatsapp_number}
+                                    onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                                />
+                            </div>
+                            <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '1rem', opacity: loading ? 0.7 : 1 }}>
+                                {loading ? 'Submitting...' : 'Submit Pitch'}
+                            </button>
+                            {error && <p style={{ color: 'red', marginTop: '1rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: 700 }}>{error}</p>}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+/* ───────────────────────────────────────────
    SPEAKERS
 ─────────────────────────────────────────── */
 const TypingText = ({ text, delay = 100 }) => {
@@ -2278,18 +2440,21 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [activeTab, setActiveTab] = useState('standard'); // 'standard', 'pro', 'partners', 'speakers', 'team', 'settings'
     const [partners, setPartners] = useState([]);
     const [registrations, setRegistrations] = useState([]);
+    const [pitches, setPitches] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [confirmingPitch, setConfirmingPitch] = useState(null); // { id, status }
 
     // Form states for adding content
     const [newSpeaker, setNewSpeaker] = useState({ name: '', role: '', expertise: '', image_url: '', bg_class: 'speaker-img-bg-1' });
     const [newPartner, setNewPartner] = useState({ name: '', logo_url: '' });
     const [newMember, setNewMember] = useState({ name: '', role: '', bio: '', image_url: '' });
     const [uploading, setUploading] = useState(false);
-    const [totalStats, setTotalStats] = useState({ total: 0, standard: 0, pro: 0 });
+    const [totalStats, setTotalStats] = useState({ total: 0, standard: 0, pro: 0, pitches: 0 });
 
     useEffect(() => {
         fetchRegistrations();
+        fetchPitches();
         fetchPartners();
     }, []);
 
@@ -2346,14 +2511,16 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
             const [
                 { count: total },
                 { count: standard },
-                { count: pro }
+                { count: pro },
+                { count: pitchCount }
             ] = await Promise.all([
                 supabase.from('registrations').select('*', { count: 'exact', head: true }),
                 supabase.from('registrations').select('*', { count: 'exact', head: true }).eq('ticket_type', 'Standard'),
-                supabase.from('registrations').select('*', { count: 'exact', head: true }).eq('ticket_type', 'Pro')
+                supabase.from('registrations').select('*', { count: 'exact', head: true }).eq('ticket_type', 'Pro'),
+                supabase.from('pitches').select('*', { count: 'exact', head: true })
             ]);
 
-            setTotalStats({ total: total || 0, standard: standard || 0, pro: pro || 0 });
+            setTotalStats({ total: total || 0, standard: standard || 0, pro: pro || 0, pitches: pitchCount || 0 });
         } catch (err) {
             console.error('Error fetching stats:', err);
         }
@@ -2369,6 +2536,19 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         setLoading(false);
     };
 
+    const fetchPitches = async () => {
+        const { data, error } = await supabase
+            .from('pitches')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (!error) {
+            setPitches(data);
+        } else {
+            console.error('Error fetching pitches:', error);
+        }
+    };
+
     const handleDeleteRegistration = async (id) => {
         if (confirm('Are you sure you want to delete this registration?')) {
             const { error } = await supabase
@@ -2381,6 +2561,57 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
             } else {
                 alert('Error deleting registration: ' + error.message);
             }
+        }
+    };
+
+    const handleDeletePitch = async (id) => {
+        if (confirm('Are you sure you want to delete this pitch?')) {
+            const { error } = await supabase
+                .from('pitches')
+                .delete()
+                .eq('id', id);
+
+            if (!error) {
+                fetchPitches();
+                fetchRegistrations(); // Refresh counts
+            } else {
+                alert('Error deleting pitch: ' + error.message);
+            }
+        }
+    };
+
+    const handlePitchStatusUpdate = async (pitch, newStatus) => {
+        // Update local state IMMEDIATELY for responsiveness
+        const originalPitches = [...pitches];
+        setPitches(prev => prev.map(p => p.id === pitch.id ? { ...p, status: newStatus } : p));
+        
+        setLoading(true);
+        try {
+            // Direct Update via our Server (Bypasses Supabase Cache)
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiBase = isLocal ? `http://${window.location.hostname}:3001` : '';
+            
+            const response = await fetch(`${apiBase}/api/update-pitch-status-direct`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: pitch.id,
+                    status: newStatus
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                setPitches(originalPitches);
+                alert(`Failed to update status: ${errorData.error || 'Server error'}`);
+            } else {
+                alert(`Pitch status successfully updated to ${newStatus.toUpperCase()}! (No email sent)`);
+            }
+        } catch (err) {
+            setPitches(originalPitches);
+            alert('Could not reach the email server. Please ensure "node server/index.js" is running on port 3001.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -2511,6 +2742,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
                     <TabButton id="standard" label="Standard Passes" icon={Users} />
                     <TabButton id="pro" label="Stand Requests" icon={Users} />
+                    <TabButton id="pitches" label="Pitches" icon={Rocket} />
                     <TabButton id="partners" label="Partners CMS" icon={Store} />
                     <TabButton id="speakers" label="Speakers CMS" icon={Mic} />
                     <TabButton id="team" label="Team CMS" icon={Users} />
@@ -2523,7 +2755,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                             {[
                                 { label: 'Total Registrations', val: stats.total, color: 'var(--accent-r)' },
                                 { label: 'Standard Passes', val: stats.standard, color: '#000' },
-                                { label: 'Stand Requests', val: stats.pro, color: '#fff', bg: '#000' }
+                                { label: 'Stand Requests', val: stats.pro, color: '#fff', bg: '#000' },
+                                { label: 'Pitches', val: totalStats.pitches, color: 'var(--accent-r)' }
                             ].map((s, i) => (
                                 <div key={i} style={{ background: s.bg || '#fff', border: '3px solid #000', borderRadius: '1.5rem', padding: '1.5rem', boxShadow: '4px 4px 0 #000' }}>
                                     <p style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', color: s.bg ? '#ccc' : '#71717a', marginBottom: '0.5rem' }}>{s.label}</p>
@@ -2592,6 +2825,114 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                     </table>
                                 </div>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'pitches' && (
+                    <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                        <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
+                            <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, marginBottom: '2rem' }}>Startup Pitches</h3>
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ textAlign: 'left', borderBottom: '3px solid #000' }}>
+                                            <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Startup / Founder</th>
+                                            <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Category</th>
+                                            <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Pitch</th>
+                                            <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Status</th>
+                                            <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Date</th>
+                                            <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {pitches.map((p, i) => (
+                                            <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
+                                                <td style={{ padding: '1rem' }}>
+                                                    <div style={{ fontWeight: 900 }}>{p.startup_name}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#71717a' }}>{p.name} ({p.email})</div>
+                                                    {p.whatsapp_number && <div style={{ fontSize: '0.8rem', color: '#25d366', fontWeight: 700 }}>WA: {p.whatsapp_number}</div>}
+                                                </td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    <span style={{
+                                                        background: p.category === 'Company' ? '#000' : 'var(--accent-r)',
+                                                        color: '#fff', padding: '0.2rem 0.6rem', borderRadius: '0.5rem', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase'
+                                                    }}>{p.category}</span>
+                                                </td>
+                                                <td style={{ padding: '1rem', fontSize: '0.8rem' }}>
+                                                    <div style={{ maxWidth: '300px', whiteSpace: 'pre-wrap' }}>{p.pitch_description}</div>
+                                                </td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    <span style={{
+                                                        background: p.status === 'accepted' ? '#ecfdf5' : p.status === 'rejected' ? '#fef2f2' : '#f4f4f5',
+                                                        color: p.status === 'accepted' ? '#059669' : p.status === 'rejected' ? '#dc2626' : '#71717a',
+                                                        padding: '0.3rem 0.6rem', borderRadius: '0.5rem', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase',
+                                                        border: `1px solid ${p.status === 'accepted' ? '#059669' : p.status === 'rejected' ? '#dc2626' : '#e5e7eb'}`
+                                                    }}>{p.status || 'pending'}</span>
+                                                </td>
+                                                <td style={{ padding: '1rem', fontSize: '0.8rem' }}>{new Date(p.created_at).toLocaleDateString()}</td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        {(!p.status || p.status === 'pending') && (
+                                                            <>
+                                                                {confirmingPitch?.id === p.id ? (
+                                                                    <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', background: '#f4f4f5', padding: '0.2rem', borderRadius: '0.5rem', border: '1px solid #000' }}>
+                                                                        <span style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', padding: '0 0.3rem' }}>Sure?</span>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                handlePitchStatusUpdate(p, confirmingPitch.status);
+                                                                                setConfirmingPitch(null);
+                                                                            }}
+                                                                            style={{ background: confirmingPitch.status === 'accepted' ? '#059669' : '#dc2626', color: '#fff', border: 'none', padding: '0.3rem 0.6rem', borderRadius: '0.4rem', cursor: 'pointer', fontSize: '0.65rem' }}
+                                                                        >
+                                                                            YES
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => setConfirmingPitch(null)}
+                                                                            style={{ background: '#000', color: '#fff', border: 'none', padding: '0.3rem 0.6rem', borderRadius: '0.4rem', cursor: 'pointer', fontSize: '0.65rem' }}
+                                                                        >
+                                                                            NO
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <>
+                                                                        <button
+                                                                            onClick={() => setConfirmingPitch({ id: p.id, status: 'accepted' })}
+                                                                            title="Accept Pitch"
+                                                                            style={{ background: '#ecfdf5', color: '#059669', border: 'none', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
+                                                                        >
+                                                                            <CheckCircle size={16} />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => setConfirmingPitch({ id: p.id, status: 'rejected' })}
+                                                                            title="Reject Pitch"
+                                                                            style={{ background: '#fef2f2', color: '#dc2626', border: 'none', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
+                                                                        >
+                                                                            <X size={16} />
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleDeletePitch(p.id)}
+                                                            title="Delete Permanently"
+                                                            style={{ background: '#f4f4f5', color: '#71717a', border: 'none', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {pitches.length === 0 && (
+                                            <tr>
+                                                <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#71717a' }}>No pitches submitted yet.</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -3111,6 +3452,28 @@ export default function App() {
                         </button>
                     </div>
                     <EventTagsSection isOpen={isEventTagsOpen} />
+                </div>
+            ) : view === 'pitch' ? (
+                <div style={{ paddingTop: '8rem' }}>
+                    <div className="container" style={{ marginBottom: '2rem' }}>
+                        <button
+                            onClick={() => setView('site')}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontWeight: 900,
+                                fontSize: '1rem',
+                                color: 'var(--accent-r)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
+                        </button>
+                    </div>
+                    <PitchSection />
                 </div>
             ) : (
                 <>

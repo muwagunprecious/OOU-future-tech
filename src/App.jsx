@@ -644,8 +644,8 @@ const GlobalStyle = () => (
     .dt-header-logo { font-family: 'Outfit', sans-serif; font-weight: 900; text-transform: uppercase; font-size: 1rem; letter-spacing: 0.05em; color: #000; }
     .dt-header-year { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.2rem; color: #ccc; }
     
-    .dt-body { padding: 3rem 2rem; background: #fff; position: relative; }
-    .dt-main-info { margin-bottom: 3rem; }
+    .dt-body { padding: 2rem 1.5rem; background: #fff; position: relative; }
+    .dt-main-info { margin-bottom: 1.5rem; }
     .dt-type-badge { 
       background: var(--accent-r); color: #fff; padding: 0.4rem 1.2rem; border-radius: 9999px; 
       font-family: 'Outfit', sans-serif; font-weight: 900; text-transform: uppercase; font-size: 0.7rem; 
@@ -1203,7 +1203,7 @@ const EventTagCard = ({ name, ticketId, photo, cardRef }) => {
     return (
         <div className="id-card-canonical" ref={cardRef} style={{
             width: '380px',
-            height: '720px',
+            height: '580px',
             background: '#fff',
             border: '2px solid #e2e8f0',
             padding: '0',
@@ -1216,7 +1216,7 @@ const EventTagCard = ({ name, ticketId, photo, cardRef }) => {
             <GeometricPatterns />
 
             {/* Header Area */}
-            <div style={{ padding: '2.5rem 2.5rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+            <div style={{ padding: '1.5rem 2.2rem 0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--accent-r)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                         FUTURE TECH
@@ -1231,10 +1231,10 @@ const EventTagCard = ({ name, ticketId, photo, cardRef }) => {
             </div>
 
             {/* Photo Area */}
-            <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '1.5rem 0' }}>
+            <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '1rem 0' }}>
                 <div style={{
-                    width: '200px',
-                    height: '200px',
+                    width: '160px',
+                    height: '160px',
                     border: '8px solid #fff',
                     borderRadius: '50%',
                     overflow: 'hidden',
@@ -1253,9 +1253,9 @@ const EventTagCard = ({ name, ticketId, photo, cardRef }) => {
             </div>
 
             {/* Info Area */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '1rem 2rem 2rem', position: 'relative', zIndex: 1, justifyContent: 'space-between' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0.5rem 2rem 1.5rem', position: 'relative', zIndex: 1, justifyContent: 'space-between' }}>
                 <div>
-                    <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
                         <SplashDesign>
                             I will be attending
                         </SplashDesign>
@@ -1282,7 +1282,7 @@ const EventTagCard = ({ name, ticketId, photo, cardRef }) => {
                 <div style={{
                     width: '100%',
                     borderTop: '2px dashed #e2e8f0',
-                    paddingTop: '1.5rem',
+                    paddingTop: '1rem',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center'

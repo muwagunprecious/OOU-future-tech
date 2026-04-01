@@ -3587,6 +3587,7 @@ const FoundersSection = () => {
     const [submitted, setSubmitted] = useState(false);
     const [isFinalizing, setIsFinalizing] = useState(false);
     const [manualEmail, setManualEmail] = useState('');
+    const [isConnecting, setIsConnecting] = useState(false);
     const [connectionMatch, setConnectionMatch] = useState(null);
     const messagesEndRef = useRef(null);
 
@@ -3635,6 +3636,7 @@ const FoundersSection = () => {
     const handleConnectManual = async (target) => {
         const confirm = window.confirm(`Connect with ${target.name}?`);
         if (!confirm) return;
+        setIsConnecting(true);
         try {
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             const apiBase = isLocal ? 'http://localhost:3001' : '';
@@ -3644,8 +3646,20 @@ const FoundersSection = () => {
                 body: JSON.stringify({ senderId: '00000000-0000-0000-0000-000000000000', receiverId: target.id })
             });
             const data = await res.json();
-            if (data.success) setConnectionMatch(data.contact);
-        } catch (err) { console.error(err); }
+            if (data.success) {
+                // Add a small delay for premium feels
+                setTimeout(() => {
+                    setConnectionMatch(data.contact);
+                    setIsConnecting(false);
+                }, 1500);
+            } else {
+                setIsConnecting(false);
+                alert('Connection failed. Please try again.');
+            }
+        } catch (err) { 
+            console.error(err); 
+            setIsConnecting(false);
+        }
     };
 
     const handleFinalSubmit = async () => {
@@ -3706,8 +3720,32 @@ const FoundersSection = () => {
     }
 
     return (
-        <section id="founders" className="founders-section" style={{ padding: '80px 20px', background: '#000' }}>
+        <section id="founders" className="founders-section" style={{ padding: '80px 20px', background: '#000', position: 'relative' }}>
             <canvas id="founders-bg" style={{ position: 'absolute', top: 0, left: 0, opacity: 0.1, pointerEvents: 'none' }}></canvas>
+            
+            {/* 🔒 CONNECTION SEALING LOADER */}
+            <AnimatePresence>
+                {isConnecting && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}
+                    >
+                        <motion.div 
+                            animate={{ scale: [1, 1.2, 1], rotate: [0, 360, 360] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            style={{ color: '#E63946', marginBottom: '2rem' }}
+                        >
+                            <Shield size={80} />
+                        </motion.div>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', textAlign: 'center', maxWidth: '80%' }}>
+                            SEALING CONNECTION...
+                        </h2>
+                        <p style={{ color: '#888', marginTop: '1rem', letterSpacing: '2px' }}>VERIFYING MATCH INTEGRITY</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             
             <div className="container" style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>

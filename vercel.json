@@ -2,8 +2,8 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/server/index.js"
+      "source": "/api/founders/(.*)",
+      "destination": "/api/founders.js"
     },
     {
       "source": "/(.*)",
@@ -11,8 +11,7 @@
     }
   ],
   "functions": {
-    "server/index.js": {
-      "includeFiles": ".env",
+    "api/founders.js": {
       "memory": 1024,
       "maxDuration": 60
     }

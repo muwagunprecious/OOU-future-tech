@@ -1,22 +1,13 @@
 const { createClient } = require('@supabase/supabase-js');
-const path = require('path');
 const cors = require('cors');
 const express = require('express');
 const multer = require('multer');
 const nodemailer = require('nodemailer');
 
-// 🛠️ Vercel-Safe Module Imports
-let PDF_SCANNER_ENGINE;
-try {
-    PDF_SCANNER_ENGINE = require('pdf-parse-fork');
-} catch (e) {
-    console.warn('⚠️ pdf-parse-fork not found in standard path, attempting fallback...');
-    try {
-        PDF_SCANNER_ENGINE = require('./node_modules/pdf-parse-fork');
-    } catch (e2) {
-        console.error('❌ Critical: Failed to load PDF engine.');
-    }
-}
+/**
+ * 🛠️ Vercel-Native Co-Founder Matching API
+ * This handler runs as a serverless function on Vercel.
+ */
 
 const app = express();
 app.use(cors());
@@ -37,18 +28,14 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Use Supabase Client with Vercel Environment Variables
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Supabase Setup
+const supabase = createClient(
+    process.env.VITE_SUPABASE_URL, 
+    process.env.VITE_SUPABASE_ANON_KEY
+);
 
-// Diagnostic internal route (Not public)
-app.get('/api/founders/status', (req, res) => {
-    res.json({ status: 'operational', supabaseUrl: !!supabaseUrl });
-});
-
-// Import services from local api/ folder
-const { validateApplication, matchProfiles, conductInterview, analyzeCV, generateMatchReasoning } = require('./groqService');
+// Import services from the local api/ folder
+const { conductInterview, analyzeCV } = require('./groqService');
 
 /**
  * 🔍 PENDING CO-FOUNDERS DIRECTORY
@@ -80,18 +67,19 @@ app.get('/api/founders/pending', async (req, res) => {
 app.post('/api/founders/chat', async (req, res) => {
     const { messages } = req.body;
     try {
-        if (!messages) return res.status(400).json({ error: 'Missing messages' });
+        if (!messages) return res.status(400).json({ error: 'Missing messages history.' });
         
         const result = await conductInterview(messages);
         
-        if (result.is_complete && result.extracted_data.user_category) {
-            console.log(`🎯 Onboarding complete: ${result.extracted_data.user_category}`);
+        // Log completion for debugging
+        if (result.is_complete && result.extracted_data?.user_category) {
+            console.log(`🎯 User identified as: ${result.extracted_data.user_category}`);
         }
         
         res.json(result);
     } catch (err) {
         console.error('❌ Chat API Error:', err.message);
-        res.status(500).json({ error: 'AI server encountered an issue. Please try again.' });
+        res.status(500).json({ error: 'The AI matchmaker encountered an issue. Please try again.' });
     }
 });
 
@@ -152,31 +140,7 @@ app.post('/api/founders/connect', async (req, res) => {
     }
 });
 
-// PDF Extraction Utility
-async function extractTextFromPDF(buffer) {
-    if (!PDF_SCANNER_ENGINE) throw new Error('PDF Scanner Engine not available on this server instance.');
-    const parseFunc = (typeof PDF_SCANNER_ENGINE === 'function') ? PDF_SCANNER_ENGINE : 
-                      (PDF_SCANNER_ENGINE.PDFParse || PDF_SCANNER_ENGINE.default || PDF_SCANNER_ENGINE.pdf || PDF_SCANNER_ENGINE);
-    const data = await parseFunc(buffer);
-    return data.text || '';
-}
-
-/**
- * 📄 CV SCANNING
- */
-app.post('/api/founders/cv-scan', upload.single('file'), async (req, res) => {
-    try {
-        if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
-        const text = await extractTextFromPDF(req.file.buffer);
-        const structuredData = await analyzeCV(text);
-        res.json(structuredData);
-    } catch (err) {
-        console.error('❌ CV Scan Error:', err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// 🚀 Vercel Native Support: Conditional Listening and Export
+// 🚀 Vercel Helper: Conditional listening for local dev
 if (process.env.NODE_ENV !== 'production' && require.main === module) {
     const PORT = 3001;
     app.listen(PORT, () => console.log(`🚀 Local dev server running on http://localhost:${PORT}`));

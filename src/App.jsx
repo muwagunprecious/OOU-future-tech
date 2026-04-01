@@ -7,8 +7,11 @@ import {
     ChevronRight, Github, Twitter, Linkedin, Mail,
     MapPin, Calendar, Users, Cpu, Shield, Globe, Award,
     Zap, Code2, Mic, Network, Lightbulb, Rocket,
-    Download, CheckCircle, Ticket, X, Trash2, Store, Menu, Camera as CameraIcon
+    Download, CheckCircle, Ticket, X, Trash2, Store, Menu, Camera as CameraIcon,
+    PartyPopper, Heart, Sparkles, Building2, UserPlus, Scale, Pencil,
+    FileText, Upload, AlertCircle, ArrowLeft, Paperclip, Terminal, Send
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /* ───────────────────────────────────────────
    GLOBAL STYLES (injected once)
@@ -772,9 +775,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             <div className="nav-menu-pill">
                 <nav className="nav-links">
                     {currentView === 'site' ? (
-                        ['Schedule', 'Speakers', 'Pitch', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                            l === 'Event Tags' || l === 'Pitch' ? (
-                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : 'event-tags'); }}>{l}</a>
+                        ['Schedule', 'Speakers', 'Club', 'Pitch', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                            l === 'Event Tags' || l === 'Pitch' || l === 'Club' ? (
+                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : 'event-tags'); }}>{l}</a>
                             ) : (
                                 <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`}>{l}</a>
                             )
@@ -799,9 +802,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             </button>
             <nav className="mobile-nav-links">
                 {currentView === 'site' ? (
-                    ['Schedule', 'Speakers', 'Pitch', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                        l === 'Event Tags' || l === 'Pitch' ? (
-                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : 'event-tags'); }}>{l}</a>
+                    ['Schedule', 'Speakers', 'Club', 'Pitch', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                        l === 'Event Tags' || l === 'Pitch' || l === 'Club' ? (
+                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : 'event-tags'); }}>{l}</a>
                         ) : (
                             <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
                         )
@@ -2007,7 +2010,9 @@ const Footer = ({ onAdmin }) => (
             <div className="footer-bottom">
                 <p className="footer-copy">© 2026 OOU Future Tech Conference. All rights reserved.</p>
                 <div className="footer-links">
-                    <span onClick={onAdmin}>Admin Dashboard</span>
+                    <span onClick={() => onViewChange('founders')}>Founders Club</span>
+                    <span onClick={() => onAdmin('verify')}>Verification Portal</span>
+                    <span onClick={() => onAdmin('admin')}>Admin Dashboard</span>
                     <span>Privacy Policy</span>
                     <span>Terms of Service</span>
                 </div>
@@ -2441,6 +2446,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [partners, setPartners] = useState([]);
     const [registrations, setRegistrations] = useState([]);
     const [pitches, setPitches] = useState([]);
+    const [founders, setFounders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [confirmingPitch, setConfirmingPitch] = useState(null); // { id, status }
@@ -2456,6 +2462,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         fetchRegistrations();
         fetchPitches();
         fetchPartners();
+        fetchFounders();
     }, []);
 
     const fetchPartners = async () => {
@@ -2536,6 +2543,19 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         setLoading(false);
     };
 
+    const fetchFounders = async () => {
+        const { data, error } = await supabase
+            .from('founders_applications')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (!error) {
+            setFounders(data);
+        } else {
+            console.error('Error fetching founders:', error);
+        }
+    };
+
     const fetchPitches = async () => {
         const { data, error } = await supabase
             .from('pitches')
@@ -2580,14 +2600,41 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         }
     };
 
+    const handleTriggerMatching = async () => {
+        setLoading(true);
+        try {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiBase = isLocal ? `http://${window.location.hostname}:3001` : '';
+            
+            const response = await fetch(`${apiBase}/api/founders/match`, { method: 'POST' });
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(`Matching complete! ${result.matches_found} new matches found and notified.`);
+                fetchFounders();
+            } else {
+                alert(result.message || 'No new matches found.');
+            }
+        } catch (err) {
+            alert('Error running matching algorithm.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteFounderApp = async (id) => {
+        if (confirm('Delete this application?')) {
+            const { error } = await supabase.from('founders_applications').delete().eq('id', id);
+            if (!error) fetchFounders();
+        }
+    };
+
     const handlePitchStatusUpdate = async (pitch, newStatus) => {
-        // Update local state IMMEDIATELY for responsiveness
         const originalPitches = [...pitches];
         setPitches(prev => prev.map(p => p.id === pitch.id ? { ...p, status: newStatus } : p));
         
         setLoading(true);
         try {
-            // Direct Update via our Server (Bypasses Supabase Cache)
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             const apiBase = isLocal ? `http://${window.location.hostname}:3001` : '';
             
@@ -2742,6 +2789,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
                     <TabButton id="standard" label="Standard Passes" icon={Users} />
                     <TabButton id="pro" label="Stand Requests" icon={Users} />
+                    <TabButton id="founders" label="Founders Club" icon={Rocket} />
                     <TabButton id="pitches" label="Pitches" icon={Rocket} />
                     <TabButton id="partners" label="Partners CMS" icon={Store} />
                     <TabButton id="speakers" label="Speakers CMS" icon={Mic} />
@@ -2821,6 +2869,91 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                     </td>
                                                 </tr>
                                             ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'founders' && (
+                    <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.5rem', margin: 0 }}>Founders Connect Applications</h2>
+                            <button 
+                                onClick={handleTriggerMatching}
+                                disabled={loading}
+                                className="btn-nav" 
+                                style={{ padding: '0.8rem 1.5rem', borderRadius: '1rem', background: 'var(--accent-r)', fontSize: '0.8rem' }}
+                            >
+                                🤖 RUN MATCHING ENGINE
+                            </button>
+                        </div>
+
+                        <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
+                            {loading && founders.length === 0 ? (
+                                <p style={{ textAlign: 'center', fontWeight: 700 }}>Fetching applications...</p>
+                            ) : (
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ textAlign: 'left', borderBottom: '3px solid #000' }}>
+                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Applicant</th>
+                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>AI Insight</th>
+                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Scores</th>
+                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Status</th>
+                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {founders.length === 0 ? (
+                                                <tr><td colSpan="5" style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>No applications found.</td></tr>
+                                            ) : (
+                                                founders.map((f, i) => (
+                                                    <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <div style={{ fontWeight: 900 }}>{f.name}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{f.email}</div>
+                                                            <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--accent-r)', textTransform: 'uppercase', marginTop: '0.4rem' }}>{f.user_type}</div>
+                                                        </td>
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>{f.ai_industry || 'N/A'}</div>
+                                                            <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Complexity: <span style={{ fontWeight: 900, color: '#000' }}>{f.ai_complexity || 'N/A'}</span></div>
+                                                            {f.ai_summary && <div style={{ fontSize: '0.65rem', fontStyle: 'italic', color: '#64748b', marginTop: '0.4rem', maxWidth: '200px' }}>"{f.ai_summary}"</div>}
+                                                        </td>
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Seriousness: <span style={{ fontWeight: 900, color: (f.ai_seriousness || 0) > 70 ? '#16a34a' : '#000' }}>{f.ai_seriousness || 0}%</span></div>
+                                                            <div style={{ fontSize: '0.7rem', color: '#71717a' }}>Experience: <span style={{ fontWeight: 900, color: (f.ai_experience || 0) > 70 ? '#16a34a' : '#000' }}>{f.ai_experience || 0}%</span></div>
+                                                        </td>
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <span style={{
+                                                                padding: '0.3rem 0.8rem',
+                                                                borderRadius: '2rem',
+                                                                fontSize: '0.65rem',
+                                                                fontWeight: 900,
+                                                                textTransform: 'uppercase',
+                                                                background: f.status === 'matched' ? '#dcfce7' : f.status === 'rejected' ? '#fee2e2' : '#f1f5f9',
+                                                                color: f.status === 'matched' ? '#166534' : f.status === 'rejected' ? '#991b1b' : '#475569',
+                                                                border: `1px solid ${f.status === 'matched' ? '#166534' : f.status === 'rejected' ? '#991b1b' : '#475569'}`
+                                                            }}>
+                                                                {f.status || 'searching'}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                                <button
+                                                                    onClick={() => handleDeleteFounderApp(f.id)}
+                                                                    style={{ padding: '0.4rem', background: '#fee2e2', color: '#dc2626', border: '2px solid #000', borderRadius: '0.5rem', cursor: 'pointer' }}
+                                                                    title="Delete Application"
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
@@ -3229,6 +3362,464 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
 };
 
 /* ───────────────────────────────────────────
+   CELEBRATION POPUP
+   ─────────────────────────────────────────── */
+const CelebrationModal = ({ isOpen, onClose }) => {
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '2rem', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)'
+                }}>
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0, rotate: -2 }}
+                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                        exit={{ scale: 0.8, opacity: 0 }}
+                        className="reg-card"
+                        style={{
+                            maxWidth: '600px', width: '100%', textAlign: 'center',
+                            background: '#fff', border: '5px solid #000', borderRadius: '3rem',
+                            padding: '4rem 2rem', boxShadow: '20px 20px 0 #000', position: 'relative',
+                            overflow: 'hidden'
+                        }}
+                    >
+                        {/* Decorative Icons */}
+                        <motion.div
+                            animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
+                            transition={{ repeat: Infinity, duration: 3 }}
+                            style={{ position: 'absolute', top: '2rem', left: '2rem', color: 'var(--accent-r)' }}
+                        >
+                            <PartyPopper size={40} />
+                        </motion.div>
+                        <motion.div
+                            animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }}
+                            transition={{ repeat: Infinity, duration: 4 }}
+                            style={{ position: 'absolute', bottom: '2rem', right: '2rem', color: '#000' }}
+                        >
+                            <Sparkles size={40} />
+                        </motion.div>
+
+                        <div style={{
+                            display: 'inline-flex', background: 'var(--accent-r)', color: '#fff',
+                            padding: '1.5rem', borderRadius: '2rem', border: '3px solid #000',
+                            marginBottom: '2rem', boxShadow: '6px 6px 0 #000'
+                        }}>
+                            <Rocket size={48} />
+                        </div>
+
+                        <h2 style={{ fontSize: '3.5rem', lineHeight: 1, marginBottom: '1.5rem', fontFamily: 'Outfit' }}>Success!</h2>
+                        <p style={{ fontSize: '1.2rem', fontWeight: 700, lineHeight: 1.5, color: '#333', marginBottom: '2.5rem' }}>
+                            OOU Future Tech 2026 was a massive success! 🚀<br />
+                            Together, we've set the stage for the next era of innovation.
+                            Thank you to everyone who made this possible.
+                        </p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <button
+                                onClick={onClose}
+                                className="btn-primary"
+                                style={{ width: '100%', justifyContent: 'center', fontSize: '1.2rem', padding: '1.5rem' }}
+                            >
+                                Let's Keep Building
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={onClose}
+                            style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', cursor: 'pointer' }}
+                        >
+                            <X size={24} />
+                        </button>
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
+    );
+};
+
+/* ───────────────────────────────────────────
+   PENDING CO-FOUNDERS DIRECTORY
+   ─────────────────────────────────────────── */
+const PendingFounders = ({ onConnect }) => {
+    const [founders, setFounders] = useState([]);
+    const [filter, setFilter] = useState('all');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchPending = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiBase = isLocal ? 'http://localhost:3001' : '';
+            const res = await fetch(`${apiBase}/api/founders/pending?category=${filter}`);
+            const data = await res.json();
+            
+            if (Array.isArray(data)) {
+                setFounders(data);
+            } else {
+                console.error('Invalid Data Format:', data);
+                setError(data.error || 'The matchmaking network is currently updating its cache. Please try again in 2 minutes.');
+                setFounders([]);
+            }
+        } catch (err) {
+            console.error('Fetch Pending Error:', err);
+            setError('Could not connect to the matchmaking server. Please check your connection.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPending();
+    }, [filter]);
+
+    return (
+        <div className="pending-founders-container" style={{ padding: '2rem 1rem' }}>
+            <div className="filter-tabs" style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                {['all', 'technical_founder', 'non_technical_founder', 'technical_for_technical'].map(cat => (
+                    <button 
+                        key={cat}
+                        onClick={() => setFilter(cat)}
+                        style={{
+                            padding: '0.6rem 1.2rem',
+                            borderRadius: '25px',
+                            border: '1px solid #E63946',
+                            background: filter === cat ? '#E63946' : 'transparent',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            textTransform: 'capitalize',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        {cat.replace(/_/g, ' ')}
+                    </button>
+                ))}
+            </div>
+
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '3rem', color: '#888' }}>Scanning network...</div>
+            ) : error ? (
+                <div style={{ textAlign: 'center', padding: '3rem', border: '1px dashed #444', borderRadius: '15px' }}>
+                    <p style={{ color: '#E63946', fontWeight: 'bold', marginBottom: '1rem' }}>⚠️ DIRECTORY ERROR</p>
+                    <p style={{ color: '#888', fontSize: '0.9rem' }}>{error}</p>
+                    <button onClick={fetchPending} style={{ marginTop: '1.5rem', background: '#333', color: '#fff', padding: '0.5rem 1.5rem', borderRadius: '10px', fontSize: '0.8rem' }}>Retry Scan</button>
+                </div>
+            ) : (
+                <div className="founders-grid" style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+                    gap: '1.5rem' 
+                }}>
+                    {founders.map(f => (
+                        <motion.div 
+                            key={f.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '15px',
+                                padding: '1.5rem',
+                                transition: 'all 0.3s ease'
+                            }}
+                            whileHover={{ y: -5, borderColor: '#E63946' }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                <div style={{ 
+                                    padding: '0.3rem 0.8rem', 
+                                    borderRadius: '5px', 
+                                    background: '#E63946', 
+                                    fontSize: '0.7rem', 
+                                    fontWeight: 'bold',
+                                    textTransform: 'uppercase'
+                                }}>
+                                    {f.user_type.replace(/_/g, ' ')}
+                                </div>
+                            </div>
+                            <h3 style={{ margin: '0 0 0.5rem 0', color: '#fff' }}>{f.name}</h3>
+                            <p style={{ fontSize: '0.9rem', color: '#aaa', margin: '0 0 1rem 0', lineHeight: '1.4' }}>
+                                {f.ai_summary || f.startup_name || "Founding member looking for challenge."}
+                            </p>
+                            <button 
+                                onClick={() => onConnect(f)}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.8rem',
+                                    borderRadius: '10px',
+                                    background: '#fff',
+                                    color: '#000',
+                                    fontWeight: 'bold',
+                                    border: 'none',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Connect Instantly
+                            </button>
+                        </motion.div>
+                    ))}
+                    {founders.length === 0 && (
+                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', color: '#555' }}>
+                            Zero matches in this category yet. Be the first!
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+/* ───────────────────────────────────────────
+   FOUNDERS CONNECT CLUB SECTION
+   ─────────────────────────────────────────── */
+const FoundersSection = () => {
+    const [view, setView] = useState('chat');
+    const [messages, setMessages] = useState([
+        { role: 'assistant', content: "Welcome to the Elite Co-Founder Matching Club. 🚀 I’m your AI matchmaker. Before we begin scanning for partners, I need to understand your vision. Are you building a startup, or are you a technical expert looking for your next big challenge?" }
+    ]);
+    const [input, setInput] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
+    const [extractedData, setExtractedData] = useState({ user_category: null, name: null, tech_stack: null });
+    const [smartFeedback, setSmartFeedback] = useState('Initializing search parameters...');
+    const [isComplete, setIsComplete] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [isFinalizing, setIsFinalizing] = useState(false);
+    const [manualEmail, setManualEmail] = useState('');
+    const [connectionMatch, setConnectionMatch] = useState(null);
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    useEffect(() => scrollToBottom(), [messages, isTyping]);
+
+    const handleSendMessage = async (e) => {
+        if (e) e.preventDefault();
+        if (!input.trim() || isTyping) return;
+        const userMessage = { role: 'user', content: input };
+        const newMessages = [...messages, userMessage];
+        setMessages(newMessages);
+        setInput('');
+        setIsTyping(true);
+        try {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiBase = isLocal ? 'http://localhost:3001' : '';
+            const res = await fetch(`${apiBase}/api/founders/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: newMessages })
+            });
+            const data = await res.json();
+            setMessages(prev => [...prev, { role: 'assistant', content: data.message, is_match: data.match_found }]);
+            if (data.extracted_data) setExtractedData(prev => ({ ...prev, ...data.extracted_data }));
+            if (data.smart_feedback) setSmartFeedback(data.smart_feedback);
+            if (data.is_complete) setIsComplete(true);
+        } catch (err) { console.error(err); } finally { setIsTyping(false); }
+    };
+
+    const handleCVUpload = async (file) => {
+        if (!file) return;
+        setIsTyping(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiBase = isLocal ? 'http://localhost:3001' : '';
+            const res = await fetch(`${apiBase}/api/founders/cv-scan`, { method: 'POST', body: formData });
+            const data = await res.json();
+            setMessages(prev => [...prev, { role: 'assistant', content: `Scanned ${file.name}. Profile updated.` }]);
+            setExtractedData(prev => ({ ...prev, name: data.name, tech_stack: data.tech_stack?.join(', ') }));
+        } catch (err) { console.error(err); } finally { setIsTyping(false); }
+    };
+
+    const handleConnectManual = async (target) => {
+        const confirm = window.confirm(`Connect with ${target.name}?`);
+        if (!confirm) return;
+        try {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiBase = isLocal ? 'http://localhost:3001' : '';
+            const res = await fetch(`${apiBase}/api/founders/connect`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ senderId: '00000000-0000-0000-0000-000000000000', receiverId: target.id })
+            });
+            const data = await res.json();
+            if (data.success) setConnectionMatch(data.contact);
+        } catch (err) { console.error(err); }
+    };
+
+    const handleFinalSubmit = async () => {
+        // Fallback for missing email from AI extraction
+        if (!extractedData.email && !manualEmail) {
+            alert('Please provide your contact email to activate your profile.');
+            return;
+        }
+
+        const finalProfile = {
+            ...extractedData,
+            email: extractedData.email || manualEmail
+        };
+
+        setIsFinalizing(true);
+        try {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiBase = isLocal ? 'http://localhost:3001' : '';
+            const res = await fetch(`${apiBase}/api/founders/finalize`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ profile: finalProfile })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setSubmitted(true);
+            } else {
+                alert(`Finalization failed: ${data.error || 'Unknown error'}. Please try again.`);
+            }
+        } catch (err) {
+            console.error('Final Save Error:', err);
+            alert('A network error occurred while saving your profile. Please check your connection and try again.');
+        } finally {
+            setIsFinalizing(false);
+        }
+    };
+
+    if (submitted) {
+        return (
+            <section id="founders" style={{ padding: '100px 20px', background: '#000', minHeight: '600px', display: 'flex', alignItems: 'center' }}>
+                <div className="container" style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                        style={{ background: '#111', border: '2px solid #E63946', borderRadius: '30px', padding: '4rem 2rem' }}>
+                        <div style={{ display: 'inline-flex', background: '#E63946', color: '#fff', padding: '1.5rem', borderRadius: '50%', marginBottom: '2rem' }}>
+                            <Rocket size={40} />
+                        </div>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', marginBottom: '1.5rem' }}>Welcome to the Club!</h2>
+                        <p style={{ color: '#888', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '2.5rem' }}>
+                            Your application is live. If we don't find a direct match immediately, our team will reach out as soon as a compatible co-founder joins the club.
+                        </p>
+                        <button onClick={() => window.location.reload()} style={{ padding: '1rem 3rem', borderRadius: '15px', background: '#fff', color: '#000', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>
+                            Continue Browsing
+                        </button>
+                    </motion.div>
+                </div>
+            </section>
+        );
+    }
+
+    return (
+        <section id="founders" className="founders-section" style={{ padding: '80px 20px', background: '#000' }}>
+            <canvas id="founders-bg" style={{ position: 'absolute', top: 0, left: 0, opacity: 0.1, pointerEvents: 'none' }}></canvas>
+            
+            <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                    <h2 style={{ fontSize: '3.5rem', fontWeight: 900, textTransform: 'uppercase', color: '#fff' }}>
+                        Co-Founder <span style={{ color: '#E63946' }}>Matchmaker</span>
+                    </h2>
+                    <div style={{ display: 'inline-flex', background: '#111', padding: '0.4rem', borderRadius: '15px', marginTop: '2rem', border: '1px solid #333' }}>
+                        <button onClick={() => setView('chat')} style={{ padding: '0.8rem 2rem', borderRadius: '12px', background: view === 'chat' ? '#E63946' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>AI Onboarding</button>
+                        <button onClick={() => setView('browse')} style={{ padding: '0.8rem 2rem', borderRadius: '12px', background: view === 'browse' ? '#E63946' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>Browse Directory</button>
+                    </div>
+                </div>
+
+                <div className="founders-box" style={{ maxWidth: '1000px', margin: '0 auto', background: '#0a0a0a', border: '1px solid #222', borderRadius: '30px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.5)' }}>
+                    {view === 'chat' ? (
+                        <div className="chat-container" style={{ height: '700px', display: 'flex', flexDirection: 'column' }}>
+                            <div className="chat-header" style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #222', background: '#0f0f0f', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#00FF00', boxShadow: '0 0 10px #00FF00' }}></div>
+                                    <span style={{ fontWeight: 'bold', letterSpacing: '1px', fontSize: '0.9rem' }}>AI MATCHMAKER LIVE</span>
+                                </div>
+                                <div style={{ fontSize: '0.8rem', color: '#666' }}>{smartFeedback}</div>
+                            </div>
+
+                            <div className="chat-messages" style={{ flex: 1, overflowY: 'auto', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                {messages.map((m, i) => (
+                                    <div key={i} style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+                                        <div style={{ padding: '1.2rem 1.6rem', borderRadius: m.role === 'user' ? '20px 20px 0 20px' : '20px 20px 20px 0', background: m.role === 'user' ? '#E63946' : '#1a1a1a', color: '#fff', border: m.role === 'user' ? 'none' : '1px solid #333', whiteSpace: 'pre-wrap' }}>
+                                            {m.is_match && <div style={{ padding: '0.3rem 0.6rem', background: '#E63946', borderRadius: '5px', fontSize: '0.7rem', fontWeight: 'bold', marginBottom: '0.8rem', display: 'inline-block' }}>MATCH IDENTIFIED</div>}
+                                            {m.content}
+                                        </div>
+                                    </div>
+                                ))}
+                                {isTyping && <div style={{ alignSelf: 'flex-start', color: '#E63946', fontSize: '0.9rem', fontStyle: 'italic', paddingLeft: '1rem' }}>AI Matchmaker is analyzing...</div>}
+                                <div ref={messagesEndRef} />
+                            </div>
+
+                            <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid #222', background: '#0f0f0f' }}>
+                                {isComplete ? (
+                                    <div style={{ textAlign: 'center', padding: '1rem' }}>
+                                        <p style={{ color: '#00FF00', fontWeight: 'bold', marginBottom: '1rem' }}>⚡ PROFILE ANALYSIS COMPLETE</p>
+                                        
+                                        {!extractedData.email && (
+                                            <div style={{ marginBottom: '1.5rem', maxWidth: '400px', margin: '0 auto 1.5rem' }}>
+                                                <p style={{ color: '#888', fontSize: '0.9rem', marginBottom: '0.5rem' }}>AI missed your email address. Please enter it below to finalize:</p>
+                                                <input 
+                                                    type="email" 
+                                                    value={manualEmail}
+                                                    onChange={(e) => setManualEmail(e.target.value)}
+                                                    placeholder="Confirm your email..."
+                                                    style={{ width: '100%', padding: '1rem', borderRadius: '12px', background: '#1a1a1a', border: '1px solid #E63946', color: '#fff', outline: 'none', textAlign: 'center' }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <button 
+                                            onClick={handleFinalSubmit}
+                                            disabled={isFinalizing}
+                                            style={{ padding: '1.2rem 4rem', borderRadius: '15px', background: isFinalizing ? '#666' : '#E63946', color: '#fff', fontWeight: 'bold', border: 'none', cursor: isFinalizing ? 'not-allowed' : 'pointer', fontSize: '1.1rem' }}
+                                        >
+                                            {isFinalizing ? 'ACTIVATING PROFILE...' : 'FINALIZE MEMBERSHIP'}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                            <label style={{ cursor: 'pointer', color: '#E63946' }}>
+                                                <Paperclip size={20} />
+                                                <input type="file" hidden onChange={(e) => handleCVUpload(e.target.files[0])} />
+                                            </label>
+                                        </div>
+                                        <input 
+                                            type="text" 
+                                            value={input}
+                                            onChange={(e) => setInput(e.target.value)}
+                                            placeholder="Type your message..."
+                                            style={{ flex: 1, background: '#1a1a1a', border: '1px solid #333', borderRadius: '15px', padding: '1rem 1.5rem', color: '#fff', outline: 'none' }}
+                                        />
+                                        <button type="submit" style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#E63946', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Send size={20} />
+                                        </button>
+                                    </form>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <PendingFounders onConnect={handleConnectManual} />
+                    )}
+                </div>
+            </div>
+
+            <AnimatePresence>
+                {connectionMatch && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.9)' }}>
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            style={{ maxWidth: '500px', width: '90%', background: '#111', border: '2px solid #E63946', borderRadius: '30px', padding: '3rem', textAlign: 'center' }}
+                        >
+                            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: '#fff' }}>🔥 Connection Sealed!</h2>
+                            <p style={{ color: '#aaa', marginBottom: '2.5rem', fontSize: '1.1rem' }}>You are now matched with {connectionMatch.name}.</p>
+                            <div style={{ background: '#222', padding: '1.2rem', borderRadius: '15px', marginBottom: '1rem', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>{connectionMatch.whatsapp_number}</div>
+                            <div style={{ background: '#222', padding: '1.2rem', borderRadius: '15px', marginBottom: '2.5rem', color: '#fff', fontSize: '1.1rem' }}>{connectionMatch.email}</div>
+                            <button onClick={() => setConnectionMatch(null)} style={{ padding: '1rem 3rem', borderRadius: '15px', background: '#E63946', color: '#fff', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>Close Window</button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </section>
+    );
+};
+
+/* ───────────────────────────────────────────
    ADMIN LOGIN
 ─────────────────────────────────────────── */
 const AdminLogin = ({ onLogin, onBack }) => {
@@ -3312,12 +3903,242 @@ const AdminLogin = ({ onLogin, onBack }) => {
 };
 
 /* ───────────────────────────────────────────
+   VERIFICATION PORTAL (STAFF CHECK-IN)
+   ─────────────────────────────────────────── */
+const VerificationPortal = ({ onBack }) => {
+    const [attendees, setAttendees] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filter, setFilter] = useState('all'); // 'all', 'checked-in', 'absent'
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({ total: 0, checkedIn: 0, absent: 0 });
+
+    useEffect(() => {
+        fetchAttendees();
+    }, []);
+
+    const fetchAttendees = async () => {
+        setLoading(true);
+        try {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiBase = isLocal ? 'http://localhost:3001' : '';
+            const res = await fetch(`${apiBase}/api/attendees`);
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setAttendees(data);
+                calculateStats(data);
+            }
+        } catch (err) {
+            console.error('Fetch error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const calculateStats = (data) => {
+        const total = data.length;
+        const checkedIn = data.filter(a => a.checked_in).length;
+        setStats({ total, checkedIn, absent: total - checkedIn });
+    };
+
+    const handleToggleCheckIn = async (attendee) => {
+        const newStatus = !attendee.checked_in;
+        // Optimistic update
+        const originalAttendees = [...attendees];
+        setAttendees(prev => prev.map(a => a.ticket_id === attendee.ticket_id ? { ...a, checked_in: newStatus } : a));
+        
+        try {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiBase = isLocal ? 'http://localhost:3001' : '';
+            const res = await fetch(`${apiBase}/api/toggle-check-in`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticket_id: attendee.ticket_id, checked_in: newStatus })
+            });
+
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || 'Failed to update');
+            }
+
+            const updated = await res.json();
+            
+            // Final update and re-calc stats
+            setAttendees(prev => prev.map(a => a.ticket_id === attendee.ticket_id ? { ...a, checked_in: updated.checked_in, checked_in_at: updated.checked_in_at } : a));
+            setStats(prev => {
+                const newCheckedIn = prev.checkedIn + (newStatus ? 1 : -1);
+                return { ...prev, checkedIn: newCheckedIn, absent: prev.total - newCheckedIn };
+            });
+        } catch (err) {
+            setAttendees(originalAttendees);
+            alert(`Error updating check-in status: ${err.message}. \n\nIMPORTANT: Make sure you have added the 'checked_in' column to the database.`);
+        }
+    };
+
+    const filtered = attendees.filter(a => {
+        const term = searchTerm.toLowerCase();
+        const matchesSearch = (a.name || '').toLowerCase().includes(term) || 
+                              (a.email || '').toLowerCase().includes(term) || 
+                              (a.ticket_id || '').toLowerCase().includes(term);
+        
+        if (filter === 'checked-in') return matchesSearch && a.checked_in;
+        if (filter === 'absent') return matchesSearch && !a.checked_in;
+        return matchesSearch;
+    });
+
+    return (
+        <div style={{ background: '#f8f9fa', minHeight: '100vh', padding: '4rem 2rem' }}>
+            <div className="container" style={{ maxWidth: '1200px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'var(--accent-r)', marginBottom: '0.5rem' }}>
+                            <CheckCircle size={24} />
+                            <span style={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.1em' }}>Staff Verification Portal</span>
+                        </div>
+                        <h1 className="section-h2" style={{ margin: 0, textAlign: 'left' }}>Attendee Check-In</h1>
+                    </div>
+                    <button onClick={onBack} className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <X size={18} /> Exit Portal
+                    </button>
+                </div>
+
+                {/* STATS */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+                    {[
+                        { label: 'Total Registered', val: stats.total, icon: <Users size={20} />, color: '#000' },
+                        { label: 'Checked In', val: stats.checkedIn, icon: <CheckCircle size={20} />, color: '#16a34a' },
+                        { label: 'Absent', val: stats.absent, icon: <X size={20} />, color: '#dc2626' }
+                    ].map((s, i) => (
+                        <div key={i} style={{ background: '#fff', border: '3px solid #000', borderRadius: '1.5rem', padding: '1.5rem', boxShadow: '4px 4px 0 #000' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#64748b', marginBottom: '0.8rem', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase' }}>
+                                {s.icon} {s.label}
+                            </div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 950, color: s.color }}>{s.val}</div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* SEARCH & FILTERS */}
+                <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '12px 12px 0 #000', marginBottom: '3rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: '300px' }}>
+                            <input
+                                type="text"
+                                className="form-input"
+                                placeholder="Search by name, email or ticket ID..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ margin: 0 }}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            {['all', 'checked-in', 'absent'].map(f => (
+                                <button
+                                    key={f}
+                                    onClick={() => setFilter(f)}
+                                    style={{
+                                        padding: '0.8rem 1.2rem',
+                                        borderRadius: '1rem',
+                                        border: '2px solid #000',
+                                        textTransform: 'uppercase',
+                                        fontWeight: 900,
+                                        fontSize: '0.7rem',
+                                        background: filter === f ? '#000' : '#fff',
+                                        color: filter === f ? '#fff' : '#000',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {f.replace('-', ' ')}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {loading ? (
+                        <div style={{ textAlign: 'center', padding: '4rem' }}>
+                            <div style={{ animation: 'spin 1.2s linear infinite', display: 'inline-block', marginBottom: '1rem' }}><Rocket size={32} /></div>
+                            <p style={{ fontWeight: 800 }}>Loading Attendee Database...</p>
+                        </div>
+                    ) : (
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '3px solid #000', textAlign: 'left' }}>
+                                        <th style={{ padding: '1.2rem', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Attendee Details</th>
+                                        <th style={{ padding: '1.2rem', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Ticket ID</th>
+                                        <th style={{ padding: '1.2rem', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Type</th>
+                                        <th style={{ padding: '1.2rem', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Check-In Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filtered.map((a) => (
+                                        <tr key={`${a.email}-${a.ticket_id}`} style={{ borderBottom: '1px solid #eee', background: a.checked_in ? '#f0fdf4' : 'transparent' }}>
+                                            <td style={{ padding: '1.2rem' }}>
+                                                <div style={{ fontWeight: 900, fontSize: '1rem' }}>{a.name}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{a.email}</div>
+                                                {a.is_legacy && <span style={{ fontSize: '0.6rem', background: '#e2e8f0', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 900, marginLeft: '0.5rem' }}>LEGACY</span>}
+                                            </td>
+                                            <td style={{ padding: '1.2rem', fontFamily: 'monospace', fontWeight: 900, color: 'var(--accent-r)' }}>
+                                                {a.ticket_id}
+                                            </td>
+                                            <td style={{ padding: '1.2rem' }}>
+                                                <span style={{ fontSize: '0.65rem', fontWeight: 950, background: a.ticket_type === 'Pro' ? '#000' : '#f8fafc', color: a.ticket_type === 'Pro' ? '#fff' : '#000', padding: '0.3rem 0.6rem', border: '2px solid #000', borderRadius: '0.6rem' }}>
+                                                    {a.ticket_type}
+                                                </span>
+                                            </td>
+                                            <td style={{ padding: '1.2rem' }}>
+                                                <button
+                                                    onClick={() => handleToggleCheckIn(a)}
+                                                    style={{
+                                                        background: a.checked_in ? '#16a34a' : '#fff',
+                                                        color: a.checked_in ? '#fff' : '#000',
+                                                        border: '2px solid #000',
+                                                        padding: '0.6rem 1rem',
+                                                        borderRadius: '0.8rem',
+                                                        fontWeight: 900,
+                                                        fontSize: '0.75rem',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        boxShadow: a.checked_in ? 'none' : '3px 3px 0 #000',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    {a.checked_in ? <><CheckCircle size={14} /> Checked-In</> : 'Verify & Check-In'}
+                                                </button>
+                                                {a.checked_in_at && (
+                                                    <div style={{ fontSize: '0.6rem', color: '#16a34a', marginTop: '0.4rem', fontWeight: 700 }}>
+                                                        at {new Date(a.checked_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {filtered.length === 0 && (
+                                        <tr>
+                                            <td colSpan="4" style={{ padding: '4rem', textAlign: 'center', color: '#64748b', fontWeight: 700 }}>
+                                                No attendees found matching your criteria.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ───────────────────────────────────────────
    APP ROOT
-─────────────────────────────────────────── */
+   ─────────────────────────────────────────── */
 export default function App() {
-    const [view, setView] = useState('site'); // 'site', 'admin-login', 'admin'
+    const [view, setView] = useState('site'); // 'site', 'admin-login', 'admin', 'founders'
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isRegModalOpen, setIsRegModalOpen] = useState(false);
+    const [isCelebrationOpen, setIsCelebrationOpen] = useState(true);
     const [selectedTicketType, setSelectedTicketType] = useState('Standard');
     const [isProDisclaimerOpen, setIsProDisclaimerOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -3379,7 +4200,9 @@ export default function App() {
                 <AdminLogin
                     onLogin={() => {
                         setIsAuthenticated(true);
-                        setView('admin');
+                        // If we stored where we wanted to go, go there, otherwise dashboard
+                        setView(localStorage.getItem('admin_redirect') || 'admin');
+                        localStorage.removeItem('admin_redirect');
                     }}
                     onBack={() => setView('site')}
                 />
@@ -3475,6 +4298,30 @@ export default function App() {
                     </div>
                     <PitchSection />
                 </div>
+            ) : view === 'founders' ? (
+                <div style={{ paddingTop: '5rem' }}>
+                    <div className="container" style={{ marginBottom: '2rem' }}>
+                        <button
+                            onClick={() => setView('site')}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontWeight: 900,
+                                fontSize: '1rem',
+                                color: 'var(--accent-r)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
+                        </button>
+                    </div>
+                    <FoundersSection />
+                </div>
+            ) : view === 'verify' ? (
+                <VerificationPortal onBack={() => setView('site')} />
             ) : (
                 <>
                     <Hero onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
@@ -3496,8 +4343,16 @@ export default function App() {
             )}
 
             <CTABanner onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
-            <Footer onAdmin={() => setView('admin-login')} />
+            <Footer onAdmin={(targetView) => { 
+                localStorage.setItem('admin_redirect', targetView); 
+                setView('admin-login'); 
+            }} />
 
+
+            <CelebrationModal
+                isOpen={isCelebrationOpen}
+                onClose={() => setIsCelebrationOpen(false)}
+            />
 
             <RegisterModal
                 isOpen={isRegModalOpen}

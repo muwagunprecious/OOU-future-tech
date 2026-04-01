@@ -3610,12 +3610,25 @@ const FoundersSection = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ messages: newMessages })
             });
+
+            // Extract accurate server error if 500 occurs
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server Error ${res.status}`);
+            }
+
             const data = await res.json();
             setMessages(prev => [...prev, { role: 'assistant', content: data.message, is_match: data.match_found }]);
             if (data.extracted_data) setExtractedData(prev => ({ ...prev, ...data.extracted_data }));
             if (data.smart_feedback) setSmartFeedback(data.smart_feedback);
             if (data.is_complete) setIsComplete(true);
-        } catch (err) { console.error(err); } finally { setIsTyping(false); }
+        } catch (err) { 
+            console.error('Chat Error:', err);
+            const errMsg = err.message || 'The AI server is recalibrating. Please try again in 30 seconds.';
+            setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ SERVER ERROR: ${errMsg}. This usually happens during deployment updates.` }]);
+        } finally { 
+            setIsTyping(false); 
+        }
     };
 
     const handleCVUpload = async (file) => {

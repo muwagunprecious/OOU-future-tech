@@ -1,12 +1,13 @@
-const { createClient } = require('@supabase/supabase-js');
-const cors = require('cors');
-const express = require('express');
-const multer = require('multer');
-const nodemailer = require('nodemailer');
+import { createClient } from '@supabase/supabase-js';
+import cors from 'cors';
+import express from 'express';
+import multer from 'multer';
+import nodemailer from 'nodemailer';
+import { conductInterview, analyzeCV } from './groqService.js';
 
 /**
- * 🛠️ Vercel-Native Co-Founder Matching API
- * This handler runs as a serverless function on Vercel.
+ * 🛠️ Vercel-Native ESM Co-Founder Matching API
+ * This handler runs as a modern ESM serverless function.
  */
 
 const app = express();
@@ -15,8 +16,9 @@ app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // Configure Multer for in-memory file processing
+const storage = multer.memoryStorage();
 const upload = multer({ 
-    storage: multer.memoryStorage(),
+    storage: storage,
     limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
 });
 
@@ -30,12 +32,9 @@ const transporter = nodemailer.createTransport({
 
 // Supabase Setup
 const supabase = createClient(
-    process.env.VITE_SUPABASE_URL, 
-    process.env.VITE_SUPABASE_ANON_KEY
+    process.env.VITE_SUPABASE_URL || '', 
+    process.env.VITE_SUPABASE_ANON_KEY || ''
 );
-
-// Import services from the local api/ folder
-const { conductInterview, analyzeCV } = require('./groqService');
 
 /**
  * 🔍 PENDING CO-FOUNDERS DIRECTORY
@@ -71,15 +70,14 @@ app.post('/api/founders/chat', async (req, res) => {
         
         const result = await conductInterview(messages);
         
-        // Log completion for debugging
         if (result.is_complete && result.extracted_data?.user_category) {
             console.log(`🎯 User identified as: ${result.extracted_data.user_category}`);
         }
         
         res.json(result);
     } catch (err) {
-        console.error('❌ Chat API Error:', err.message);
-        res.status(500).json({ error: 'The AI matchmaker encountered an issue. Please try again.' });
+        console.error('❌ Chat API Error:', err);
+        res.status(500).json({ error: err.message || 'The AI engine crashed during processing.' });
     }
 });
 
@@ -140,10 +138,18 @@ app.post('/api/founders/connect', async (req, res) => {
     }
 });
 
-// 🚀 Vercel Helper: Conditional listening for local dev
-if (process.env.NODE_ENV !== 'production' && require.main === module) {
-    const PORT = 3001;
-    app.listen(PORT, () => console.log(`🚀 Local dev server running on http://localhost:${PORT}`));
-}
+/**
+ * 📄 CV SCANNING (STUB FOR NOW DUE TO PDF-PARSE-FORK ESM COMPLEXITY)
+ */
+app.post('/api/founders/cv-scan', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+        // Minimal logic to prevent crash while testing core chat
+        const result = { name: "Applicant From PDF", tech_stack: ["In Progress"] };
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
-module.exports = app;
+export default app;

@@ -1,26 +1,21 @@
-const Groq = require('groq-sdk');
+import Groq from 'groq-sdk';
 
 /**
- * 🧠 AI Processing Logic for Co-Founder Matchmaking
- * Integrated with the GROQ Llama 3 engine for interview analysis and matching reasoning.
+ * 🧠 AI Processing Logic for Co-Founder Matchmaking (ESM)
+ * Integrated with the GROQ Llama 3 engine.
  */
 
 const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY
 });
 
-const SYSTEM_PROMPT = `SYSTEM ROLE: ELITE CO-FOUNDER MATCHMAKING AI
-You are an advanced AI recruitment advisor.
-Your goal is to categorize users and match them based on technical and business compatibility.
-`;
-
 /**
  * Conversational Interview Logic
  */
-async function conductInterview(messages) {
+export async function conductInterview(messages) {
     try {
         const interviewPrompt = `
-        You are a sophisticated AI matchmaker. 
+        You are an elite AI founder matchmaker. 
         Categorize the user into: technical_founder, non_technical_founder, or technical_for_technical.
         Ask about their problem, solution, tech stack, and contact details.
         
@@ -51,7 +46,7 @@ async function conductInterview(messages) {
 /**
  * CV Analysis
  */
-async function analyzeCV(text) {
+export async function analyzeCV(text) {
     const systemPrompt = `Analyze this CV text and return { name, primary_skill, tech_stack: [], experience_level, summary, experience_score: 0 } as JSON.`;
     const completion = await groq.chat.completions.create({
         messages: [{ role: "system", content: systemPrompt }, { role: "user", content: text.substring(0, 5000) }],
@@ -60,8 +55,3 @@ async function analyzeCV(text) {
     });
     return JSON.parse(completion.choices[0].message.content);
 }
-
-module.exports = {
-    conductInterview,
-    analyzeCV
-};

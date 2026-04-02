@@ -37,6 +37,20 @@ const supabase = createClient(
 );
 
 /**
+ * 🏥 HEALTH & DIAGNOSTIC ROUTES
+ */
+app.get('/api/founders/test', (req, res) => {
+    res.json({ 
+        status: 'Vercel API Operational',
+        timestamp: new Date().toISOString(),
+        env: {
+            hasSupabase: !!process.env.VITE_SUPABASE_URL,
+            hasGroq: !!process.env.GROQ_API_KEY
+        }
+    });
+});
+
+/**
  * 🔍 PENDING CO-FOUNDERS DIRECTORY
  */
 app.get('/api/founders/pending', async (req, res) => {

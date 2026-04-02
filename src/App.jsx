@@ -3699,6 +3699,11 @@ const FoundersSection = () => {
             const data = await res.json();
             if (data.success) {
                 setSubmitted(true);
+                // Auto-switch to directory view after a short delay
+                setTimeout(() => {
+                    setSubmitted(false);
+                    setView('browse');
+                }, 4000);
             } else {
                 alert(`Finalization failed: ${data.error || 'Unknown error'}. Please try again.`);
             }
@@ -3723,8 +3728,11 @@ const FoundersSection = () => {
                         <p style={{ color: '#888', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '2.5rem' }}>
                             Your application is live. If we don't find a direct match immediately, our team will reach out as soon as a compatible co-founder joins the club.
                         </p>
-                        <button onClick={() => window.location.reload()} style={{ padding: '1rem 3rem', borderRadius: '15px', background: '#fff', color: '#000', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>
-                            Continue Browsing
+                        <button 
+                            onClick={() => { setSubmitted(false); setView('browse'); }} 
+                            style={{ padding: '1rem 3rem', borderRadius: '15px', background: '#fff', color: '#000', fontWeight: 'bold', border: 'none', cursor: 'pointer', width: '100%' }}
+                        >
+                            Explore Local Directory
                         </button>
                     </motion.div>
                 </div>
@@ -3733,7 +3741,54 @@ const FoundersSection = () => {
     }
 
     return (
-        <section id="founders" className="founders-section" style={{ padding: '80px 20px', background: '#000', position: 'relative' }}>
+        <section id="founders" className="founders-section">
+            <style>{`
+                .founders-section {
+                    padding: 80px 20px;
+                    background: #000;
+                    position: relative;
+                }
+                .founders-title {
+                    font-size: 3.5rem;
+                    line-height: 1.1;
+                    margin-bottom: 1rem;
+                }
+                .founders-nav-btn {
+                    padding: 0.8rem 2rem;
+                    font-size: 1rem;
+                }
+                .chat-container {
+                    height: 700px;
+                }
+                @media (max-width: 768px) {
+                    .founders-section {
+                        padding: 40px 15px;
+                    }
+                    .founders-title {
+                        font-size: 2.2rem;
+                    }
+                    .founders-nav-btn {
+                        padding: 0.6rem 1rem;
+                        font-size: 0.85rem;
+                    }
+                    .chat-container {
+                        height: 550px;
+                    }
+                    .chat-header {
+                        padding: 1rem !important;
+                    }
+                    .chat-messages {
+                        padding: 1.2rem !important;
+                        gap: 1rem !important;
+                    }
+                    .chat-messages > div {
+                        max-width: 95% !important;
+                    }
+                    .founders-box {
+                        border-radius: 20px !important;
+                    }
+                }
+            `}</style>
             <canvas id="founders-bg" style={{ position: 'absolute', top: 0, left: 0, opacity: 0.1, pointerEvents: 'none' }}></canvas>
             
             {/* 🔒 CONNECTION SEALING LOADER */}
@@ -3743,31 +3798,31 @@ const FoundersSection = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', padding: '20px' }}
                     >
                         <motion.div 
                             animate={{ scale: [1, 1.2, 1], rotate: [0, 360, 360] }}
                             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                             style={{ color: '#E63946', marginBottom: '2rem' }}
                         >
-                            <Shield size={80} />
+                            <Shield size={60} className="mobile-icon" />
                         </motion.div>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', textAlign: 'center', maxWidth: '80%' }}>
+                        <h2 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: 900, color: '#fff', textAlign: 'center', maxWidth: '90%' }}>
                             SEALING CONNECTION...
                         </h2>
-                        <p style={{ color: '#888', marginTop: '1rem', letterSpacing: '2px' }}>VERIFYING MATCH INTEGRITY</p>
+                        <p style={{ color: '#888', marginTop: '1rem', letterSpacing: '2px', fontSize: '0.8rem' }}>VERIFYING MATCH INTEGRITY</p>
                     </motion.div>
                 )}
             </AnimatePresence>
             
-            <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                    <h2 style={{ fontSize: '3.5rem', fontWeight: 900, textTransform: 'uppercase', color: '#fff' }}>
+            <div className="container" style={{ position: 'relative', zIndex: 1, padding: 0 }}>
+                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                    <h2 className="founders-title" style={{ fontWeight: 900, textTransform: 'uppercase', color: '#fff' }}>
                         Co-Founder <span style={{ color: '#E63946' }}>Matchmaker</span>
                     </h2>
-                    <div style={{ display: 'inline-flex', background: '#111', padding: '0.4rem', borderRadius: '15px', marginTop: '2rem', border: '1px solid #333' }}>
-                        <button onClick={() => setView('chat')} style={{ padding: '0.8rem 2rem', borderRadius: '12px', background: view === 'chat' ? '#E63946' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>AI Onboarding</button>
-                        <button onClick={() => setView('browse')} style={{ padding: '0.8rem 2rem', borderRadius: '12px', background: view === 'browse' ? '#E63946' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>Browse Directory</button>
+                    <div style={{ display: 'inline-flex', background: '#111', padding: '0.4rem', borderRadius: '15px', marginTop: '1rem', border: '1px solid #333', maxWidth: '100%' }}>
+                        <button onClick={() => setView('chat')} className="founders-nav-btn" style={{ borderRadius: '12px', background: view === 'chat' ? '#E63946' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>AI Onboarding</button>
+                        <button onClick={() => setView('browse')} className="founders-nav-btn" style={{ borderRadius: '12px', background: view === 'browse' ? '#E63946' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>Browse Directory</button>
                     </div>
                 </div>
 

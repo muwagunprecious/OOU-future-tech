@@ -3800,16 +3800,32 @@ const FoundersSection = () => {
                 }
 
                 @media (max-width: 768px) {
-                    .founders-section { padding: 50px 15px; }
-                    .founders-header { margin-bottom: 2.5rem; }
-                    .founders-box { border-radius: 20px; }
-                    .chat-container { height: 600px; }
-                    .chat-messages { padding: 1.2rem; }
-                    .message-bubble { max-width: 92%; font-size: 0.95rem; padding: 1rem 1.2rem; }
-                    .chat-input-area { padding: 1.2rem; }
-                    .founders-nav-btn { padding: 0.7rem 1.2rem; font-size: 0.85rem; }
-                    .founders-card { padding: 1.2rem !important; }
-                    .founders-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+                    .founders-section { padding: 40px 0 !important; }
+                    .founders-container { padding: 0 !important; width: 100% !important; }
+                    .founders-header { margin-bottom: 2rem; padding: 0 15px; }
+                    .founders-box { 
+                        border-radius: 0 !important; 
+                        width: 100% !important; 
+                        max-width: 100% !important;
+                        border-left: none !important;
+                        border-right: none !important;
+                    }
+                    .chat-container { height: 85vh !important; }
+                    .chat-messages { padding: 1rem; }
+                    .message-bubble { 
+                        max-width: 88% !important; 
+                        font-size: 0.95rem; 
+                        padding: 0.8rem 1rem;
+                        word-break: break-word;
+                    }
+                    .chat-input-area { 
+                        padding: 1rem !important; 
+                        position: sticky;
+                        bottom: 0;
+                    }
+                    .founders-nav-btn { padding: 0.6rem 1rem; font-size: 0.8rem; }
+                    .founders-card { padding: 1rem !important; margin: 0 10px; }
+                    .founders-grid { grid-template-columns: 1fr !important; gap: 1rem !important; padding: 0 10px; }
                 }
 
                 .founders-card {

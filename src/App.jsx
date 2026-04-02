@@ -3477,21 +3477,15 @@ const PendingFounders = ({ onConnect }) => {
     }, [filter]);
 
     return (
-        <div className="pending-founders-container" style={{ padding: '2rem 1rem' }}>
-            <div className="filter-tabs" style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+        <div className="pending-founders-container" style={{ padding: '2rem 0' }}>
+            <div className="filter-tabs" style={{ display: 'flex', gap: '0.6rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
                 {['all', 'technical_founder', 'non_technical_founder', 'technical_for_technical'].map(cat => (
                     <button 
-                        key={cat}
-                        onClick={() => setFilter(cat)}
+                        key={cat} onClick={() => setFilter(cat)}
                         style={{
-                            padding: '0.6rem 1.2rem',
-                            borderRadius: '25px',
-                            border: '1px solid #E63946',
-                            background: filter === cat ? '#E63946' : 'transparent',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            textTransform: 'capitalize',
-                            fontSize: '0.85rem'
+                            padding: '0.5rem 1rem', borderRadius: '25px', border: '1px solid #E63946',
+                            background: filter === cat ? '#E63946' : 'transparent', color: '#fff',
+                            cursor: 'pointer', textTransform: 'capitalize', fontSize: '0.8rem'
                         }}
                     >
                         {cat.replace(/_/g, ' ')}
@@ -3503,57 +3497,32 @@ const PendingFounders = ({ onConnect }) => {
                 <div style={{ textAlign: 'center', padding: '3rem', color: '#888' }}>Scanning network...</div>
             ) : error ? (
                 <div style={{ textAlign: 'center', padding: '3rem', border: '1px dashed #444', borderRadius: '15px' }}>
-                    <p style={{ color: '#E63946', fontWeight: 'bold', marginBottom: '1rem' }}>⚠️ DIRECTORY ERROR</p>
-                    <p style={{ color: '#888', fontSize: '0.9rem' }}>{error}</p>
-                    <button onClick={fetchPending} style={{ marginTop: '1.5rem', background: '#333', color: '#fff', padding: '0.5rem 1.5rem', borderRadius: '10px', fontSize: '0.8rem' }}>Retry Scan</button>
+                    <p style={{ color: '#E63946', fontWeight: 'bold' }}>⚠️ DIRECTORY ERROR</p>
+                    <p style={{ color: '#888', fontSize: '0.8rem' }}>{error}</p>
+                    <button onClick={fetchPending} style={{ marginTop: '1rem', background: '#333', color: '#fff', padding: '0.5rem 1rem', borderRadius: '10px' }}>Retry</button>
                 </div>
             ) : (
-                <div className="founders-grid" style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
-                    gap: '1.5rem' 
-                }}>
+                <div className="founders-grid">
                     {founders.map(f => (
                         <motion.div 
-                            key={f.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            style={{
-                                background: 'rgba(255, 255, 255, 0.03)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '15px',
-                                padding: '1.5rem',
-                                transition: 'all 0.3s ease'
-                            }}
-                            whileHover={{ y: -5, borderColor: '#E63946' }}
+                            key={f.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                            className="founders-card" whileHover={{ y: -5, borderColor: '#E63946' }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                                <div style={{ 
-                                    padding: '0.3rem 0.8rem', 
-                                    borderRadius: '5px', 
-                                    background: '#E63946', 
-                                    fontSize: '0.7rem', 
-                                    fontWeight: 'bold',
-                                    textTransform: 'uppercase'
-                                }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                <div style={{ padding: '0.2rem 0.6rem', borderRadius: '4px', background: '#E63946', fontSize: '0.65rem', fontWeight: 'bold', textTransform: 'uppercase' }}>
                                     {f.user_type.replace(/_/g, ' ')}
                                 </div>
                             </div>
-                            <h3 style={{ margin: '0 0 0.5rem 0', color: '#fff' }}>{f.name}</h3>
-                            <p style={{ fontSize: '0.9rem', color: '#aaa', margin: '0 0 1rem 0', lineHeight: '1.4' }}>
-                                {f.ai_summary || f.startup_name || "Founding member looking for challenge."}
+                            <h3 style={{ fontSize: '1.2rem', margin: '0 0 0.5rem 0', color: '#fff' }}>{f.name}</h3>
+                            <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 1.2rem 0', lineHeight: '1.4' }}>
+                                {f.ai_summary || "Founding member looking for challenge."}
                             </p>
                             <button 
                                 onClick={() => onConnect(f)}
                                 style={{
-                                    width: '100%',
-                                    padding: '0.8rem',
-                                    borderRadius: '10px',
-                                    background: '#fff',
-                                    color: '#000',
-                                    fontWeight: 'bold',
-                                    border: 'none',
-                                    cursor: 'pointer'
+                                    width: '100%', padding: '0.7rem', borderRadius: '10px',
+                                    background: '#fff', color: '#000', fontWeight: 'bold',
+                                    border: 'none', cursor: 'pointer', fontSize: '0.9rem'
                                 }}
                             >
                                 Connect Instantly
@@ -3717,20 +3686,19 @@ const FoundersSection = () => {
 
     if (submitted) {
         return (
-            <section id="founders" style={{ padding: '100px 20px', background: '#000', minHeight: '600px', display: 'flex', alignItems: 'center' }}>
-                <div className="container" style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
-                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                        style={{ background: '#111', border: '2px solid #E63946', borderRadius: '30px', padding: '4rem 2rem' }}>
-                        <div style={{ display: 'inline-flex', background: '#E63946', color: '#fff', padding: '1.5rem', borderRadius: '50%', marginBottom: '2rem' }}>
-                            <Rocket size={40} />
+            <section id="founders" className="founders-section">
+                <div className="founders-container" style={{ maxWidth: '600px' }}>
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="success-card">
+                        <div style={{ display: 'inline-flex', background: '#E63946', color: '#fff', padding: '1.2rem', borderRadius: '50%', marginBottom: '1.5rem' }}>
+                            <Rocket size={32} />
                         </div>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', marginBottom: '1.5rem' }}>Welcome to the Club!</h2>
-                        <p style={{ color: '#888', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '2.5rem' }}>
-                            Your application is live. If we don't find a direct match immediately, our team will reach out as soon as a compatible co-founder joins the club.
+                        <h2 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.2rem)', fontWeight: 900, color: '#fff', marginBottom: '1rem' }}>Welcome to the Club!</h2>
+                        <p style={{ color: '#888', fontSize: '1rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+                            Your application is live. Our team will reach out as soon as a compatible co-founder joins the club.
                         </p>
                         <button 
                             onClick={() => { setSubmitted(false); setView('browse'); }} 
-                            style={{ padding: '1rem 3rem', borderRadius: '15px', background: '#fff', color: '#000', fontWeight: 'bold', border: 'none', cursor: 'pointer', width: '100%' }}
+                            style={{ width: '100%', padding: '1rem', borderRadius: '15px', background: '#fff', color: '#000', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
                         >
                             Explore Local Directory
                         </button>
@@ -3747,152 +3715,208 @@ const FoundersSection = () => {
                     padding: 80px 20px;
                     background: #000;
                     position: relative;
+                    overflow: hidden;
+                }
+                .founders-container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    position: relative;
+                    z-index: 10;
+                }
+                .founders-header {
+                    text-align: center;
+                    margin-bottom: 4rem;
                 }
                 .founders-title {
-                    font-size: 3.5rem;
-                    line-height: 1.1;
+                    font-size: clamp(2rem, 8vw, 3.5rem);
+                    font-weight: 900;
+                    text-transform: uppercase;
+                    color: #fff;
                     margin-bottom: 1rem;
+                }
+                .founders-nav {
+                    display: inline-flex;
+                    background: #111;
+                    padding: 0.5rem;
+                    border-radius: 20px;
+                    border: 1px solid #333;
+                    margin-top: 1.5rem;
                 }
                 .founders-nav-btn {
                     padding: 0.8rem 2rem;
-                    font-size: 1rem;
+                    border-radius: 15px;
+                    font-weight: 700;
+                    transition: all 0.3s ease;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 0.95rem;
+                }
+                .founders-box {
+                    max-width: 1000px;
+                    margin: 0 auto;
+                    background: #0a0a0a;
+                    border: 1px solid #222;
+                    border-radius: 30px;
+                    overflow: hidden;
+                    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
                 }
                 .chat-container {
                     height: 700px;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .chat-messages {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 2rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                }
+                .message-bubble {
+                    max-width: 80%;
+                    padding: 1.2rem 1.6rem;
+                    border-radius: 20px;
+                    font-size: 1rem;
+                    line-height: 1.5;
+                }
+                .message-user {
+                    align-self: flex-end;
+                    background: #E63946;
+                    color: #fff;
+                    border-bottom-right-radius: 4px;
+                }
+                .message-bot {
+                    align-self: flex-start;
+                    background: #1a1a1a;
+                    color: #fff;
+                    border: 1px solid #333;
+                    border-bottom-left-radius: 4px;
+                }
+                .chat-input-area {
+                    padding: 1.5rem 2rem;
+                    border-top: 1px solid #222;
+                    background: #0f0f0f;
+                }
+
+                @media (max-width: 768px) {
+                    .founders-section { padding: 50px 15px; }
+                    .founders-header { margin-bottom: 2.5rem; }
+                    .founders-box { border-radius: 20px; }
+                    .chat-container { height: 600px; }
+                    .chat-messages { padding: 1.2rem; }
+                    .message-bubble { max-width: 92%; font-size: 0.95rem; padding: 1rem 1.2rem; }
+                    .chat-input-area { padding: 1.2rem; }
+                    .founders-nav-btn { padding: 0.7rem 1.2rem; font-size: 0.85rem; }
+                    .founders-card { padding: 1.2rem !important; }
+                    .founders-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+                }
+
+                .founders-card {
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 15px;
+                    padding: 1.5rem;
+                    transition: all 0.3s ease;
+                }
+                .founders-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                    gap: 1.5rem;
+                }
+                .success-card {
+                    background: #111;
+                    border: 2px solid #E63946;
+                    border-radius: 30px;
+                    padding: 4rem 2rem;
+                    text-align: center;
                 }
                 @media (max-width: 768px) {
-                    .founders-section {
-                        padding: 40px 15px;
-                    }
-                    .founders-title {
-                        font-size: 2.2rem;
-                    }
-                    .founders-nav-btn {
-                        padding: 0.6rem 1rem;
-                        font-size: 0.85rem;
-                    }
-                    .chat-container {
-                        height: 550px;
-                    }
-                    .chat-header {
-                        padding: 1rem !important;
-                    }
-                    .chat-messages {
-                        padding: 1.2rem !important;
-                        gap: 1rem !important;
-                    }
-                    .chat-messages > div {
-                        max-width: 95% !important;
-                    }
-                    .founders-box {
-                        border-radius: 20px !important;
-                    }
+                    .success-card { padding: 3rem 1.5rem; border-radius: 20px; }
                 }
             `}</style>
+            
             <canvas id="founders-bg" style={{ position: 'absolute', top: 0, left: 0, opacity: 0.1, pointerEvents: 'none' }}></canvas>
             
-            {/* 🔒 CONNECTION SEALING LOADER */}
             <AnimatePresence>
                 {isConnecting && (
                     <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', padding: '20px' }}
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(15px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', padding: '20px' }}
                     >
-                        <motion.div 
-                            animate={{ scale: [1, 1.2, 1], rotate: [0, 360, 360] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                            style={{ color: '#E63946', marginBottom: '2rem' }}
-                        >
-                            <Shield size={60} className="mobile-icon" />
+                        <motion.div animate={{ scale: [1, 1.1, 1], rotate: [0, 360] }} transition={{ duration: 3, repeat: Infinity }} style={{ color: '#E63946', marginBottom: '2rem' }}>
+                            <Shield size={60} />
                         </motion.div>
-                        <h2 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: 900, color: '#fff', textAlign: 'center', maxWidth: '90%' }}>
-                            SEALING CONNECTION...
-                        </h2>
+                        <h2 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: 900, color: '#fff', textAlign: 'center' }}>SEALING CONNECTION...</h2>
                         <p style={{ color: '#888', marginTop: '1rem', letterSpacing: '2px', fontSize: '0.8rem' }}>VERIFYING MATCH INTEGRITY</p>
                     </motion.div>
                 )}
             </AnimatePresence>
             
-            <div className="container" style={{ position: 'relative', zIndex: 1, padding: 0 }}>
-                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                    <h2 className="founders-title" style={{ fontWeight: 900, textTransform: 'uppercase', color: '#fff' }}>
-                        Co-Founder <span style={{ color: '#E63946' }}>Matchmaker</span>
-                    </h2>
-                    <div style={{ display: 'inline-flex', background: '#111', padding: '0.4rem', borderRadius: '15px', marginTop: '1rem', border: '1px solid #333', maxWidth: '100%' }}>
-                        <button onClick={() => setView('chat')} className="founders-nav-btn" style={{ borderRadius: '12px', background: view === 'chat' ? '#E63946' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>AI Onboarding</button>
-                        <button onClick={() => setView('browse')} className="founders-nav-btn" style={{ borderRadius: '12px', background: view === 'browse' ? '#E63946' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>Browse Directory</button>
+            <div className="founders-container">
+                <div className="founders-header">
+                    <h2 className="founders-title">Co-Founder <span style={{ color: '#E63946' }}>Matchmaker</span></h2>
+                    <div className="founders-nav">
+                        <button onClick={() => setView('chat')} className="founders-nav-btn" style={{ background: view === 'chat' ? '#E63946' : 'transparent', color: '#fff' }}>AI Onboarding</button>
+                        <button onClick={() => setView('browse')} className="founders-nav-btn" style={{ background: view === 'browse' ? '#E63946' : 'transparent', color: '#fff' }}>Browse Directory</button>
                     </div>
                 </div>
 
-                <div className="founders-box" style={{ maxWidth: '1000px', margin: '0 auto', background: '#0a0a0a', border: '1px solid #222', borderRadius: '30px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.5)' }}>
+                <div className="founders-box">
                     {view === 'chat' ? (
-                        <div className="chat-container" style={{ height: '700px', display: 'flex', flexDirection: 'column' }}>
-                            <div className="chat-header" style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #222', background: '#0f0f0f', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="chat-container">
+                            <div className="chat-header" style={{ padding: '1.2rem 2rem', borderBottom: '1px solid #222', background: '#0f0f0f', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#00FF00', boxShadow: '0 0 10px #00FF00' }}></div>
-                                    <span style={{ fontWeight: 'bold', letterSpacing: '1px', fontSize: '0.9rem' }}>AI MATCHMAKER LIVE</span>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00FF00', boxShadow: '0 0 10px #00FF00' }}></div>
+                                    <span style={{ fontWeight: 'bold', letterSpacing: '1px', fontSize: '0.8rem', color: '#fff' }}>AI MATCHMAKER LIVE</span>
                                 </div>
-                                <div style={{ fontSize: '0.8rem', color: '#666' }}>{smartFeedback}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#666', fontStyle: 'italic' }}>{smartFeedback}</div>
                             </div>
 
-                            <div className="chat-messages" style={{ flex: 1, overflowY: 'auto', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div className="chat-messages">
                                 {messages.map((m, i) => (
-                                    <div key={i} style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
-                                        <div style={{ padding: '1.2rem 1.6rem', borderRadius: m.role === 'user' ? '20px 20px 0 20px' : '20px 20px 20px 0', background: m.role === 'user' ? '#E63946' : '#1a1a1a', color: '#fff', border: m.role === 'user' ? 'none' : '1px solid #333', whiteSpace: 'pre-wrap' }}>
-                                            {m.is_match && <div style={{ padding: '0.3rem 0.6rem', background: '#E63946', borderRadius: '5px', fontSize: '0.7rem', fontWeight: 'bold', marginBottom: '0.8rem', display: 'inline-block' }}>MATCH IDENTIFIED</div>}
-                                            {m.content}
-                                        </div>
+                                    <div key={i} className={m.role === 'user' ? 'message-user message-bubble' : 'message-bot message-bubble'} style={{ whiteSpace: 'pre-wrap' }}>
+                                        {m.is_match && <div style={{ padding: '0.3rem 0.6rem', background: '#E63946', borderRadius: '5px', fontSize: '0.7rem', fontWeight: 'bold', marginBottom: '0.8rem', display: 'inline-block' }}>MATCH IDENTIFIED</div>}
+                                        {m.content}
                                     </div>
                                 ))}
-                                {isTyping && <div style={{ alignSelf: 'flex-start', color: '#E63946', fontSize: '0.9rem', fontStyle: 'italic', paddingLeft: '1rem' }}>AI Matchmaker is analyzing...</div>}
+                                {isTyping && <div style={{ alignSelf: 'flex-start', color: '#E63946', fontSize: '0.85rem', fontStyle: 'italic', paddingLeft: '1rem' }}>AI Matchmaker is analyzing...</div>}
                                 <div ref={messagesEndRef} />
                             </div>
 
-                            <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid #222', background: '#0f0f0f' }}>
+                            <div className="chat-input-area">
                                 {isComplete ? (
                                     <div style={{ textAlign: 'center', padding: '1rem' }}>
-                                        <p style={{ color: '#00FF00', fontWeight: 'bold', marginBottom: '1rem' }}>⚡ PROFILE ANALYSIS COMPLETE</p>
-                                        
+                                        <p style={{ color: '#00FF00', fontWeight: 'bold', marginBottom: '1.5rem', fontSize: '0.9rem' }}>⚡ PROFILE ANALYSIS COMPLETE</p>
                                         {!extractedData.email && (
-                                            <div style={{ marginBottom: '1.5rem', maxWidth: '400px', margin: '0 auto 1.5rem' }}>
-                                                <p style={{ color: '#888', fontSize: '0.9rem', marginBottom: '0.5rem' }}>AI missed your email address. Please enter it below to finalize:</p>
+                                            <div style={{ marginBottom: '1.5rem', maxWidth: '400px', margin: '0 auto' }}>
                                                 <input 
-                                                    type="email" 
-                                                    value={manualEmail}
-                                                    onChange={(e) => setManualEmail(e.target.value)}
-                                                    placeholder="Confirm your email..."
-                                                    style={{ width: '100%', padding: '1rem', borderRadius: '12px', background: '#1a1a1a', border: '1px solid #E63946', color: '#fff', outline: 'none', textAlign: 'center' }}
+                                                    type="email" value={manualEmail} onChange={(e) => setManualEmail(e.target.value)}
+                                                    placeholder="Enter your email to finalize..."
+                                                    style={{ width: '100%', padding: '1rem', borderRadius: '12px', background: '#1a1a1a', border: '1px solid #444', color: '#fff', outline: 'none', textAlign: 'center' }}
                                                 />
                                             </div>
                                         )}
-
                                         <button 
-                                            onClick={handleFinalSubmit}
-                                            disabled={isFinalizing}
-                                            style={{ padding: '1.2rem 4rem', borderRadius: '15px', background: isFinalizing ? '#666' : '#E63946', color: '#fff', fontWeight: 'bold', border: 'none', cursor: isFinalizing ? 'not-allowed' : 'pointer', fontSize: '1.1rem' }}
+                                            onClick={handleFinalSubmit} disabled={isFinalizing}
+                                            style={{ width: '100%', maxWidth: '400px', padding: '1.2rem', borderRadius: '15px', background: isFinalizing ? '#444' : '#E63946', color: '#fff', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
                                         >
                                             {isFinalizing ? 'ACTIVATING PROFILE...' : 'FINALIZE MEMBERSHIP'}
                                         </button>
                                     </div>
                                 ) : (
-                                    <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '1rem' }}>
-                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                            <label style={{ cursor: 'pointer', color: '#E63946' }}>
-                                                <Paperclip size={20} />
-                                                <input type="file" hidden onChange={(e) => handleCVUpload(e.target.files[0])} />
-                                            </label>
-                                        </div>
+                                    <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                                        <label style={{ cursor: 'pointer', color: '#E63946', padding: '0.5rem' }}>
+                                            <Paperclip size={22} />
+                                            <input type="file" hidden onChange={(e) => handleCVUpload(e.target.files[0])} />
+                                        </label>
                                         <input 
-                                            type="text" 
-                                            value={input}
-                                            onChange={(e) => setInput(e.target.value)}
-                                            placeholder="Type your message..."
-                                            style={{ flex: 1, background: '#1a1a1a', border: '1px solid #333', borderRadius: '15px', padding: '1rem 1.5rem', color: '#fff', outline: 'none' }}
+                                            type="text" value={input} onChange={(e) => setInput(e.target.value)}
+                                            placeholder="Message the matchmaker..."
+                                            style={{ flex: 1, background: '#1a1a1a', border: '1px solid #333', borderRadius: '15px', padding: '1.1rem 1.5rem', color: '#fff', outline: 'none', fontSize: '1rem' }}
                                         />
-                                        <button type="submit" style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#E63946', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <Send size={20} />
+                                        <button type="submit" style={{ width: '55px', height: '55px', minWidth: '55px', borderRadius: '50%', background: '#E63946', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Send size={24} />
                                         </button>
                                     </form>
                                 )}
@@ -3902,6 +3926,7 @@ const FoundersSection = () => {
                         <PendingFounders onConnect={handleConnectManual} />
                     )}
                 </div>
+            </div>
             </div>
 
             <AnimatePresence>

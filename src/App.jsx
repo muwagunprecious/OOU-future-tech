@@ -775,9 +775,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             <div className="nav-menu-pill">
                 <nav className="nav-links">
                     {currentView === 'site' ? (
-                        ['Schedule', 'Speakers', 'Club', 'Pitch', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                            l === 'Event Tags' || l === 'Pitch' || l === 'Club' ? (
-                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : 'event-tags'); }}>{l}</a>
+                        ['Schedule', 'Speakers', 'Club', 'Pitch', 'Tech Edu', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                            l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'Tech Edu' ? (
+                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'Tech Edu' ? 'techwaitlist' : 'event-tags'); }}>{l}</a>
                             ) : (
                                 <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`}>{l}</a>
                             )
@@ -802,9 +802,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             </button>
             <nav className="mobile-nav-links">
                 {currentView === 'site' ? (
-                    ['Schedule', 'Speakers', 'Club', 'Pitch', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                        l === 'Event Tags' || l === 'Pitch' || l === 'Club' ? (
-                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : 'event-tags'); }}>{l}</a>
+                    ['Schedule', 'Speakers', 'Club', 'Pitch', 'Tech Edu', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                        l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'Tech Edu' ? (
+                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'Tech Edu' ? 'techwaitlist' : 'event-tags'); }}>{l}</a>
                         ) : (
                             <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
                         )
@@ -3541,6 +3541,215 @@ const PendingFounders = ({ onConnect }) => {
 };
 
 /* ───────────────────────────────────────────
+   TECH WAITLIST SECTION (OOU TECH EDU)
+   ─────────────────────────────────────────── */
+const TechWaitlistSection = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        whatsapp: '',
+        track: 'Frontend Engineering',
+        level: 'Beginner'
+    });
+    const [loading, setLoading] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [error, setError] = useState(null);
+    const [assignedTicketId, setAssignedTicketId] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        // Check if email already registered for this tech waitlist
+        const { data: existing, error: checkError } = await supabase
+            .from('registrations')
+            .select('email')
+            .eq('email', formData.email)
+            .like('ticket_type', 'tech_waitlist_%')
+            .maybeSingle();
+
+        if (existing) {
+            setError('You have already joined the OOU Tech Edu waitlist.');
+            setLoading(false);
+            return;
+        }
+
+        const ticketId = `#OOU-EDU-${Math.floor(10000 + Math.random() * 90000)}`;
+
+        const { error: insertError } = await supabase
+            .from('registrations')
+            .insert([{
+                name: formData.name,
+                email: formData.email,
+                ticket_type: `tech_waitlist_${formData.track.toLowerCase().replace(/\\s+/g, '_')}`,
+                ticket_id: ticketId,
+                whatsapp_number: formData.whatsapp,
+                company_name: formData.track,
+                products: formData.level
+            }]);
+
+        if (insertError) {
+            console.error('Waitlist Supabase Error:', insertError);
+            setError('Failed to join the waitlist. Please check your connection.');
+            setLoading(false);
+            return;
+        }
+
+        setAssignedTicketId(ticketId);
+        setIsSubmitted(true);
+        setLoading(false);
+    };
+
+    if (isSubmitted) {
+        return (
+            <div style={{ maxWidth: '600px', margin: '3rem auto', padding: '0 1rem' }}>
+                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                    style={{ background: '#ffffff', border: '3px solid #000000', padding: '3rem 2rem', textAlign: 'center', boxShadow: '8px 8px 0 #000000' }}>
+                    <div style={{ display: 'inline-flex', background: 'var(--accent-r)', color: '#fff', padding: '1rem', borderRadius: '50%', marginBottom: '1.5rem', border: '2px solid #000' }}>
+                        <CheckCircle size={36} />
+                    </div>
+                    <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>You're on the list!</h2>
+                    <p style={{ color: '#555', fontSize: '1rem', lineHeight: '1.6', marginBottom: '2.5rem' }}>
+                        Welcome to OOU Tech Edu. We have reserved your spot in the learning pipeline. We will notify you once admission begins for the upcoming cohort.
+                    </p>
+                    
+                    {/* Neo-brutalist Ticket Stub */}
+                    <div style={{ border: '3px dashed #000', padding: '2rem 1.5rem', position: 'relative', background: '#fafafa', marginBottom: '2.5rem', textAlign: 'left' }}>
+                        <div style={{ position: 'absolute', top: '-15px', left: '-15px', width: '30px', height: '30px', background: '#fff', borderRadius: '50%', border: '3px solid #000' }}></div>
+                        <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '30px', height: '30px', background: '#fff', borderRadius: '50%', border: '3px solid #000' }}></div>
+                        <div style={{ position: 'absolute', bottom: '-15px', left: '-15px', width: '30px', height: '30px', background: '#fff', borderRadius: '50%', border: '3px solid #000' }}></div>
+                        <div style={{ position: 'absolute', bottom: '-15px', right: '-15px', width: '30px', height: '30px', background: '#fff', borderRadius: '50%', border: '3px solid #000' }}></div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', marginBottom: '1rem' }}>
+                            <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', textTransform: 'uppercase' }}>OOU TECH EDU</span>
+                            <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', color: 'var(--accent-r)' }}>{assignedTicketId}</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
+                            <div>
+                                <span style={{ display: 'block', color: '#666', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 'bold' }}>ADMITTEE</span>
+                                <strong style={{ fontSize: '1rem' }}>{formData.name}</strong>
+                            </div>
+                            <div>
+                                <span style={{ display: 'block', color: '#666', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 'bold' }}>TRACK</span>
+                                <strong style={{ fontSize: '1rem' }}>{formData.track}</strong>
+                            </div>
+                            <div>
+                                <span style={{ display: 'block', color: '#666', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 'bold' }}>WHATSAPP</span>
+                                <strong style={{ fontSize: '1rem' }}>{formData.whatsapp}</strong>
+                            </div>
+                            <div>
+                                <span style={{ display: 'block', color: '#666', fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 'bold' }}>LEVEL</span>
+                                <strong style={{ fontSize: '1rem' }}>{formData.level}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
+
+    return (
+        <div style={{ maxWidth: '600px', margin: '2rem auto 5rem auto', padding: '0 1.5rem' }}>
+            <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '2.5rem 2rem', boxShadow: '8px 8px 0 #000000' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div style={{ background: 'var(--accent-r)', color: '#fff', padding: '0.8rem', border: '2px solid #000', borderRadius: '8px' }}>
+                        <Terminal size={28} />
+                    </div>
+                    <div>
+                        <h1 style={{ fontSize: '2rem', margin: 0, textTransform: 'uppercase' }}>OOU TECH EDU</h1>
+                        <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px' }}>COHORT WAITLIST</span>
+                    </div>
+                </div>
+
+                <p style={{ color: '#444', lineHeight: '1.6', fontSize: '0.95rem', marginBottom: '2rem' }}>
+                    Join the waitlist to master high-value programming skills. You will get complete roadmaps, curated industry courses, practical projects, personal mentorship, and direct internship alerts.
+                </p>
+
+                {error && (
+                    <div style={{ background: '#fef2f2', border: '2px solid #ef4444', color: '#b91c1c', padding: '1rem', marginBottom: '1.5rem', fontWeight: 'bold', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <AlertCircle size={20} />
+                        <span>{error}</span>
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div>
+                        <label style={{ display: 'block', fontWeight: 900, marginBottom: '0.5rem', textTransform: 'uppercase', fontSize: '0.85rem' }}>Full Name</label>
+                        <input
+                            type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            placeholder="Enter your name"
+                            style={{ width: '100%', padding: '1rem', border: '3px solid #000', outline: 'none', background: '#fff', fontSize: '1rem', fontFamily: 'Inter, sans-serif' }}
+                        />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontWeight: 900, marginBottom: '0.5rem', textTransform: 'uppercase', fontSize: '0.85rem' }}>Email Address</label>
+                        <input
+                            type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            placeholder="Enter your email address"
+                            style={{ width: '100%', padding: '1rem', border: '3px solid #000', outline: 'none', background: '#fff', fontSize: '1rem', fontFamily: 'Inter, sans-serif' }}
+                        />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontWeight: 900, marginBottom: '0.5rem', textTransform: 'uppercase', fontSize: '0.85rem' }}>WhatsApp Number</label>
+                        <input
+                            type="tel" required value={formData.whatsapp} onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                            placeholder="e.g. +2348012345678"
+                            style={{ width: '100%', padding: '1rem', border: '3px solid #000', outline: 'none', background: '#fff', fontSize: '1rem', fontFamily: 'Inter, sans-serif' }}
+                        />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontWeight: 900, marginBottom: '0.5rem', textTransform: 'uppercase', fontSize: '0.85rem' }}>Select Learning Track</label>
+                        <select
+                            value={formData.track} onChange={(e) => setFormData({ ...formData, track: e.target.value })}
+                            style={{ width: '100%', padding: '1rem', border: '3px solid #000', outline: 'none', background: '#fff', fontSize: '1rem', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }}
+                        >
+                            <option value="Frontend Engineering">Frontend Engineering (HTML/CSS/JS/React)</option>
+                            <option value="Backend Engineering">Backend Engineering (Node.js/Database/Cloud)</option>
+                            <option value="Product Design">Product Design (UI/UX/Figma)</option>
+                            <option value="Mobile Development">Mobile Development (Flutter/React Native)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontWeight: 900, marginBottom: '0.5rem', textTransform: 'uppercase', fontSize: '0.85rem' }}>Experience Level</label>
+                        <select
+                            value={formData.level} onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                            style={{ width: '100%', padding: '1rem', border: '3px solid #000', outline: 'none', background: '#fff', fontSize: '1rem', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }}
+                        >
+                            <option value="Beginner">Beginner (No prior coding experience)</option>
+                            <option value="Intermediate">Intermediate (Understand programming basics)</option>
+                        </select>
+                    </div>
+
+                    <button
+                        type="submit" disabled={loading}
+                        style={{
+                            background: 'var(--accent-r)',
+                            color: '#ffffff',
+                            padding: '1.2rem',
+                            border: '3px solid #000',
+                            boxShadow: '4px 4px 0 #000',
+                            fontSize: '1.1rem',
+                            fontWeight: 900,
+                            textTransform: 'uppercase',
+                            marginTop: '1rem',
+                            transition: 'all 0.15s ease',
+                            cursor: loading ? 'not-allowed' : 'pointer'
+                        }}
+                    >
+                        {loading ? 'joining waitlist...' : 'join the cohort waitlist'}
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+/* ───────────────────────────────────────────
    FOUNDERS CONNECT CLUB SECTION
    ─────────────────────────────────────────── */
 const FoundersSection = () => {
@@ -4301,6 +4510,9 @@ export default function App() {
 
     useEffect(() => {
         fetchCMSData();
+        if (window.location.pathname === '/techwaitlist' || window.location.pathname === '/techwaitlist/') {
+            setView('techwaitlist');
+        }
     }, []);
 
     const fetchCMSData = async () => {
@@ -4466,6 +4678,31 @@ export default function App() {
                         </button>
                     </div>
                     <FoundersSection />
+                </div>
+            ) : view === 'techwaitlist' ? (
+                <div style={{ paddingTop: '8rem' }}>
+                    <div className="container" style={{ marginBottom: '2rem' }}>
+                        <button
+                            onClick={() => {
+                                setView('site');
+                                window.history.pushState({}, '', '/');
+                            }}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontWeight: 900,
+                                fontSize: '1rem',
+                                color: 'var(--accent-r)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
+                        </button>
+                    </div>
+                    <TechWaitlistSection />
                 </div>
             ) : view === 'verify' ? (
                 <VerificationPortal onBack={() => setView('site')} />

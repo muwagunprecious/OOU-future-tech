@@ -775,9 +775,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             <div className="nav-menu-pill">
                 <nav className="nav-links">
                     {currentView === 'site' ? (
-                        ['Schedule', 'Speakers', 'Club', 'Pitch', 'Tech Edu', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                            l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'Tech Edu' ? (
-                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'Tech Edu' ? 'techwaitlist' : 'event-tags'); }}>{l}</a>
+                        ['Schedule', 'Speakers', 'Club', 'Pitch', 'FTA', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                            l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'FTA' ? (
+                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'FTA' ? 'techwaitlist' : 'event-tags'); }}>{l}</a>
                             ) : (
                                 <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`}>{l}</a>
                             )
@@ -802,9 +802,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             </button>
             <nav className="mobile-nav-links">
                 {currentView === 'site' ? (
-                    ['Schedule', 'Speakers', 'Club', 'Pitch', 'Tech Edu', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                        l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'Tech Edu' ? (
-                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'Tech Edu' ? 'techwaitlist' : 'event-tags'); }}>{l}</a>
+                    ['Schedule', 'Speakers', 'Club', 'Pitch', 'FTA', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                        l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'FTA' ? (
+                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'FTA' ? 'techwaitlist' : 'event-tags'); }}>{l}</a>
                         ) : (
                             <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
                         )
@@ -2574,7 +2574,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     };
 
     const handleDeleteWaitlistEntry = async (id) => {
-        if (confirm('Remove this person from the Tech Edu waitlist?')) {
+        if (confirm('Remove this person from the Future Tech Academy (FTA) waitlist?')) {
             const { error } = await supabase.from('registrations').delete().eq('id', id);
             if (!error) fetchWaitlist();
             else alert('Error removing entry: ' + error.message);
@@ -2993,7 +2993,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                         {/* Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                             <div>
-                                <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.5rem', margin: 0 }}>Tech Edu Waitlist</h2>
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.5rem', margin: 0 }}>Future Tech Academy (FTA) Waitlist</h2>
                                 <p style={{ color: '#71717a', fontSize: '0.85rem', marginTop: '0.3rem' }}>{waitlist.length} person{waitlist.length !== 1 ? 's' : ''} registered</p>
                             </div>
                             <button
@@ -3678,7 +3678,7 @@ const PendingFounders = ({ onConnect }) => {
 };
 
 /* ───────────────────────────────────────────
-   TECH WAITLIST SECTION (OOU TECH EDU)
+   TECH WAITLIST SECTION (FUTURE TECH ACADEMY - FTA)
    ─────────────────────────────────────────── */
 const TechWaitlistSection = () => {
     const [formData, setFormData] = useState({
@@ -3707,7 +3707,7 @@ const TechWaitlistSection = () => {
             .maybeSingle();
 
         if (existing) {
-            setError('You have already joined the OOU Tech Edu waitlist.');
+            setError('You have already joined the Future Tech Academy (FTA) waitlist.');
             setLoading(false);
             return;
         }
@@ -3748,7 +3748,7 @@ const TechWaitlistSection = () => {
                     </div>
                     <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>You're on the list!</h2>
                     <p style={{ color: '#555', fontSize: '1rem', lineHeight: '1.6', marginBottom: '2.5rem' }}>
-                        Welcome to OOU Tech Edu. We have reserved your spot in the learning pipeline. We will notify you once admission begins for the upcoming cohort.
+                        Welcome to Future Tech Academy (FTA). We have reserved your spot in the learning pipeline. We will notify you once admission begins for the upcoming cohort.
                     </p>
                     
                     {/* Neo-brutalist Ticket Stub */}
@@ -3759,7 +3759,7 @@ const TechWaitlistSection = () => {
                         <div style={{ position: 'absolute', bottom: '-15px', right: '-15px', width: '30px', height: '30px', background: '#fff', borderRadius: '50%', border: '3px solid #000' }}></div>
                         
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', marginBottom: '1rem' }}>
-                            <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', textTransform: 'uppercase' }}>OOU TECH EDU</span>
+                            <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', textTransform: 'uppercase' }}>Future Tech Academy (FTA)</span>
                             <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', color: 'var(--accent-r)' }}>{assignedTicketId}</span>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
@@ -3794,7 +3794,7 @@ const TechWaitlistSection = () => {
                         <Terminal size={28} />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2rem', margin: 0, textTransform: 'uppercase' }}>OOU TECH EDU</h1>
+                        <h1 style={{ fontSize: '1.6rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }}>Future Tech Academy (FTA)</h1>
                         <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px' }}>COHORT WAITLIST</span>
                     </div>
                 </div>

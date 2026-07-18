@@ -2442,11 +2442,13 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
    ADMIN DASHBOARD
 ─────────────────────────────────────────── */
 const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen, speakersMode, comingSoonText, dynamicSpeakers, dynamicTeam }) => {
-    const [activeTab, setActiveTab] = useState('standard'); // 'standard', 'pro', 'partners', 'speakers', 'team', 'settings'
+    const [activeTab, setActiveTab] = useState('standard'); // 'standard', 'pro', 'partners', 'speakers', 'team', 'settings', 'techwaitlist'
     const [partners, setPartners] = useState([]);
     const [registrations, setRegistrations] = useState([]);
     const [pitches, setPitches] = useState([]);
     const [founders, setFounders] = useState([]);
+    const [waitlist, setWaitlist] = useState([]);
+    const [waitlistSearch, setWaitlistSearch] = useState('');
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [confirmingPitch, setConfirmingPitch] = useState(null); // { id, status }
@@ -2463,6 +2465,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         fetchPitches();
         fetchPartners();
         fetchFounders();
+        fetchWaitlist();
     }, []);
 
     const fetchPartners = async () => {
@@ -2553,6 +2556,28 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
             setFounders(data);
         } else {
             console.error('Error fetching founders:', error);
+        }
+    };
+
+    const fetchWaitlist = async () => {
+        const { data, error } = await supabase
+            .from('registrations')
+            .select('*')
+            .like('ticket_type', 'tech_waitlist_%')
+            .order('created_at', { ascending: false });
+
+        if (!error && data) {
+            setWaitlist(data);
+        } else if (error) {
+            console.error('Error fetching tech waitlist:', error);
+        }
+    };
+
+    const handleDeleteWaitlistEntry = async (id) => {
+        if (confirm('Remove this person from the Tech Edu waitlist?')) {
+            const { error } = await supabase.from('registrations').delete().eq('id', id);
+            if (!error) fetchWaitlist();
+            else alert('Error removing entry: ' + error.message);
         }
     };
 
@@ -2791,6 +2816,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                     <TabButton id="pro" label="Stand Requests" icon={Users} />
                     <TabButton id="founders" label="Founders Club" icon={Rocket} />
                     <TabButton id="pitches" label="Pitches" icon={Rocket} />
+                    <TabButton id="techwaitlist" label="Tech Waitlist" icon={Terminal} />
                     <TabButton id="partners" label="Partners CMS" icon={Store} />
                     <TabButton id="speakers" label="Speakers CMS" icon={Mic} />
                     <TabButton id="team" label="Team CMS" icon={Users} />
@@ -2958,6 +2984,117 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                     </table>
                                 </div>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'techwaitlist' && (
+                    <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                            <div>
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.5rem', margin: 0 }}>Tech Edu Waitlist</h2>
+                                <p style={{ color: '#71717a', fontSize: '0.85rem', marginTop: '0.3rem' }}>{waitlist.length} person{waitlist.length !== 1 ? 's' : ''} registered</p>
+                            </div>
+                            <button
+                                onClick={fetchWaitlist}
+                                className="btn-outline"
+                                style={{ padding: '0.7rem 1.4rem', fontSize: '0.8rem', borderRadius: '1rem' }}
+                            >
+                                ↺ Refresh
+                            </button>
+                        </div>
+
+                        {/* Track summary badges */}
+                        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+                            {['Frontend Engineering', 'Backend Engineering', 'Product Design', 'Mobile Development'].map(track => {
+                                const count = waitlist.filter(w => w.company_name === track).length;
+                                return (
+                                    <div key={track} style={{ background: '#fff', border: '3px solid #000', padding: '0.6rem 1.2rem', boxShadow: '3px 3px 0 #000', fontSize: '0.8rem', fontWeight: 900 }}>
+                                        <span style={{ color: 'var(--accent-r)' }}>{count}</span> {track}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Search */}
+                        <input
+                            type="text"
+                            placeholder="Search by name, email or track..."
+                            value={waitlistSearch}
+                            onChange={e => setWaitlistSearch(e.target.value)}
+                            style={{ width: '100%', padding: '0.9rem 1.2rem', border: '3px solid #000', marginBottom: '1.5rem', fontSize: '0.95rem', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', boxSizing: 'border-box' }}
+                        />
+
+                        {/* Table */}
+                        <div style={{ background: '#fff', border: '3px solid #000', boxShadow: '8px 8px 0 #000', overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ textAlign: 'left', borderBottom: '3px solid #000', background: '#000', color: '#fff' }}>
+                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>#</th>
+                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Applicant</th>
+                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Track</th>
+                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Level</th>
+                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>WhatsApp</th>
+                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>ID</th>
+                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Date</th>
+                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Del</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {waitlist
+                                        .filter(w =>
+                                            w.name?.toLowerCase().includes(waitlistSearch.toLowerCase()) ||
+                                            w.email?.toLowerCase().includes(waitlistSearch.toLowerCase()) ||
+                                            w.company_name?.toLowerCase().includes(waitlistSearch.toLowerCase())
+                                        )
+                                        .map((w, i) => (
+                                            <tr key={w.id} style={{ borderBottom: '1px solid #eee', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
+                                                <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.8rem', fontWeight: 700, color: '#71717a' }}>{i + 1}</td>
+                                                <td style={{ padding: '0.9rem 1.2rem' }}>
+                                                    <div style={{ fontWeight: 900, fontSize: '0.95rem' }}>{w.name}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{w.email}</div>
+                                                </td>
+                                                <td style={{ padding: '0.9rem 1.2rem' }}>
+                                                    <span style={{
+                                                        display: 'inline-block',
+                                                        padding: '0.3rem 0.7rem',
+                                                        background: 'var(--accent-r)',
+                                                        color: '#fff',
+                                                        fontSize: '0.65rem',
+                                                        fontWeight: 900,
+                                                        textTransform: 'uppercase',
+                                                        border: '2px solid #000'
+                                                    }}>{w.company_name || '—'}</span>
+                                                </td>
+                                                <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.8rem', fontWeight: 700 }}>{w.products || '—'}</td>
+                                                <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.8rem', color: '#0f172a' }}>
+                                                    {w.whatsapp_number ? (
+                                                        <a href={`https://wa.me/${w.whatsapp_number.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-r)', fontWeight: 700, textDecoration: 'none' }}>
+                                                            {w.whatsapp_number}
+                                                        </a>
+                                                    ) : '—'}
+                                                </td>
+                                                <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.75rem', color: '#475569', fontFamily: 'monospace' }}>{w.ticket_id}</td>
+                                                <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.75rem', color: '#71717a' }}>
+                                                    {w.created_at ? new Date(w.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                                                </td>
+                                                <td style={{ padding: '0.9rem 1.2rem' }}>
+                                                    <button
+                                                        onClick={() => handleDeleteWaitlistEntry(w.id)}
+                                                        style={{ padding: '0.4rem', background: '#fee2e2', color: '#dc2626', border: '2px solid #000', cursor: 'pointer' }}
+                                                        title="Remove from waitlist"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    {waitlist.length === 0 && (
+                                        <tr><td colSpan="8" style={{ padding: '3rem', textAlign: 'center', opacity: 0.5, fontWeight: 700 }}>No waitlist signups yet.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 )}
@@ -4151,7 +4288,6 @@ const FoundersSection = () => {
                         <PendingFounders onConnect={handleConnectManual} />
                     )}
                 </div>
-            </div>
             </div>
 
             <AnimatePresence>

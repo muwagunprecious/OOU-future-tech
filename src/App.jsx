@@ -759,7 +759,7 @@ const GlobalStyle = () => (
 /* ───────────────────────────────────────────
    NAVBAR
 ─────────────────────────────────────────── */
-const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentView }) => (
+const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentView, isRegistrationOpen }) => (
     <>
         <div className="nav-wrap">
             <div className="nav-logo-pill" onClick={() => onViewChange('site')} style={{ cursor: 'pointer' }}>
@@ -789,7 +789,7 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             </div>
 
             <div className="nav-cta-pill" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                <button className="btn-nav" onClick={() => onRegister()}>Register Now</button>
+                <button className="btn-nav" onClick={() => onRegister()}>{isRegistrationOpen ? 'Register Now' : 'Closed'}</button>
                 <button className="mobile-menu-btn" onClick={() => setIsMenuOpen(true)}>
                     <Menu size={20} />
                 </button>
@@ -2087,7 +2087,7 @@ const ProDisclaimerModal = ({ isOpen, onClose, onProceed }) => {
 /* ───────────────────────────────────────────
    REGISTER MODAL
 ─────────────────────────────────────────── */
-const RegisterModal = ({ isOpen, onClose, initialType }) => {
+const RegisterModal = ({ isOpen, onClose, initialType, isRegistrationOpen }) => {
     const ticketRef = useRef(null);
     const [formData, setFormData] = useState({ name: '', email: '', type: 'Standard', companyName: '', whatsappNumber: '', products: '' });
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -2235,13 +2235,28 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
                 <button className="modal-close" onClick={onClose}><X size={20} /></button>
                 <div className="reg-section" style={{ padding: '3rem 0 0', borderTop: 'none' }}>
                     <div className="container">
-                        <div className="section-header">
-                            <h2 className="section-h2">Claim Your Access</h2>
-                            <p>Join the next generation of African innovators. Fill in your details below to generate your official conference ticket.</p>
-                        </div>
+                        {!isRegistrationOpen ? (
+                            <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+                                <div style={{ display: 'inline-flex', background: '#fee2e2', color: '#dc2626', padding: '1rem', borderRadius: '50%', marginBottom: '1.5rem', border: '3px solid #000' }}>
+                                    <AlertCircle size={36} />
+                                </div>
+                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.8rem', marginBottom: '1rem' }}>Registrations Closed</h3>
+                                <p style={{ color: '#555', fontSize: '1rem', lineHeight: '1.6', marginBottom: '2.5rem' }}>
+                                    OOU Future Tech 2026 has successfully concluded! Ticket registrations and booth bookings are now closed. Thank you to all our attendees, speakers, and partners.
+                                </p>
+                                <button onClick={onClose} className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                                    Close Window
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="section-header">
+                                    <h2 className="section-h2">Claim Your Access</h2>
+                                    <p>Join the next generation of African innovators. Fill in your details below to generate your official conference ticket.</p>
+                                </div>
 
-                        <div className="reg-container">
-                            {!isSubmitted ? (
+                                <div className="reg-container">
+                                    {!isSubmitted ? (
                                 <div className="reg-card">
                                     <form onSubmit={handleSubmit}>
                                         <div className="form-group">
@@ -2431,11 +2446,13 @@ const RegisterModal = ({ isOpen, onClose, initialType }) => {
                                 </div>
                             )}
                         </div>
-                    </div>
-                </div>
+                    </>
+                )}
             </div>
         </div>
-    );
+    </div>
+</div>
+);
 };
 
 /* ───────────────────────────────────────────
@@ -4639,7 +4656,7 @@ export default function App() {
     const [dynamicSpeakers, setDynamicSpeakers] = useState([]);
     const [dynamicPartners, setDynamicPartners] = useState([]);
     const [dynamicTeam, setDynamicTeam] = useState([]);
-    const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
+    const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
     const [speakersMode, setSpeakersMode] = useState('live'); // 'live' or 'coming_soon'
     const [comingSoonText, setComingSoonText] = useState('Exciting lineup coming soon! Stay tuned.');
     const [isEventTagsOpen, setIsEventTagsOpen] = useState(true);
@@ -4664,8 +4681,8 @@ export default function App() {
 
             const { data: settings } = await supabase.from('site_settings').select('*');
             if (settings) {
-                const regSetting = settings.find(s => s.key === 'registration_open');
-                if (regSetting) setIsRegistrationOpen(regSetting.value === 'true');
+                // Enforce registration closed since the conference is finished
+                setIsRegistrationOpen(false);
 
                 const modeSetting = settings.find(s => s.key === 'speakers_mode');
                 if (modeSetting) setSpeakersMode(modeSetting.value);
@@ -4878,6 +4895,7 @@ export default function App() {
                 isOpen={isRegModalOpen}
                 onClose={() => setIsRegModalOpen(false)}
                 initialType={selectedTicketType}
+                isRegistrationOpen={isRegistrationOpen}
             />
 
             <ProDisclaimerModal

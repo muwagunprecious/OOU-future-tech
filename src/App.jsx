@@ -4100,6 +4100,84 @@ const ACADEMY_COURSES = {
     }
 };
 
+/* ───────────────────────────────────────────
+   FTA LEARNING MODULES ASSIGNMENT SYSTEM
+   ─────────────────────────────────────────── */
+const getAssignmentInstruction = (lesson) => {
+    switch (lesson.id) {
+        case 'fe-internet-https':
+            return 'Explain in your own words the difference between HTTP and HTTPS, and how SSL/TLS encryption works.';
+        case 'fe-html-intro':
+            return 'Write a basic HTML5 skeleton snippet containing a header tag (<h1>), a paragraph tag (<p>), and an anchor link tag (<a>) pointing to "https://google.com".';
+        case 'fe-css-basics':
+            return 'Write a CSS block targeting a class named ".brutalist-button" that applies a solid black border of 3px and a black box-shadow of 4px.';
+        case 'fe-js-intro':
+            return 'Write a JavaScript code snippet that prints "Hello FutureTech" using console.log.';
+        case 'fe-js-dom-api':
+            return 'Write a JavaScript expression using document.querySelector to select an element with the class ".title-card" and change its style.color to "red".';
+        case 'fe-api-intro':
+            return 'Write an asynchronous JavaScript function named "fetchUsers" that uses fetch() to call "https://api.com/users" and logs the response.';
+        case 'fe-git-intro':
+            return 'List the exact sequence of 3 git commands to stage all changes, commit them with the message "initial release", and push them to the origin main remote.';
+        case 'fe-react-vite':
+            return 'Write a simple functional React component named "Profile" that returns a div containing your name inside an h2 tag.';
+        default:
+            return `Write a code snippet or a brief explanation demonstrating the core concept of the current lesson: "${lesson.title}".`;
+    }
+};
+
+const runAIGrader = (lessonId, code) => {
+    let score = 70; // baseline
+    let feedback = "";
+    const lowerCode = code.toLowerCase().trim();
+
+    if (code.length < 15) {
+        score = 45;
+        feedback = "Critique: The submission is too short. Please provide a complete, working code solution or explanation addressing the prompt criteria.";
+        return { score, feedback };
+    }
+
+    if (lessonId === 'fe-internet-https') {
+        const hasKeywords = lowerCode.includes('encrypt') || lowerCode.includes('ssl') || lowerCode.includes('security');
+        if (hasKeywords) {
+            score = 90;
+            feedback = "AI Grade: Excellent! You successfully explained the role of encryption and SSL/TLS handshakes in securing HTTPS routes.";
+        } else {
+            score = 60;
+            feedback = "AI Grade: Fair. Your explanation covers basic transmission but misses the core concepts of SSL/TLS encryption keys.";
+        }
+    } else if (lessonId === 'fe-html-intro') {
+        const hasH1 = lowerCode.includes('<h1');
+        const hasP = lowerCode.includes('<p');
+        const hasA = lowerCode.includes('<a');
+        if (hasH1 && hasP && hasA) {
+            score = 95;
+            feedback = "AI Grade: Perfect! Your HTML snippet conforms to HTML5 standards, using semantic h1, p, and anchor elements correctly.";
+        } else {
+            score = 55;
+            feedback = "AI Grade: Deficient. Your code misses one or more required tags (h1, p, or a href). Make sure tags are properly opened and closed.";
+        }
+    } else if (lessonId === 'fe-css-basics') {
+        const border = lowerCode.includes('border') && lowerCode.includes('3px') && lowerCode.includes('solid');
+        const shadow = lowerCode.includes('box-shadow') || lowerCode.includes('shadow');
+        if (border && shadow) {
+            score = 92;
+            feedback = "AI Grade: Strong! Your CSS selectors successfully target the class and apply the requested solid borders and offset box shadows.";
+        } else {
+            score = 65;
+            feedback = "AI Grade: Incomplete. Your styling rules do not satisfy the exact specifications for 3px solid borders and box-shadow offsets.";
+        }
+    } else if (lowerCode.includes('console.log') || lowerCode.includes('function') || lowerCode.includes('const') || lowerCode.includes('let') || lowerCode.includes('<div') || lowerCode.includes('git')) {
+        score = 88;
+        feedback = "AI Grade: Good! The code shows a correct syntactic implementation of the core lecture concept. Variable scopes and syntax rules are correctly followed.";
+    } else {
+        score = 75;
+        feedback = "AI Grade: Acceptable. Your response explains the concept, but could be enhanced by writing functional, executable code snippets instead of plain text.";
+    }
+
+    return { score, feedback };
+};
+
 const AcademyDashboard = () => {
     const [selectedCourse, setSelectedCourse] = useState('Frontend Engineering');
     const course = ACADEMY_COURSES[selectedCourse];

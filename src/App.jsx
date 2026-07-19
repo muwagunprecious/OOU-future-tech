@@ -4,7 +4,7 @@ import download from 'downloadjs';
 import { jsPDF } from 'jspdf';
 import { supabase } from './lib/supabase';
 import {
-    ChevronRight, Github, Twitter, Linkedin, Mail,
+    ChevronRight, ChevronDown, Github, Twitter, Linkedin, Mail,
     MapPin, Calendar, Users, Cpu, Shield, Globe, Award,
     Zap, Code2, Mic, Network, Lightbulb, Rocket,
     Download, CheckCircle, Ticket, X, Trash2, Store, Menu, Camera as CameraIcon,
@@ -4106,6 +4106,16 @@ const AcademyDashboard = () => {
     const firstLesson = course.modules[0].lessons[0];
     const [selectedLesson, setSelectedLesson] = useState(firstLesson);
     
+    // Accordion state
+    const [expandedModules, setExpandedModules] = useState({ 0: true });
+    
+    const toggleModule = (idx) => {
+        setExpandedModules(prev => ({
+            ...prev,
+            [idx]: !prev[idx]
+        }));
+    };
+    
     // Scratchpad notes state
     const [noteText, setNoteText] = useState('');
     const [isSaving, setIsSaving] = useState(false);
@@ -4114,6 +4124,7 @@ const AcademyDashboard = () => {
     useEffect(() => {
         const newFirstLesson = course.modules[0].lessons[0];
         setSelectedLesson(newFirstLesson);
+        setExpandedModules({ 0: true });
     }, [selectedCourse]);
 
     // Load saved notes when lesson changes
@@ -4196,39 +4207,70 @@ const AcademyDashboard = () => {
                         {course.description}
                     </p>
 
-                    {course.modules.map((mod, modIdx) => (
-                        <div key={modIdx} style={{ marginBottom: '1.5rem' }}>
-                            <h4 style={{ fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--accent-r)', margin: '0 0 0.8rem 0' }}>
-                                {mod.title}
-                            </h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                {mod.lessons.map(les => (
-                                    <button
-                                        key={les.id}
-                                        onClick={() => setSelectedLesson(les)}
-                                        style={{
-                                            textAlign: 'left',
-                                            padding: '0.75rem',
-                                            background: selectedLesson.id === les.id ? '#000000' : '#fafafa',
-                                            color: selectedLesson.id === les.id ? '#ffffff' : '#000000',
-                                            border: '2px solid #000000',
-                                            fontSize: '0.8rem',
-                                            fontWeight: 700,
-                                            cursor: 'pointer',
-                                            width: '100%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-between',
-                                            gap: '0.5rem'
-                                        }}
-                                    >
-                                        <span>{les.title}</span>
-                                        <Play size={12} style={{ flexShrink: 0, opacity: selectedLesson.id === les.id ? 1 : 0.4 }} />
-                                    </button>
-                                ))}
+                    {course.modules.map((mod, modIdx) => {
+                        const isExpanded = !!expandedModules[modIdx];
+                        return (
+                            <div key={modIdx} style={{ marginBottom: '1rem', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.8rem' }}>
+                                <button
+                                    onClick={() => toggleModule(modIdx)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        width: '100%',
+                                        background: 'none',
+                                        border: 'none',
+                                        padding: '0.5rem 0',
+                                        cursor: 'pointer',
+                                        textAlign: 'left',
+                                        color: isExpanded ? 'var(--accent-r)' : '#000000',
+                                        transition: 'color 0.15s ease'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                        {mod.title}
+                                    </span>
+                                    {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                </button>
+                                <AnimatePresence initial={false}>
+                                    {isExpanded && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.2 }}
+                                            style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}
+                                        >
+                                            {mod.lessons.map(les => (
+                                                <button
+                                                    key={les.id}
+                                                    onClick={() => setSelectedLesson(les)}
+                                                    style={{
+                                                        textAlign: 'left',
+                                                        padding: '0.75rem',
+                                                        background: selectedLesson.id === les.id ? '#000000' : '#fafafa',
+                                                        color: selectedLesson.id === les.id ? '#ffffff' : '#000000',
+                                                        border: '2px solid #000000',
+                                                        fontSize: '0.8rem',
+                                                        fontWeight: 700,
+                                                        cursor: 'pointer',
+                                                        width: '100%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                        gap: '0.5rem'
+                                                    }}
+                                                >
+                                                    <span style={{ flex: 1 }}>{les.title}</span>
+                                                    <Play size={10} style={{ flexShrink: 0, opacity: selectedLesson.id === les.id ? 1 : 0.4 }} />
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* MAIN CONTENT AREA */}

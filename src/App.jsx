@@ -4127,52 +4127,210 @@ const getAssignmentInstruction = (lesson) => {
 };
 
 const runAIGrader = (lessonId, code) => {
-    let score = 70; // baseline
+    let score = 100;
     let feedback = "";
-    const lowerCode = code.toLowerCase().trim();
+    const trimmedCode = code.trim();
+    const lowerCode = trimmedCode.toLowerCase();
 
-    if (code.length < 15) {
-        score = 45;
-        feedback = "Critique: The submission is too short. Please provide a complete, working code solution or explanation addressing the prompt criteria.";
-        return { score, feedback };
+    // 1. Strict length check
+    if (trimmedCode.length < 35) {
+        return {
+            score: 30,
+            feedback: "AI Strict Review: Rejected. The submission is way too brief. A comprehensive solution with proper syntax and explanation is required."
+        };
     }
 
+    // 2. Formatting quality check (Common syntax checks)
+    let syntaxDeductions = 0;
+    let syntaxCritique = [];
+
+    // JS-specific formatting check
+    if (['fe-js-intro', 'fe-js-dom-api', 'fe-api-intro'].includes(lessonId)) {
+        if (!trimmedCode.endsWith(';')) {
+            syntaxDeductions += 15;
+            syntaxCritique.push("Missing terminal semicolon ';'");
+        }
+        if (!trimmedCode.includes('//')) {
+            syntaxDeductions += 10;
+            syntaxCritique.push("Missing inline documentation/comments explaining code behavior");
+        }
+    }
+
+    // CSS-specific check
+    if (lessonId === 'fe-css-basics') {
+        if (!trimmedCode.includes('{') || !trimmedCode.includes('}')) {
+            syntaxDeductions += 25;
+            syntaxCritique.push("Malformed CSS block: missing braces '{ }'");
+        }
+        if (trimmedCode.includes(':') && !trimmedCode.includes(';')) {
+            syntaxDeductions += 15;
+            syntaxCritique.push("Missing closing semicolon ';' on properties");
+        }
+    }
+
+    // 3. Specific validation rules
     if (lessonId === 'fe-internet-https') {
-        const hasKeywords = lowerCode.includes('encrypt') || lowerCode.includes('ssl') || lowerCode.includes('security');
-        if (hasKeywords) {
-            score = 90;
-            feedback = "AI Grade: Excellent! You successfully explained the role of encryption and SSL/TLS handshakes in securing HTTPS routes.";
+        const hasHTTPVS = lowerCode.includes('http') && lowerCode.includes('https');
+        const hasEncryption = lowerCode.includes('encrypt') || lowerCode.includes('cryptograph');
+        const hasSSL = lowerCode.includes('ssl') || lowerCode.includes('tls');
+        const hasPorts = lowerCode.includes('443') || lowerCode.includes('80');
+
+        let missing = [];
+        if (!hasHTTPVS) missing.push("Clear distinction between HTTP and HTTPS protocols");
+        if (!hasEncryption) missing.push("Explanation of encryption mechanisms");
+        if (!hasSSL) missing.push("Reference to SSL/TLS handshake protocol");
+        if (!hasPorts) missing.push("Protocol port allocations (Port 80 vs Port 443)");
+
+        if (missing.length > 0) {
+            score = Math.max(30, 90 - (missing.length * 20));
+            feedback = `AI Strict Review: Failed. Your answer is incomplete. Missing: ${missing.join(', ')}.`;
         } else {
-            score = 60;
-            feedback = "AI Grade: Fair. Your explanation covers basic transmission but misses the core concepts of SSL/TLS encryption keys.";
-        }
-    } else if (lessonId === 'fe-html-intro') {
-        const hasH1 = lowerCode.includes('<h1');
-        const hasP = lowerCode.includes('<p');
-        const hasA = lowerCode.includes('<a');
-        if (hasH1 && hasP && hasA) {
-            score = 95;
-            feedback = "AI Grade: Perfect! Your HTML snippet conforms to HTML5 standards, using semantic h1, p, and anchor elements correctly.";
-        } else {
-            score = 55;
-            feedback = "AI Grade: Deficient. Your code misses one or more required tags (h1, p, or a href). Make sure tags are properly opened and closed.";
-        }
-    } else if (lessonId === 'fe-css-basics') {
-        const border = lowerCode.includes('border') && lowerCode.includes('3px') && lowerCode.includes('solid');
-        const shadow = lowerCode.includes('box-shadow') || lowerCode.includes('shadow');
-        if (border && shadow) {
             score = 92;
-            feedback = "AI Grade: Strong! Your CSS selectors successfully target the class and apply the requested solid borders and offset box shadows.";
-        } else {
-            score = 65;
-            feedback = "AI Grade: Incomplete. Your styling rules do not satisfy the exact specifications for 3px solid borders and box-shadow offsets.";
+            feedback = "AI Strict Review: Passed. Excellent conceptual overview of network handshakes and cryptography.";
         }
-    } else if (lowerCode.includes('console.log') || lowerCode.includes('function') || lowerCode.includes('const') || lowerCode.includes('let') || lowerCode.includes('<div') || lowerCode.includes('git')) {
-        score = 88;
-        feedback = "AI Grade: Good! The code shows a correct syntactic implementation of the core lecture concept. Variable scopes and syntax rules are correctly followed.";
-    } else {
-        score = 75;
-        feedback = "AI Grade: Acceptable. Your response explains the concept, but could be enhanced by writing functional, executable code snippets instead of plain text.";
+    } 
+    else if (lessonId === 'fe-html-intro') {
+        const doctype = lowerCode.includes('<!doctype html>');
+        const htmlTag = lowerCode.includes('<html') && lowerCode.includes('</html>');
+        const h1Tag = lowerCode.includes('<h1') && lowerCode.includes('</h1>');
+        const pTag = lowerCode.includes('<p') && lowerCode.includes('</p>');
+        const aTag = lowerCode.includes('<a') && lowerCode.includes('</a>') && lowerCode.includes('href=') && lowerCode.includes('google.com');
+
+        let missing = [];
+        if (!doctype) missing.push("<!DOCTYPE html> declaration");
+        if (!htmlTag) missing.push("<html> outer wrapper");
+        if (!h1Tag) missing.push("Heading tag (<h1>)");
+        if (!pTag) missing.push("Paragraph tag (<p>)");
+        if (!aTag) missing.push("Anchor tag (<a>) referencing google.com");
+
+        if (missing.length > 0) {
+            score = Math.max(25, 95 - (missing.length * 20));
+            feedback = `AI Strict Review: Failed. Invalid HTML skeleton. Missing: ${missing.join(', ')}.`;
+        } else {
+            score = 96;
+            feedback = "AI Strict Review: Passed. Code conforms fully to modern HTML5 semantics.";
+        }
+    } 
+    else if (lessonId === 'fe-css-basics') {
+        const selector = lowerCode.includes('.brutalist-button');
+        const border = lowerCode.includes('border') && lowerCode.includes('3px') && lowerCode.includes('solid');
+        const shadow = lowerCode.includes('box-shadow') && lowerCode.includes('4px');
+
+        let missing = [];
+        if (!selector) missing.push("Selector targeting '.brutalist-button'");
+        if (!border) missing.push("3px solid border declaration");
+        if (!shadow) missing.push("4px offset box-shadow declaration");
+
+        if (missing.length > 0) {
+            score = Math.max(30, 92 - (missing.length * 25));
+            feedback = `AI Strict Review: Failed. Styling doesn't match design specifications. Missing: ${missing.join(', ')}.`;
+        } else {
+            score = 90 - syntaxDeductions;
+            feedback = "AI Strict Review: Passed. CSS satisfies brutalist formatting specifications.";
+        }
+    } 
+    else if (lessonId === 'fe-js-intro') {
+        const log = lowerCode.includes('console.log');
+        const text = code.includes('Hello FutureTech');
+
+        let missing = [];
+        if (!log) missing.push("console.log invocation");
+        if (!text) missing.push("Case-sensitive string matching 'Hello FutureTech'");
+
+        if (missing.length > 0) {
+            score = 40;
+            feedback = `AI Strict Review: Failed. Script error. Missing: ${missing.join(', ')}.`;
+        } else {
+            score = 95 - syntaxDeductions;
+            feedback = "AI Strict Review: Passed. Accurate JavaScript output.";
+        }
+    } 
+    else if (lessonId === 'fe-js-dom-api') {
+        const select = lowerCode.includes('document.queryselector') && (lowerCode.includes("'.title-card'") || lowerCode.includes('".title-card"'));
+        const color = lowerCode.includes('.style.color') && (lowerCode.includes('red') || lowerCode.includes("'red'") || lowerCode.includes('"red"'));
+
+        let missing = [];
+        if (!select) missing.push("Selector targeting element with class '.title-card'");
+        if (!color) missing.push("Assigning style color to 'red'");
+
+        if (missing.length > 0) {
+            score = 35;
+            feedback = `AI Strict Review: Failed. DOM modification error. Missing: ${missing.join(', ')}.`;
+        } else {
+            score = 93 - syntaxDeductions;
+            feedback = "AI Strict Review: Passed. Dynamic styling assignment is valid.";
+        }
+    } 
+    else if (lessonId === 'fe-api-intro') {
+        const asyncWord = lowerCode.includes('async');
+        const func = lowerCode.includes('function') && lowerCode.includes('fetchusers');
+        const fetchWord = lowerCode.includes('fetch(') && lowerCode.includes('api.com/users');
+        const awaitWord = lowerCode.includes('await');
+
+        let missing = [];
+        if (!asyncWord) missing.push("'async' keyword declaration");
+        if (!func) missing.push("Function named 'fetchUsers'");
+        if (!fetchWord) missing.push("fetch() request to the target API endpoint");
+        if (!awaitWord) missing.push("'await' keyword handler for the promise resolution");
+
+        if (missing.length > 0) {
+            score = Math.max(30, 94 - (missing.length * 20));
+            feedback = `AI Strict Review: Failed. Promise interface configuration error. Missing: ${missing.join(', ')}.`;
+        } else {
+            score = 94 - syntaxDeductions;
+            feedback = "AI Strict Review: Passed. Asynchronous API fetch pipeline is correct.";
+        }
+    } 
+    else if (lessonId === 'fe-git-intro') {
+        const add = lowerCode.includes('git add');
+        const commit = lowerCode.includes('git commit') && lowerCode.includes('initial release');
+        const push = lowerCode.includes('git push');
+
+        let missing = [];
+        if (!add) missing.push("Staging stage: 'git add .'");
+        if (!commit) missing.push("Commit description: 'git commit -m \"initial release\"'");
+        if (!push) missing.push("Push route: 'git push origin main'");
+
+        if (missing.length > 0) {
+            score = 40;
+            feedback = `AI Strict Review: Failed. Workflow commands incomplete. Missing: ${missing.join(', ')}.`;
+        } else {
+            score = 95;
+            feedback = "AI Strict Review: Passed. Accurate version control commands.";
+        }
+    } 
+    else if (lessonId === 'fe-react-vite') {
+        const componentName = code.includes('Profile');
+        const ret = lowerCode.includes('return');
+        const h2 = lowerCode.includes('<h2') && lowerCode.includes('</h2>');
+
+        let missing = [];
+        if (!componentName) missing.push("React component identifier 'Profile'");
+        if (!ret) missing.push("return statement containing JSX block");
+        if (!h2) missing.push("h2 tag containing student name");
+
+        if (missing.length > 0) {
+            score = 45;
+            feedback = `AI Strict Review: Failed. Component configuration error. Missing: ${missing.join(', ')}.`;
+        } else {
+            score = 90 - syntaxDeductions;
+            feedback = "AI Strict Review: Passed. Functional React component compiled successfully.";
+        }
+    } 
+    else {
+        const hasCodeKeyword = lowerCode.includes('function') || lowerCode.includes('const') || lowerCode.includes('let') || lowerCode.includes('<') || lowerCode.includes('git');
+        if (!hasCodeKeyword) {
+            score = 55;
+            feedback = "AI Strict Review: Failed. Your answer must include executable source code templates rather than generic text definitions.";
+        } else {
+            score = 80 - syntaxDeductions;
+            feedback = "AI Strict Review: Passed. Conceptual implementation is syntactically sound.";
+        }
+    }
+
+    if (syntaxCritique.length > 0 && score >= 75) {
+        score = Math.max(50, score - syntaxDeductions);
+        feedback += ` (Formatting Deductions applied: ${syntaxCritique.join(', ')})`;
     }
 
     return { score, feedback };
@@ -4249,9 +4407,13 @@ const AcademyDashboard = () => {
         }
 
         if (prevLesson) {
-            const score = localStorage.getItem(`fta-assignment-score-${prevLesson.id}`);
-            if (!score) {
+            const scoreStr = localStorage.getItem(`fta-assignment-score-${prevLesson.id}`);
+            if (!scoreStr) {
                 return true; // Previous lesson assignment is not submitted yet!
+            }
+            const scoreVal = parseInt(scoreStr);
+            if (isNaN(scoreVal) || scoreVal < 75) {
+                return true; // Failed! Keeps this lesson locked!
             }
         }
 
@@ -4666,9 +4828,9 @@ const AcademyDashboard = () => {
 
                                     {gradingResult ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'fadeIn 0.2s ease-out' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: gradingResult.score >= 70 ? '#f0fdf4' : '#fef2f2', border: '2px solid #000', padding: '1rem', borderRadius: '0.8rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: gradingResult.score >= 75 ? '#f0fdf4' : '#fef2f2', border: '2px solid #000', padding: '1rem', borderRadius: '0.8rem' }}>
                                                 <div style={{ 
-                                                    background: gradingResult.score >= 70 ? '#16a34a' : '#dc2626', 
+                                                    background: gradingResult.score >= 75 ? '#16a34a' : '#dc2626', 
                                                     color: '#fff', 
                                                     width: '50px', 
                                                     height: '50px', 
@@ -4684,8 +4846,8 @@ const AcademyDashboard = () => {
                                                     {gradingResult.score}
                                                 </div>
                                                 <div>
-                                                    <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.75rem', color: gradingResult.score >= 70 ? '#166534' : '#991b1b' }}>
-                                                        {gradingResult.score >= 70 ? 'Grade: Passed 🟢' : 'Grade: Review Required 🔴'}
+                                                    <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.75rem', color: gradingResult.score >= 75 ? '#166534' : '#991b1b' }}>
+                                                        {gradingResult.score >= 75 ? 'Grade: Passed 🟢' : 'Grade: Review Required 🔴'}
                                                     </div>
                                                     <div style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 700, marginTop: '0.2rem' }}>
                                                         {gradingResult.feedback}

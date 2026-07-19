@@ -3706,36 +3706,213 @@ const ACADEMY_COURSES = {
         description: 'Master visual layouts, UI components, state management, and modern React web applications.',
         modules: [
             {
-                title: 'Module 1: Semantic Structure & HTML5',
+                title: 'Module 1: Internet & HTML Foundations',
                 lessons: [
                     {
-                        id: 'fe-html-intro',
-                        title: '1. Introduction to Web Elements & Semantic HTML',
-                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-                        notes: `### Introduction to Semantic HTML\n\nSemantic HTML elements are tags that describe the meaning of the content they contain. They make code readable, improve SEO, and ensure accessibility for screen readers.\n\nKey Semantic Tags:\n• <header> - Defines top headers/navigation.\n• <main> - Contains primary body content.\n• <article> - Represents self-contained text.\n• <footer> - Holds footer metadata.\n• <aside> - Content aside from page content (e.g. sidebar).`
+                        id: 'fe-internet-https',
+                        title: '1. Internet and HTTPS',
+                        videoUrl: 'https://www.youtube.com/embed/wW2A5SZ3GkI',
+                        notes: `### Internet and HTTPS\n\nLearn how data travels across the global network, what IP addresses are, and how the Domain Name System (DNS) maps domain names to servers.\n\n*   **HTTP**: HyperText Transfer Protocol is the foundation of data exchange on the web.\n*   **HTTPS**: The secure version of HTTP. It encrypts communication using SSL/TLS protocols to prevent data interception.`
                     },
                     {
-                        id: 'fe-html-forms',
-                        title: '2. Advanced Form Handling & Dynamic Validations',
-                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-                        notes: `### Form Inputs & Validations\n\nHandling user inputs is crucial for security and user experience. Always use target attributes:\n\nKey Practices:\n• Use type="email" for automated browser check.\n• Use required to block empty submissions.\n• Apply pattern attributes for custom phone structures.\n• Implement client-side validations to provide immediate feedback.`
+                        id: 'fe-html-intro',
+                        title: '2. HTML & Introduction to Tags',
+                        videoUrl: 'https://www.youtube.com/embed/K_EVuLegRZ0',
+                        notes: `### HTML Introduction & Tags\n\nHTML (HyperText Markup Language) defines the structure and layout of a web page using a system of elements and tags.\n\n*   **Tags**: Elements are wrapped in opening and closing tags (e.g. <h1> and </h1>).\n*   **Attributes**: Provide additional information about tags (e.g. href for anchors, src for images).`
+                    },
+                    {
+                        id: 'fe-html-textual',
+                        title: '3. Textual Tags',
+                        videoUrl: 'https://www.youtube.com/embed/VkWJQe_EsjQ',
+                        notes: `### Textual Elements in HTML\n\nProperly structure headers, paragraphs, lists, and semantic tags for textual content.\n\n*   **Headers**: <h1> to <h6> establish document hierarchy.\n*   **Paragraphs**: Use <p> to separate blocks of text.\n*   **Formatting**: Use <strong> for bold importance and <em> for emphasis.`
+                    },
+                    {
+                        id: 'fe-html-tables',
+                        title: '4. Table Tags',
+                        videoUrl: 'https://www.youtube.com/embed/e62D-aayveY',
+                        notes: `### Creating Tables in HTML\n\nTables are useful for displaying structured, tabular data. Avoid using tables for page layouts!\n\n*   <table>: The root container element.\n*   <tr>: Defines a table row.\n*   <th>: Defines a header cell (bold and centered by default).\n*   <td>: Defines a standard data cell.`
+                    },
+                    {
+                        id: 'fe-html-full',
+                        title: '5. Full HTML',
+                        videoUrl: 'https://www.youtube.com/embed/kUMe1FH4CHE',
+                        notes: `### Full HTML Document Structure\n\nA valid HTML5 document follows a strict container layout:\n\n*   \`<!DOCTYPE html>\`: Informs the browser that this is an HTML5 document.\n*   <html>: Encases all content.\n*   <head>: Contains metadata, page title, and link stylesheets.\n*   <body>: Contains all visual content seen by users.`
                     }
                 ]
             },
             {
-                title: 'Module 2: Styling and CSS3 Architecture',
+                title: 'Module 2: Styling and CSS Architecture',
                 lessons: [
                     {
-                        id: 'fe-css-flex',
-                        title: '3. Flexbox & Grid layouts for Brutalist Design',
-                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-                        notes: `### Flexbox vs Grid\n\nUse Flexbox for one-dimensional layouts (rows or columns) and Grid for multi-dimensional tabular alignment.\n\nKey Code Snippets:\n• display: flex; gap: 1rem; - Horizontal row alignment.\n• display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) - Perfect responsive cards.`
+                        id: 'fe-css-basics',
+                        title: '6. CSS Basics',
+                        videoUrl: 'https://www.youtube.com/embed/Z4pCqK-V_Wo',
+                        notes: `### CSS Basics\n\nCSS (Cascading Style Sheets) controls the visual styling, presentation, layout, and responsiveness of web pages.\n\n*   **Selectors**: Target tags, classes, or IDs.\n*   **Properties & Values**: Modify styles (e.g., color: red; or font-size: 16px;).`
                     },
                     {
-                        id: 'fe-css-neo',
-                        title: '4. Neo-Brutalist Styling Tokens & Variables',
-                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
-                        notes: `### Neo-brutalist Styling\n\nCharacterized by flat UI controls, thick dark borders, and bright primary color systems.\n\nDesign Tokens:\n• border: 3px solid #000; - Flat container borders.\n• box-shadow: 4px 4px 0 #000; - Offset card shadows.\n• background: var(--accent-r); - Vibrant accents.`
+                        id: 'fe-css-types',
+                        title: '7. Inline, External and Internal CSS',
+                        videoUrl: 'https://www.youtube.com/embed/6EMkq7UqMGE',
+                        notes: `### Types of CSS Integration\n\nCSS can be applied to HTML in three ways:\n\n1.  **Inline CSS**: Directly inside tags using the style attribute.\n2.  **Internal CSS**: Inside a <style> block in the document head.\n3.  **External CSS**: In a separate .css file linked using a <link> tag (Best Practice).`
+                    },
+                    {
+                        id: 'fe-css-responsive',
+                        title: '8. Responsive Design',
+                        videoUrl: 'https://www.youtube.com/embed/OXGznpKZ_sA',
+                        notes: `### Responsive Web Design\n\nCreate layouts that adjust dynamically to mobile, tablet, and desktop screens.\n\n*   **Media Queries**: Apply styles only when specific conditions are met (e.g., @media (max-width: 768px)).\n*   **Viewport Metatag**: Tells the mobile browser how to scale the page height/width.`
+                    }
+                ]
+            },
+            {
+                title: 'Module 3: JavaScript Programming Basics',
+                lessons: [
+                    {
+                        id: 'fe-js-intro',
+                        title: '9. What is JavaScript',
+                        videoUrl: 'https://www.youtube.com/embed/upDLs1sn7g4',
+                        notes: `### Introduction to JavaScript\n\nJavaScript is a lightweight, dynamic, interpreted programming language that adds interactivity and logic to static pages.\n\n*   **Scripting Language**: Executes client-side inside the user's browser.\n*   **Dynamic UI**: Can modify text, change colors, submit forms, and pull API data without page refreshes.`
+                    },
+                    {
+                        id: 'fe-js-run',
+                        title: '10. How to Run JavaScript',
+                        videoUrl: 'https://www.youtube.com/embed/3JVtC3sUFvo',
+                        notes: `### Running JavaScript\n\nJavaScript can be executed in several environments:\n\n1.  **Browser Console**: Press F12 to run code immediately in the browser.\n2.  **Script Tag**: Encase JS inside a HTML <script> tag.\n3.  **Node.js**: Run JS directly on your terminal/server environment.`
+                    },
+                    {
+                        id: 'fe-js-first',
+                        title: '11. Writing My First JavaScript Code',
+                        videoUrl: 'https://www.youtube.com/embed/wEwDaFXqLDA',
+                        notes: `### First Steps in JS\n\nLearn the basic output operations and commands in JS:\n\n*   console.log("Hello, World!"); - Prints message to the developer console.\n*   alert("Welcome!"); - Displays an interactive popup dialog in the browser.`
+                    },
+                    {
+                        id: 'fe-js-variables',
+                        title: '12. Variables in JavaScript',
+                        videoUrl: 'https://www.youtube.com/embed/nbX0MIV7-Ek',
+                        notes: `### Variables & Memory Storage\n\nVariables store data values in computer memory for reuse. JavaScript has three declaration keywords:\n\n*   var: Legacy syntax, function-scoped.\n*   let: Modern syntax, block-scoped, re-assignable.\n*   const: Modern block-scoped syntax for read-only constants.`
+                    },
+                    {
+                        id: 'fe-js-naming',
+                        title: '13. Variable Naming Rules in JS',
+                        videoUrl: 'https://www.youtube.com/embed/QYpx61K6cMQ',
+                        notes: `### Variable Naming Conventions\n\nVariable names must follow rules and best practices:\n\n*   Must start with a letter, underscore (_), or dollar sign ($).\n*   Cannot start with a number.\n*   Case-sensitive (e.g. userName and username are different).\n*   Cannot use reserved JavaScript keywords (like class, if, const).`
+                    },
+                    {
+                        id: 'fe-js-prototypes',
+                        title: '14. Object Prototyping in JavaScript',
+                        videoUrl: 'https://www.youtube.com/embed/hAK4PgReRPA',
+                        notes: `### Prototypes and Inheritance\n\nJavaScript is a prototype-based language. Every object has a link to a prototype object from which it inherits properties and methods.\n\n*   Object.prototype: The root prototype object.\n*   Prototypal chain allows sharing functions across instances, saving memory.`
+                    },
+                    {
+                        id: 'fe-js-datatypes',
+                        title: '15. Data Types in JS',
+                        videoUrl: 'https://www.youtube.com/embed/nCwQY8inRvU',
+                        notes: `### Primitive vs Complex Data Types\n\nJavaScript data values belong to one of these types:\n\n*   **Primitive Types** (immutable, passed by value):\n    *   String, Number, Boolean, Null, Undefined, Symbol, BigInt.\n*   **Complex Types** (mutable, passed by reference):\n    *   Object, Array, Function.`
+                    },
+                    {
+                        id: 'fe-js-casting',
+                        title: '16. Type Casting in JavaScript',
+                        videoUrl: 'https://www.youtube.com/embed/pTCGADi-RwY',
+                        notes: `### Type Conversion & Coercion\n\nConverting data from one type to another:\n\n*   **Implicit Coercion**: JS engine automatically converts types (e.g., 5 + '5' = '55').\n*   **Explicit Casting**: Manual conversion using functions like Number(), String(), or parseInt().`
+                    },
+                    {
+                        id: 'fe-js-equality',
+                        title: '17. Equality and Comparison in JS',
+                        videoUrl: 'https://www.youtube.com/embed/bBCS51qUjU8',
+                        notes: `### Comparison Operators\n\n*   **Loose Equality** (==): Compares values after coercing types (e.g. 5 == '5' is true).\n*   **Strict Equality** (===): Compares values and data types without coercion (e.g. 5 === '5' is false - BEST PRACTICE).`
+                    },
+                    {
+                        id: 'fe-js-functions',
+                        title: '18. Functions in JavaScript',
+                        videoUrl: 'https://www.youtube.com/embed/HFaxylC7bUc',
+                        notes: `### Functions in JS\n\nFunctions are reusable blocks of code designed to perform a specific task.\n\n*   **Declaration**:\n    function greet(name) { return 'Hello ' + name; }\n*   **Arrow Function** (Modern ES6 syntax):\n    const greet = (name) => \`Hello \${name}\`;`
+                    }
+                ]
+            },
+            {
+                title: 'Module 4: DOM API & Asynchronous JS',
+                lessons: [
+                    {
+                        id: 'fe-js-dom-api',
+                        title: '19. DOM API JS',
+                        videoUrl: 'https://www.youtube.com/embed/wbQLEXg_urE',
+                        notes: `### Document Object Model (DOM)\n\nThe DOM represents the structure of an HTML page as a tree object, allowing scripts to dynamically query and modify document components.\n\n*   document: The entry point object representing the current web page.`
+                    },
+                    {
+                        id: 'fe-js-dom-manip',
+                        title: '20. DOM Manipulations',
+                        videoUrl: 'https://www.youtube.com/embed/5fb2aPlgoys',
+                        notes: `### Modifying HTML Elements via JS\n\n*   **Querying Elements**: Use document.getElementById() or document.querySelector().\n*   **Updating Content**: Use element.textContent or element.innerHTML.\n*   **Listening to Events**: Use element.addEventListener("click", callback).`
+                    },
+                    {
+                        id: 'fe-js-async-intro',
+                        title: '21. Introduction to Asynchronous JavaScript',
+                        videoUrl: 'https://www.youtube.com/embed/Coyy79wRz_s',
+                        notes: `### Synchronous vs Asynchronous\n\n*   **Synchronous**: Blocking execution. Each line waits for the previous line to finish.\n*   **Asynchronous**: Non-blocking execution. Allows long-running tasks (like database queries) to execute in the background, keeping the main thread responsive.`
+                    },
+                    {
+                        id: 'fe-js-event-loop-1',
+                        title: '22. Asynchronous JS 2 (Event Loop)',
+                        videoUrl: 'https://www.youtube.com/embed/8aGhZQkoFbQ',
+                        notes: `### The Event Loop & Concurrency\n\nJavaScript is single-threaded, meaning it can only do one task at a time. The event loop orchestrates asynchronous tasks:\n\n*   **Call Stack**: Holds execution frames.\n*   **Callback Queue**: Tasks ready to run after call stack is empty.`
+                    },
+                    {
+                        id: 'fe-js-event-loop-2',
+                        title: '23. Event Loop',
+                        videoUrl: 'https://www.youtube.com/embed/eiC58R16hb8',
+                        notes: `### Microtasks and Macrotasks\n\n*   **Microtasks**: High priority tasks, executed immediately after call stack empties (e.g., Promises, queueMicrotask()).\n*   **Macrotasks**: Standard callbacks (e.g., setTimeout(), UI rendering events).`
+                    },
+                    {
+                        id: 'fe-js-async-final',
+                        title: '24. Async Final Course',
+                        videoUrl: 'https://www.youtube.com/embed/ZYb_ZU8LNxs',
+                        notes: `### Promises & Async/Await\n\nModern interfaces use Promises and Async/Await for non-blocking requests:\n\n*   const res = await fetch(url);\n*   Use try-catch blocks to cleanly capture network request rejections.`
+                    },
+                    {
+                        id: 'fe-js-iterators',
+                        title: '25. Using Iterators in JavaScript',
+                        videoUrl: 'https://www.youtube.com/embed/2oU-DfdWM0c',
+                        notes: `### Iterating Collections in JS\n\nWork with lists and arrays using modern iterative methods:\n\n*   forEach: Run callback for each item.\n*   map: Return a new array with modified values.\n*   filter: Extract subsets matching criteria.\n*   reduce: Accumulate elements into a single value.`
+                    }
+                ]
+            },
+            {
+                title: 'Module 5: APIs & Web Protocols',
+                lessons: [
+                    {
+                        id: 'fe-api-intro',
+                        title: '26. What is an API',
+                        videoUrl: 'https://www.youtube.com/embed/ByGJQzlzxQg',
+                        notes: `### Application Programming Interface (API)\n\nAn API is a contract allowing different software programs to communicate with each other.\n\n*   **Request**: Sending parameters (Headers, Body) to a remote server.\n*   **Response**: Server answers back with status code and body payload (usually JSON).`
+                    },
+                    {
+                        id: 'fe-api-rest',
+                        title: '27. Restful API',
+                        videoUrl: 'https://www.youtube.com/embed/lsMQRaeKNDk',
+                        notes: `### REST Architecture (Representational State Transfer)\n\nA set of principles utilizing standard HTTP verbs for managing database resources:\n\n*   GET: Read resource.\n*   POST: Create resource.\n*   PUT / PATCH: Modify resource.\n*   DELETE: Remove resource.`
+                    },
+                    {
+                        id: 'fe-api-soap-rest',
+                        title: '28. Soap vs Rest API',
+                        videoUrl: 'https://www.youtube.com/embed/MykDvTS86xs',
+                        notes: `### REST vs SOAP protocols\n\n*   **REST**: Uses HTTP directly, supports JSON/XML/HTML, lightweight and fast (Best for Web).\n*   **SOAP**: Simple Object Access Protocol. Strict XML messaging format, high security (Enterprise/Banks).`
+                    },
+                    {
+                        id: 'fe-api-graphql',
+                        title: '29. GraphQL',
+                        videoUrl: 'https://www.youtube.com/embed/Zg4XIpnLWQg',
+                        notes: `### GraphQL Foundations\n\nA query language for APIs created by Facebook. Solves over-fetching and under-fetching:\n\n*   **Single Endpoint**: Request exactly the fields you need in a single roundtrip.\n*   **Schema**: Statically typed documentation.`
+                    },
+                    {
+                        id: 'fe-api-fetch',
+                        title: '30. How to Fetch API',
+                        videoUrl: 'https://www.youtube.com/embed/37vxWr0WgQk',
+                        notes: `### Fetching APIs Client-side\n\nUse browser-native fetch() api to request resource:\n\ntry {\n    const response = await fetch("https://api.com/data");\n    const data = await response.json();\n    console.log(data);\n} catch (error) {\n    console.error("Network error:", error);\n}`
+                    },
+                    {
+                        id: 'fe-api-websocket',
+                        title: '31. WebSocket Explained',
+                        videoUrl: 'https://www.youtube.com/embed/CzcfeL7ymbU',
+                        notes: `### WebSockets & Real-time Web\n\nWebSockets establish a persistent, bi-directional TCP channel between client and server.\n\n*   **Bi-directional**: Unlike HTTP requests, the server can push events to the client at any time without polling.`
                     }
                 ]
             }
@@ -3926,15 +4103,29 @@ const AcademyDashboard = () => {
                             </h2>
                         </div>
 
-                        {/* HTML5 video element */}
+                        {/* HTML5 or YouTube video element */}
                         <div style={{ background: '#000000', border: '3px solid #000000', position: 'relative', overflow: 'hidden', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <video
-                                key={selectedLesson.id}
-                                src={selectedLesson.videoUrl}
-                                controls
-                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                poster={`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="90" viewBox="0 0 160 90"><rect width="160" height="90" fill="%23000"/><text x="80" y="45" font-family="Outfit, sans-serif" font-weight="900" font-size="6" fill="%23e11d48" text-anchor="middle">FUTURE TECH ACADEMY</text></svg>`}
-                            />
+                            {selectedLesson.videoUrl.includes('youtube.com') || selectedLesson.videoUrl.includes('youtu.be') ? (
+                                <iframe
+                                    key={selectedLesson.id}
+                                    width="100%"
+                                    height="100%"
+                                    src={selectedLesson.videoUrl}
+                                    title={selectedLesson.title}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowFullScreen
+                                    style={{ border: 'none', width: '100%', height: '100%' }}
+                                />
+                            ) : (
+                                <video
+                                    key={selectedLesson.id}
+                                    src={selectedLesson.videoUrl}
+                                    controls
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                    poster={`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="90" viewBox="0 0 160 90"><rect width="160" height="90" fill="%23000"/><text x="80" y="45" font-family="Outfit, sans-serif" font-weight="900" font-size="6" fill="%23e11d48" text-anchor="middle">FUTURE TECH ACADEMY</text></svg>`}
+                                />
+                            )}
                         </div>
                     </div>
 

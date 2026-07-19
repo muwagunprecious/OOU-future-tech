@@ -775,9 +775,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             <div className="nav-menu-pill">
                 <nav className="nav-links">
                     {currentView === 'site' ? (
-                        ['Schedule', 'Speakers', 'Club', 'Pitch', 'FTA', 'Academy', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                            l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'FTA' || l === 'Academy' ? (
-                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'FTA' ? 'techwaitlist' : l === 'Academy' ? 'academy' : 'event-tags'); }}>{l}</a>
+                        ['Schedule', 'Speakers', 'Club', 'Pitch', 'FTA', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                            l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'FTA' ? (
+                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'FTA' ? 'techwaitlist' : 'event-tags'); }}>{l}</a>
                             ) : (
                                 <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`}>{l}</a>
                             )
@@ -802,9 +802,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             </button>
             <nav className="mobile-nav-links">
                 {currentView === 'site' ? (
-                    ['Schedule', 'Speakers', 'Club', 'Pitch', 'FTA', 'Academy', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                        l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'FTA' || l === 'Academy' ? (
-                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'FTA' ? 'techwaitlist' : l === 'Academy' ? 'academy' : 'event-tags'); }}>{l}</a>
+                    ['Schedule', 'Speakers', 'Club', 'Pitch', 'FTA', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                        l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'FTA' ? (
+                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'FTA' ? 'techwaitlist' : 'event-tags'); }}>{l}</a>
                         ) : (
                             <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
                         )

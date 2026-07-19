@@ -4116,16 +4116,73 @@ const AcademyDashboard = () => {
         }));
     };
     
-    // Scratchpad notes state
-    const [noteText, setNoteText] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
-    
+    // Cohort state and Assignment Submission state
+    const [studentCohort, setStudentCohort] = useState('Cohort 1');
+    const [assignmentText, setAssignmentText] = useState('');
+    const [isGrading, setIsGrading] = useState(false);
+    const [gradingResult, setGradingResult] = useState(null);
+    const [recentSubmissionCount, setRecentSubmissionCount] = useState(0);
+
     // Sync selected lesson when course changes
     useEffect(() => {
         const newFirstLesson = course.modules[0].lessons[0];
         setSelectedLesson(newFirstLesson);
         setExpandedModules({ 0: true });
     }, [selectedCourse]);
+
+    // Sync assignment text and grading status when lesson changes or on submission
+    useEffect(() => {
+        setAssignmentText('');
+        const savedScore = localStorage.getItem(`fta-assignment-score-${selectedLesson.id}`);
+        const savedFeedback = localStorage.getItem(`fta-assignment-feedback-${selectedLesson.id}`);
+        const savedCode = localStorage.getItem(`fta-assignment-code-${selectedLesson.id}`);
+        
+        if (savedScore) {
+            setGradingResult({
+                score: parseInt(savedScore),
+                feedback: savedFeedback,
+                code: savedCode
+            });
+        } else {
+            setGradingResult(null);
+        }
+    }, [selectedLesson, recentSubmissionCount]);
+
+    // Check if a lesson is locked
+    const isLessonLocked = (les, modIdx, lesIdx) => {
+        // 1. Admin cohort lock check
+        const cohortLocks = JSON.parse(localStorage.getItem('fta-cohort-locks') || '{}');
+        const isModuleLockedByAdmin = cohortLocks[`${studentCohort}-${selectedCourse}-module-${modIdx}`];
+        if (isModuleLockedByAdmin) {
+            return true;
+        }
+
+        // 2. Sequential assignment submission lock check
+        // If it's the very first lesson, it's always unlocked
+        if (modIdx === 0 && lesIdx === 0) return false;
+
+        // Find the previous lesson in the course
+        let prevLesson = null;
+        if (lesIdx > 0) {
+            prevLesson = course.modules[modIdx].lessons[lesIdx - 1];
+        } else if (modIdx > 0) {
+            const prevMod = course.modules[modIdx - 1];
+            prevLesson = prevMod.lessons[prevMod.lessons.length - 1];
+        }
+
+        if (prevLesson) {
+            const score = localStorage.getItem(`fta-assignment-score-${prevLesson.id}`);
+            if (!score) {
+                return true; // Previous lesson assignment is not submitted yet!
+            }
+        }
+
+        return false;
+    };
+
+    // Scratchpad notes state
+    const [noteText, setNoteText] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     // Load saved notes when lesson changes
     useEffect(() => {
@@ -4171,28 +4228,54 @@ const AcademyDashboard = () => {
                 </p>
             </div>
 
-            {/* Course Selector Tabs */}
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-                {Object.keys(ACADEMY_COURSES).map(cKey => (
-                    <button
-                        key={cKey}
-                        onClick={() => setSelectedCourse(cKey)}
+            {/* Course & Cohort Selector Row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    {Object.keys(ACADEMY_COURSES).map(cKey => (
+                        <button
+                            key={cKey}
+                            onClick={() => setSelectedCourse(cKey)}
+                            style={{
+                                background: selectedCourse === cKey ? 'var(--accent-r)' : '#ffffff',
+                                color: selectedCourse === cKey ? '#ffffff' : '#000000',
+                                border: '3px solid #000000',
+                                boxShadow: selectedCourse === cKey ? '2px 2px 0 #000000' : '4px 4px 0 #000000',
+                                padding: '0.8rem 1.6rem',
+                                fontWeight: 900,
+                                textTransform: 'uppercase',
+                                fontSize: '0.9rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.1s ease'
+                            }}
+                        >
+                            {cKey}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Cohort Selector */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: '#fff', border: '3px solid #000', padding: '0.5rem 1rem', borderRadius: '1rem', boxShadow: '4px 4px 0 #000' }}>
+                    <Users size={18} />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', fontFamily: 'Outfit' }}>Active Cohort:</span>
+                    <select
+                        value={studentCohort}
+                        onChange={(e) => setStudentCohort(e.target.value)}
                         style={{
-                            background: selectedCourse === cKey ? 'var(--accent-r)' : '#ffffff',
-                            color: selectedCourse === cKey ? '#ffffff' : '#000000',
-                            border: '3px solid #000000',
-                            boxShadow: selectedCourse === cKey ? '2px 2px 0 #000000' : '4px 4px 0 #000000',
-                            padding: '0.8rem 1.6rem',
+                            border: '2px solid #000',
+                            borderRadius: '0.5rem',
+                            padding: '0.3rem 0.6rem',
                             fontWeight: 900,
-                            textTransform: 'uppercase',
-                            fontSize: '0.9rem',
-                            cursor: 'pointer',
-                            transition: 'all 0.1s ease'
+                            fontFamily: 'Outfit',
+                            fontSize: '0.75rem',
+                            background: '#fff',
+                            cursor: 'pointer'
                         }}
                     >
-                        {cKey}
-                    </button>
-                ))}
+                        <option value="Cohort 1">Cohort 1</option>
+                        <option value="Cohort 2">Cohort 2</option>
+                        <option value="Cohort 3">Cohort 3</option>
+                    </select>
+                </div>
             </div>
 
             {/* Main Dashboard Layout */}
@@ -4241,30 +4324,39 @@ const AcademyDashboard = () => {
                                             transition={{ duration: 0.2 }}
                                             style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}
                                         >
-                                            {mod.lessons.map(les => (
-                                                <button
-                                                    key={les.id}
-                                                    onClick={() => setSelectedLesson(les)}
-                                                    style={{
-                                                        textAlign: 'left',
-                                                        padding: '0.75rem',
-                                                        background: selectedLesson.id === les.id ? '#000000' : '#fafafa',
-                                                        color: selectedLesson.id === les.id ? '#ffffff' : '#000000',
-                                                        border: '2px solid #000000',
-                                                        fontSize: '0.8rem',
-                                                        fontWeight: 700,
-                                                        cursor: 'pointer',
-                                                        width: '100%',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'space-between',
-                                                        gap: '0.5rem'
-                                                    }}
-                                                >
-                                                    <span style={{ flex: 1 }}>{les.title}</span>
-                                                    <Play size={10} style={{ flexShrink: 0, opacity: selectedLesson.id === les.id ? 1 : 0.4 }} />
-                                                </button>
-                                            ))}
+                                            {mod.lessons.map((les, lesIdx) => {
+                                                const isLocked = isLessonLocked(les, modIdx, lesIdx);
+                                                return (
+                                                    <button
+                                                        key={les.id}
+                                                        disabled={isLocked}
+                                                        onClick={() => setSelectedLesson(les)}
+                                                        style={{
+                                                            textAlign: 'left',
+                                                            padding: '0.75rem',
+                                                            background: selectedLesson.id === les.id ? '#000000' : isLocked ? '#f3f4f6' : '#fafafa',
+                                                            color: selectedLesson.id === les.id ? '#ffffff' : isLocked ? '#9ca3af' : '#000000',
+                                                            border: '2px solid #000000',
+                                                            fontSize: '0.8rem',
+                                                            fontWeight: 700,
+                                                            cursor: isLocked ? 'not-allowed' : 'pointer',
+                                                            width: '100%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'space-between',
+                                                            gap: '0.5rem',
+                                                            opacity: isLocked ? 0.6 : 1
+                                                        }}
+                                                    >
+                                                        <span style={{ flex: 1 }}>{les.title}</span>
+                                                        {isLocked ? (
+                                                            <Lock size={12} style={{ flexShrink: 0, color: '#9ca3af' }} />
+                                                        ) : (
+                                                            <Play size={10} style={{ flexShrink: 0, opacity: selectedLesson.id === les.id ? 1 : 0.4 }} />
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
@@ -4275,146 +4367,325 @@ const AcademyDashboard = () => {
 
                 {/* MAIN CONTENT AREA */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    
-                    {/* VIDEO PLAYER CARD */}
-                    <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '8px 8px 0 #000000' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
-                            <div style={{ background: 'var(--accent-r)', color: '#fff', padding: '0.4rem 0.8rem', border: '2px solid #000', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>
-                                Lecture Video
-                            </div>
-                            <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0 }}>
-                                {selectedLesson.title}
-                            </h2>
-                        </div>
+                    {(() => {
+                        let selectedModIdx = 0;
+                        let selectedLesIdx = 0;
+                        course.modules.forEach((mod, mIdx) => {
+                            mod.lessons.forEach((les, lIdx) => {
+                                if (les.id === selectedLesson.id) {
+                                    selectedModIdx = mIdx;
+                                    selectedLesIdx = lIdx;
+                                }
+                            });
+                        });
 
-                        {/* HTML5 or YouTube video element */}
-                        <div style={{ background: '#000000', border: '3px solid #000000', position: 'relative', overflow: 'hidden', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {selectedLesson.videoUrl.includes('youtube.com') || selectedLesson.videoUrl.includes('youtu.be') ? (
-                                <iframe
-                                    key={selectedLesson.id}
-                                    width="100%"
-                                    height="100%"
-                                    src={selectedLesson.videoUrl}
-                                    title={selectedLesson.title}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowFullScreen
-                                    style={{ border: 'none', width: '100%', height: '100%' }}
-                                />
-                            ) : (
-                                <video
-                                    key={selectedLesson.id}
-                                    src={selectedLesson.videoUrl}
-                                    controls
-                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                    poster={`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="90" viewBox="0 0 160 90"><rect width="160" height="90" fill="%23000"/><text x="80" y="45" font-family="Outfit, sans-serif" font-weight="900" font-size="6" fill="%23e11d48" text-anchor="middle">FUTURE TECH ACADEMY</text></svg>`}
-                                />
-                            )}
-                        </div>
-                    </div>
+                        const isLocked = isLessonLocked(selectedLesson, selectedModIdx, selectedLesIdx);
+                        const cohortLocks = JSON.parse(localStorage.getItem('fta-cohort-locks') || '{}');
+                        const isLockedByAdmin = cohortLocks[`${studentCohort}-${selectedCourse}-module-${selectedModIdx}`];
 
-                    {/* NOTES & SCRATCHPAD CONTAINER */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="notes-grid">
-                        
-                        {/* LEFT COLUMN: Lecture Takeaways */}
-                        <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000', display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
-                                <FileText size={18} style={{ color: 'var(--accent-r)' }} />
-                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase' }}>
-                                    Lecture Takeaways
-                                </h3>
-                            </div>
-                            <div style={{ 
-                                fontSize: '0.85rem', 
-                                lineHeight: '1.6', 
-                                color: '#333', 
-                                overflowY: 'auto', 
-                                maxHeight: '280px',
-                                whiteSpace: 'pre-line',
-                                fontFamily: 'Inter, sans-serif'
-                            }}>
-                                {selectedLesson.notes}
-                            </div>
-                        </div>
-
-                        {/* RIGHT COLUMN: Interactive notepad */}
-                        <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000', display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                                    <Pencil size={16} style={{ color: 'var(--accent-r)' }} />
-                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase' }}>
-                                        Interactive Scratchpad
-                                    </h3>
+                        if (isLocked) {
+                            return (
+                                <div style={{ background: '#fef2f2', border: '3px solid #000000', padding: '4rem 2rem', textAlign: 'center', boxShadow: '8px 8px 0 #000000', borderRadius: '2rem', animation: 'fadeIn 0.2s ease-out' }}>
+                                    <div style={{ display: 'inline-flex', background: '#fee2e2', color: '#dc2626', padding: '1.2rem', borderRadius: '2rem', border: '3px solid #000', marginBottom: '1.5rem' }}>
+                                        <Lock size={44} />
+                                    </div>
+                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: 955, fontSize: '1.8rem', color: '#000', textTransform: 'uppercase', margin: 0 }}>
+                                        Lesson Locked
+                                    </h2>
+                                    <p style={{ maxWidth: '500px', margin: '1rem auto 0 auto', color: '#555', fontWeight: 700, fontSize: '0.95rem', lineHeight: '1.5' }}>
+                                        {isLockedByAdmin 
+                                          ? `The administrator has locked ${course.modules[selectedModIdx]?.title || 'this module'} for students in ${studentCohort}.` 
+                                          : "You must complete the previous lesson's coding assignment to unlock this lecture. Sequential learning is required!"}
+                                    </p>
                                 </div>
-                                <span style={{ fontSize: '0.7rem', color: isSaving ? 'var(--accent-r)' : '#888', fontWeight: 'bold' }}>
-                                    {isSaving ? 'Saving...' : 'Auto-Saved'}
-                                </span>
-                            </div>
-                            <textarea
-                                value={noteText}
-                                onChange={handleNoteChange}
-                                placeholder="Jot down quick thoughts, code snippets, or notes from the lecture here..."
-                                style={{
-                                    width: '100%',
-                                    minHeight: '180px',
-                                    padding: '0.8rem',
-                                    border: '2px solid #000000',
-                                    borderRadius: '4px',
-                                    outline: 'none',
-                                    fontSize: '0.85rem',
-                                    fontFamily: 'monospace',
-                                    background: '#fcfcfc',
-                                    resize: 'vertical',
-                                    boxSizing: 'border-box',
-                                    marginBottom: '1rem'
-                                }}
-                            />
-                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: 'auto' }}>
-                                <button
-                                    onClick={handleDownloadNotes}
-                                    disabled={!noteText}
-                                    style={{
-                                        background: '#000000',
-                                        color: '#ffffff',
-                                        border: '2px solid #000000',
-                                        padding: '0.5rem 1rem',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 900,
-                                        textTransform: 'uppercase',
-                                        cursor: noteText ? 'pointer' : 'not-allowed',
-                                        opacity: noteText ? 1 : 0.5,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.4rem'
-                                    }}
-                                >
-                                    <Download size={12} /> Download (.txt)
-                                </button>
-                                <button
-                                    onClick={handleClearNotes}
-                                    disabled={!noteText}
-                                    style={{
-                                        background: '#ffffff',
-                                        color: 'var(--accent-r)',
-                                        border: '2px solid var(--accent-r)',
-                                        padding: '0.5rem 1rem',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 900,
-                                        textTransform: 'uppercase',
-                                        cursor: noteText ? 'pointer' : 'not-allowed',
-                                        opacity: noteText ? 1 : 0.5,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.4rem'
-                                    }}
-                                >
-                                    <Trash2 size={12} /> Clear
-                                </button>
-                            </div>
-                        </div>
+                            );
+                        }
 
-                    </div>
+                        const handleGradeAssignment = () => {
+                            if (!assignmentText.trim()) {
+                                alert('Please type or paste your assignment submission before grading!');
+                                return;
+                            }
+                            setIsGrading(true);
+                            setTimeout(() => {
+                                const result = runAIGrader(selectedLesson.id, assignmentText);
+                                
+                                // Save to localStorage
+                                localStorage.setItem(`fta-assignment-score-${selectedLesson.id}`, result.score.toString());
+                                localStorage.setItem(`fta-assignment-feedback-${selectedLesson.id}`, result.feedback);
+                                localStorage.setItem(`fta-assignment-code-${selectedLesson.id}`, assignmentText);
+                                
+                                // Save score to user leaderboard scores tracking
+                                const userScores = JSON.parse(localStorage.getItem('fta-user-scores') || '[]');
+                                userScores.push(result.score);
+                                localStorage.setItem('fta-user-scores', JSON.stringify(userScores));
 
+                                setGradingResult({
+                                    score: result.score,
+                                    feedback: result.feedback,
+                                    code: assignmentText
+                                });
+                                setIsGrading(false);
+                                setRecentSubmissionCount(prev => prev + 1);
+                            }, 1500);
+                        };
+
+                        return (
+                            <>
+                                {/* VIDEO PLAYER CARD */}
+                                <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '8px 8px 0 #000000' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
+                                        <div style={{ background: 'var(--accent-r)', color: '#fff', padding: '0.4rem 0.8rem', border: '2px solid #000', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                                            Lecture Video
+                                        </div>
+                                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0 }}>
+                                            {selectedLesson.title}
+                                        </h2>
+                                    </div>
+
+                                    {/* HTML5 or YouTube video element */}
+                                    <div style={{ background: '#000000', border: '3px solid #000000', position: 'relative', overflow: 'hidden', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {selectedLesson.videoUrl.includes('youtube.com') || selectedLesson.videoUrl.includes('youtu.be') ? (
+                                            <iframe
+                                                key={selectedLesson.id}
+                                                width="100%"
+                                                height="100%"
+                                                src={selectedLesson.videoUrl}
+                                                title={selectedLesson.title}
+                                                frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                allowFullScreen
+                                                style={{ border: 'none', width: '100%', height: '100%' }}
+                                            />
+                                        ) : (
+                                            <video
+                                                key={selectedLesson.id}
+                                                src={selectedLesson.videoUrl}
+                                                controls
+                                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                                poster={`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="90" viewBox="0 0 160 90"><rect width="160" height="90" fill="%23000"/><text x="80" y="45" font-family="Outfit, sans-serif" font-weight="900" font-size="6" fill="%23e11d48" text-anchor="middle">FUTURE TECH ACADEMY</text></svg>`}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* NOTES & SCRATCHPAD CONTAINER */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="notes-grid">
+                                    
+                                    {/* LEFT COLUMN: Lecture Takeaways */}
+                                    <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000', display: 'flex', flexDirection: 'column' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
+                                            <FileText size={18} style={{ color: 'var(--accent-r)' }} />
+                                            <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase' }}>
+                                                Lecture Takeaways
+                                            </h3>
+                                        </div>
+                                        <div style={{ 
+                                            fontSize: '0.85rem', 
+                                            lineHeight: '1.6', 
+                                            color: '#333', 
+                                            overflowY: 'auto', 
+                                            maxHeight: '280px',
+                                            whiteSpace: 'pre-line',
+                                            fontFamily: 'Inter, sans-serif'
+                                        }}>
+                                            {selectedLesson.notes}
+                                        </div>
+                                    </div>
+
+                                    {/* RIGHT COLUMN: Interactive notepad */}
+                                    <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000', display: 'flex', flexDirection: 'column' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                                <Pencil size={16} style={{ color: 'var(--accent-r)' }} />
+                                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase' }}>
+                                                    Interactive Scratchpad
+                                                </h3>
+                                            </div>
+                                            <span style={{ fontSize: '0.7rem', color: isSaving ? 'var(--accent-r)' : '#888', fontWeight: 'bold' }}>
+                                                {isSaving ? 'Saving...' : 'Auto-Saved'}
+                                            </span>
+                                        </div>
+                                        <textarea
+                                            value={noteText}
+                                            onChange={handleNoteChange}
+                                            placeholder="Jot down quick thoughts, code snippets, or notes from the lecture here..."
+                                            style={{
+                                                width: '100%',
+                                                minHeight: '180px',
+                                                padding: '0.8rem',
+                                                border: '2px solid #000000',
+                                                borderRadius: '4px',
+                                                outline: 'none',
+                                                fontSize: '0.85rem',
+                                                fontFamily: 'monospace',
+                                                background: '#fcfcfc',
+                                                resize: 'vertical',
+                                                boxSizing: 'border-box',
+                                                marginBottom: '1rem'
+                                            }}
+                                        />
+                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: 'auto' }}>
+                                            <button
+                                                onClick={handleDownloadNotes}
+                                                disabled={!noteText}
+                                                style={{
+                                                    background: '#000000',
+                                                    color: '#ffffff',
+                                                    border: '2px solid #000000',
+                                                    padding: '0.5rem 1rem',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 900,
+                                                    textTransform: 'uppercase',
+                                                    cursor: noteText ? 'pointer' : 'not-allowed',
+                                                    opacity: noteText ? 1 : 0.5,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.4rem'
+                                                }}
+                                            >
+                                                <Download size={12} /> Download (.txt)
+                                            </button>
+                                            <button
+                                                onClick={handleClearNotes}
+                                                disabled={!noteText}
+                                                style={{
+                                                    background: '#ffffff',
+                                                    color: 'var(--accent-r)',
+                                                    border: '2px solid var(--accent-r)',
+                                                    padding: '0.5rem 1rem',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 900,
+                                                    textTransform: 'uppercase',
+                                                    cursor: noteText ? 'pointer' : 'not-allowed',
+                                                    opacity: noteText ? 1 : 0.5,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.4rem'
+                                                }}
+                                            >
+                                                <Trash2 size={12} /> Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ASSIGNMENT SUBMISSION & AI GRADING CARD */}
+                                <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '2rem', boxShadow: '8px 8px 0 #000000', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
+                                        <Award size={20} style={{ color: 'var(--accent-r)' }} />
+                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', margin: 0, textTransform: 'uppercase' }}>
+                                            📝 Coding Assignment & AI Grader
+                                        </h3>
+                                    </div>
+
+                                    <div>
+                                        <div style={{ fontWeight: 950, fontSize: '0.75rem', textTransform: 'uppercase', color: '#71717a', marginBottom: '0.4rem' }}>Task Instructions:</div>
+                                        <div style={{ background: '#f8fafc', border: '2px solid #000', padding: '1rem', borderRadius: '0.8rem', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', lineHeight: '1.5' }}>
+                                            {getAssignmentInstruction(selectedLesson)}
+                                        </div>
+                                    </div>
+
+                                    {gradingResult ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'fadeIn 0.2s ease-out' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: gradingResult.score >= 70 ? '#f0fdf4' : '#fef2f2', border: '2px solid #000', padding: '1rem', borderRadius: '0.8rem' }}>
+                                                <div style={{ 
+                                                    background: gradingResult.score >= 70 ? '#16a34a' : '#dc2626', 
+                                                    color: '#fff', 
+                                                    width: '50px', 
+                                                    height: '50px', 
+                                                    borderRadius: '50%', 
+                                                    display: 'flex', 
+                                                    alignItems: 'center', 
+                                                    justifyContent: 'center', 
+                                                    fontWeight: 900, 
+                                                    fontSize: '1.2rem',
+                                                    border: '2px solid #000',
+                                                    flexShrink: 0
+                                                }}>
+                                                    {gradingResult.score}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.75rem', color: gradingResult.score >= 70 ? '#166534' : '#991b1b' }}>
+                                                        {gradingResult.score >= 70 ? 'Grade: Passed 🟢' : 'Grade: Review Required 🔴'}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 700, marginTop: '0.2rem' }}>
+                                                        {gradingResult.feedback}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem', color: '#71717a' }}>Your Submitted Code:</label>
+                                                <pre style={{ background: '#f1f5f9', border: '2px solid #000', padding: '1rem', borderRadius: '0.8rem', fontSize: '0.8rem', fontFamily: 'monospace', color: '#0f172a', margin: 0, overflowX: 'auto', whiteSpace: 'pre-wrap' }}>
+                                                    {gradingResult.code}
+                                                </pre>
+                                            </div>
+
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                🔒 Submission locked. Assignments can only be graded once per cohort.
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem', color: '#71717a' }}>Submit Your Code / Answer:</label>
+                                                <textarea
+                                                    value={assignmentText}
+                                                    onChange={(e) => setAssignmentText(e.target.value)}
+                                                    placeholder="// Enter your JavaScript, CSS, HTML or text response here..."
+                                                    disabled={isGrading}
+                                                    style={{
+                                                        width: '100%',
+                                                        minHeight: '120px',
+                                                        padding: '0.8rem',
+                                                        border: '2px solid #000000',
+                                                        borderRadius: '0.8rem',
+                                                        outline: 'none',
+                                                        fontSize: '0.85rem',
+                                                        fontFamily: 'monospace',
+                                                        background: '#fcfcfc',
+                                                        resize: 'vertical',
+                                                        boxSizing: 'border-box'
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <button
+                                                onClick={handleGradeAssignment}
+                                                disabled={isGrading || !assignmentText.trim()}
+                                                style={{
+                                                    background: isGrading ? '#e2e8f0' : 'var(--accent-r)',
+                                                    color: isGrading ? '#94a3b8' : '#ffffff',
+                                                    border: '3px solid #000000',
+                                                    padding: '1rem',
+                                                    borderRadius: '1rem',
+                                                    fontFamily: 'Outfit',
+                                                    fontWeight: 950,
+                                                    textTransform: 'uppercase',
+                                                    cursor: (isGrading || !assignmentText.trim()) ? 'not-allowed' : 'pointer',
+                                                    boxShadow: (isGrading || !assignmentText.trim()) ? 'none' : '4px 4px 0 #000000',
+                                                    transition: 'all 0.1s ease',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '0.6rem'
+                                                }}
+                                            >
+                                                {isGrading ? (
+                                                    <>🧠 AI GRADER ANALYZING CODE...</>
+                                                ) : (
+                                                    <>
+                                                        <Cpu size={18} /> SUBMIT & GRADE CODE 🤖
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        );
+                    })()}
                 </div>
 
             </div>

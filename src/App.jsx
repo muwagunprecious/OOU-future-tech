@@ -3915,6 +3915,148 @@ const ACADEMY_COURSES = {
                         notes: `### WebSockets & Real-time Web\n\nWebSockets establish a persistent, bi-directional TCP channel between client and server.\n\n*   **Bi-directional**: Unlike HTTP requests, the server can push events to the client at any time without polling.`
                     }
                 ]
+            },
+            {
+                title: 'Module 6: Version Control with Git & GitHub',
+                lessons: [
+                    {
+                        id: 'fe-git-intro',
+                        title: '32. What is Version Control',
+                        videoUrl: 'https://www.youtube.com/embed/Yc8sCSeMhi4',
+                        notes: `### Introduction to Version Control\n\nVersion control systems track history of file changes over time, enabling safe experimentation, rollback, and team collaboration.\n\n*   **Local History**: Records snapshots of files locally.\n*   **Collaboration**: Prevents developers from overwriting each other's code modifications.`
+                    },
+                    {
+                        id: 'fe-git-vs',
+                        title: '33. Git vs Other Version Control',
+                        videoUrl: 'https://www.youtube.com/embed/SAHkNyBh6Gk',
+                        notes: `### Distributed vs Centralized VCS\n\n*   **Git** (Distributed): Every developer has a complete local clone of the project history. Fast operations, offline capability.\n*   **SVN** (Centralized): Rely on a single central server to check in and check out files.`
+                    },
+                    {
+                        id: 'fe-git-install',
+                        title: '34. Installing Git',
+                        videoUrl: 'https://www.youtube.com/embed/t2-l3WvWvqg',
+                        notes: `### Setting up Git Locally\n\nDownload and configure Git for your operating system:\n\n*   **Commands**:\n    \`\`\`bash\n    git config --global user.name "Your Name"\n    git config --global user.email "your.email@example.com"\n    \`\`\``
+                    },
+                    {
+                        id: 'fe-git-repo',
+                        title: '35. Creating a Repo',
+                        videoUrl: 'https://www.youtube.com/embed/SgZhE40BvC4',
+                        notes: `### Creating a Repository\n\nInitialize a folder to track it with git:\n\n*   \`git init\` - Initializes a new local git repository.\n*   \`git add .\` - Stages all files in the current directory for commit.\n*   \`git commit -m "initial commit"\` - Saves the staged snapshot to project history.`
+                    },
+                    {
+                        id: 'fe-git-clone',
+                        title: '36. Cloning Your First Repo',
+                        videoUrl: 'https://www.youtube.com/embed/q9wc7hUrW8U',
+                        notes: `### Cloning Git Repositories\n\nDownload an existing repository from a remote host like GitHub:\n\n*   \`git clone <url>\` - Downloads the repository and its entire history to your local machine.`
+                    },
+                    {
+                        id: 'fe-git-remotes',
+                        title: '37. Managing Remotes',
+                        videoUrl: 'https://www.youtube.com/embed/8-PGbsaeEG0',
+                        notes: `### Git Remotes\n\nLink your local repository to a remote server on GitHub/GitLab:\n\n*   \`git remote add origin <url>\` - Establishes default remote link.\n*   \`git remote -v\` - Lists all configured remote URLs.`
+                    },
+                    {
+                        id: 'fe-git-push',
+                        title: '38. How to Push Your Code',
+                        videoUrl: 'https://www.youtube.com/embed/vpRkAoCqX3o',
+                        notes: `### Pushing Local Commits\n\nUpload your local branch changes to the remote repository on GitHub:\n\n*   \`git push -u origin main\` - Pushes main branch commits and sets upstream tracker.`
+                    },
+                    {
+                        id: 'fe-git-pull',
+                        title: '39. Pulling Your Code',
+                        videoUrl: 'https://www.youtube.com/embed/jRLGobWwA3Y',
+                        notes: `### Pulling Remote Updates\n\nDownload and integrate remote commits into your current working branch:\n\n*   \`git pull origin main\` - Fetches remote changes and merges them automatically.`
+                    },
+                    {
+                        id: 'fe-git-merge-rebase',
+                        title: '40. Git Merge and Rebase',
+                        videoUrl: 'https://www.youtube.com/embed/0chZFIZLR_0',
+                        notes: `### Git Merge vs Rebase\n\n*   **Merge**: Combines two branches with a dedicated merge commit, preserving historical timeline shape.\n*   **Rebase**: Re-applies commits on top of another base, creating a linear history (rewriting logs).`
+                    }
+                ]
+            },
+            {
+                title: 'Module 7: Modern Frontend Development with React & Next.js',
+                lessons: [
+                    {
+                        id: 'fe-react-vite',
+                        title: '41. CLI Tools (Vite)',
+                        videoUrl: 'https://www.youtube.com/embed/KCrXgy8qtjM',
+                        notes: `### Modern CLI Bundlers\n\nCreate fast React applications using Vite instead of Create-React-App:\n\n*   **Setup**:\n    \`\`\`bash\n    npm create vite@latest my-app -- --template react\n    npm install\n    npm run dev\n    \`\`\``
+                    },
+                    {
+                        id: 'fe-react-components-1',
+                        title: '42. Components in React JS',
+                        videoUrl: 'https://www.youtube.com/embed/d5ooYpXioqE',
+                        notes: `### React Components\n\nComponents are reusable UI blocks returned as JS functions containing HTML markup (JSX).\n\n*   **Props**: Arguments passed into components to customize parameters.`
+                    },
+                    {
+                        id: 'fe-react-rendering',
+                        title: '43. Rendering in React JS',
+                        videoUrl: 'https://www.youtube.com/embed/VPtL6dU0YXc',
+                        notes: `### JSX Rendering & Lists\n\nRender dynamically using expressions in braces:\n\n*   **Conditional Rendering**: Use ternary operators (\`condition ? true : false\`).\n*   **List Rendering**: Always use \`.map()\` and specify unique \`key\` attributes.`
+                    },
+                    {
+                        id: 'fe-react-hooks',
+                        title: '44. Hooks in React',
+                        videoUrl: 'https://www.youtube.com/embed/V9i3cGD-mts',
+                        notes: `### React Hooks Intro\n\nHooks let function components tap into state and lifecycle features:\n\n*   \`useState\`: Declares state variables.\n*   \`useEffect\`: Executes side-effects (fetching, event listeners).`
+                    },
+                    {
+                        id: 'fe-react-routing',
+                        title: '45. Routing',
+                        videoUrl: 'https://www.youtube.com/embed/943D7U74_sQ',
+                        notes: `### Client-side Routing\n\nUse React Router to navigate between different view pages without reloading the window page.\n\n*   \`<BrowserRouter>\`, \`<Routes>\`, and \`<Route>\` define path mappings.`
+                    },
+                    {
+                        id: 'fe-react-state',
+                        title: '46. State Management',
+                        videoUrl: 'https://www.youtube.com/embed/-bEzt5ISACA',
+                        notes: `### State Management Systems\n\nHandle shared data across complex components using:\n\n*   **Context API**: Built-in simple global state.\n*   **Redux / Zustand**: Modern, lightweight external state engines.`
+                    },
+                    {
+                        id: 'fe-react-panda',
+                        title: '47. Panda CSS',
+                        videoUrl: 'https://www.youtube.com/embed/UlY-Ixddjm0',
+                        notes: `### Panda CSS Foundations\n\nA modern, build-time CSS-in-JS engine providing type-safe utility styling:\n\n*   Combines the speed of CSS variables with build-time stylesheet generation.`
+                    },
+                    {
+                        id: 'fe-react-tailwind',
+                        title: '48. Tailwind CSS',
+                        videoUrl: 'https://www.youtube.com/embed/6biMWgD6_JY',
+                        notes: `### Tailwind CSS Utility Classes\n\nA utility-first CSS framework for building custom designs directly inside your markup:\n\n*   Example: \`className="flex gap-4 p-4 border border-black shadow-md"\``
+                    },
+                    {
+                        id: 'fe-react-components-2',
+                        title: '49. Advanced Components in React',
+                        videoUrl: 'https://www.youtube.com/embed/wIyHSOugGGw',
+                        notes: `### Advanced React Patterns\n\n*   **Children Props**: Pass markup blocks inside components.\n*   **Custom Hooks**: Extract and share state logic across multiple components.`
+                    },
+                    {
+                        id: 'fe-react-api',
+                        title: '50. API Calls in React',
+                        videoUrl: 'https://www.youtube.com/embed/dW6-vE9r-s4',
+                        notes: `### API Data Fetching\n\nFetch remote database resources inside \`useEffect\`:\n\n*   Use loading flags and local states to manage promise resolution and rendering.`
+                    },
+                    {
+                        id: 'fe-react-testing',
+                        title: '51. Testing in React JS',
+                        videoUrl: 'https://www.youtube.com/embed/JBSUgDxICg8',
+                        notes: `### React Component Testing\n\nWrite automated unit and integration tests using **Jest** and **React Testing Library**:\n\n*   Simulate button clicks, render output components, and check assertions.`
+                    },
+                    {
+                        id: 'fe-react-hookforms',
+                        title: '52. Hookforms in React',
+                        videoUrl: 'https://www.youtube.com/embed/cc_xmawJ8Kg',
+                        notes: `### React Hook Form\n\nA lightweight library to handle form state validation, reduce re-renders, and capture submission data cleanly.`
+                    },
+                    {
+                        id: 'fe-react-nextjs',
+                        title: '53. Next.js',
+                        videoUrl: 'https://www.youtube.com/embed/ZVnjOPwW4ZA',
+                        notes: `### Next.js React Framework\n\nNext.js enables server-side rendering (SSR), static generation (SSG), and API routes out of the box for production-ready applications.`
+                    }
+                ]
             }
         ]
     },

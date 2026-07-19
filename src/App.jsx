@@ -4029,7 +4029,7 @@ const ACADEMY_COURSES = {
                     {
                         id: 'fe-react-components-2',
                         title: '49. Advanced Components in React',
-                        videoUrl: 'https://www.youtube.com/embed/wIyHSOugGGw',
+                        videoUrl: 'https://www.youtube.com/embed/d5ooYpXioqE',
                         notes: `### Advanced React Patterns\n\n*   **Children Props**: Pass markup blocks inside components.\n*   **Custom Hooks**: Extract and share state logic across multiple components.`
                     },
                     {

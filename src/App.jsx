@@ -9,7 +9,7 @@ import {
     Zap, Code2, Mic, Network, Lightbulb, Rocket,
     Download, CheckCircle, Ticket, X, Trash2, Store, Menu, Camera as CameraIcon,
     PartyPopper, Heart, Sparkles, Building2, UserPlus, Scale, Pencil,
-    FileText, Upload, AlertCircle, ArrowLeft, Paperclip, Terminal, Send
+    FileText, Upload, AlertCircle, ArrowLeft, Paperclip, Terminal, Send, Play, BookOpen, Video
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -748,10 +748,10 @@ const GlobalStyle = () => (
       .vol-container { grid-template-columns: 1fr; }
       .id-card-canonical { width: 100% !important; height: auto !important; aspect-ratio: 380/560; }
     }
-    /* ANIMATIONS */
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* ACADEMY STYLES */
+    @media(max-width: 800px) {
+      .academy-grid { grid-template-columns: 1fr !important; }
+      .notes-grid { grid-template-columns: 1fr !important; }
     }
   `}</style>
 )
@@ -775,9 +775,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             <div className="nav-menu-pill">
                 <nav className="nav-links">
                     {currentView === 'site' ? (
-                        ['Schedule', 'Speakers', 'Club', 'Pitch', 'FTA', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                            l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'FTA' ? (
-                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'FTA' ? 'techwaitlist' : 'event-tags'); }}>{l}</a>
+                        ['Schedule', 'Speakers', 'Club', 'Pitch', 'FTA', 'Academy', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                            l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'FTA' || l === 'Academy' ? (
+                                <a key={l} href="#" onClick={(e) => { e.preventDefault(); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'FTA' ? 'techwaitlist' : l === 'Academy' ? 'academy' : 'event-tags'); }}>{l}</a>
                             ) : (
                                 <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`}>{l}</a>
                             )
@@ -802,9 +802,9 @@ const Navbar = ({ onRegister, isMenuOpen, setIsMenuOpen, onViewChange, currentVi
             </button>
             <nav className="mobile-nav-links">
                 {currentView === 'site' ? (
-                    ['Schedule', 'Speakers', 'Club', 'Pitch', 'FTA', 'Event Tags', 'FAQs', 'Team'].map(l => (
-                        l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'FTA' ? (
-                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'FTA' ? 'techwaitlist' : 'event-tags'); }}>{l}</a>
+                    ['Schedule', 'Speakers', 'Club', 'Pitch', 'FTA', 'Academy', 'Event Tags', 'FAQs', 'Team'].map(l => (
+                        l === 'Event Tags' || l === 'Pitch' || l === 'Club' || l === 'FTA' || l === 'Academy' ? (
+                            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); onViewChange(l === 'Pitch' ? 'pitch' : l === 'Club' ? 'founders' : l === 'FTA' ? 'techwaitlist' : l === 'Academy' ? 'academy' : 'event-tags'); }}>{l}</a>
                         ) : (
                             <a key={l} href={`#${l.toLowerCase().replace(' ', '-')}`} onClick={() => setIsMenuOpen(false)}>{l}</a>
                         )
@@ -2150,7 +2150,11 @@ const RegisterModal = ({ isOpen, onClose, initialType, isRegistrationOpen }) => 
 
         if (sbError) {
             console.error('Supabase error:', sbError);
-            setError('Failed to save registration. Please check your connection or try again.');
+            if (sbError.code === '23505') {
+                setError('This email is already registered. You can only claim one ticket.');
+            } else {
+                setError('Failed to save registration. Please check your connection or try again.');
+            }
             setLoading(false);
             return;
         }
@@ -3695,6 +3699,355 @@ const PendingFounders = ({ onConnect }) => {
 };
 
 /* ───────────────────────────────────────────
+   FUTURE TECH ACADEMY (FTA) LEARNING PORTAL
+   ─────────────────────────────────────────── */
+const ACADEMY_COURSES = {
+    'Frontend Engineering': {
+        description: 'Master visual layouts, UI components, state management, and modern React web applications.',
+        modules: [
+            {
+                title: 'Module 1: Semantic Structure & HTML5',
+                lessons: [
+                    {
+                        id: 'fe-html-intro',
+                        title: '1. Introduction to Web Elements & Semantic HTML',
+                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+                        notes: `### Introduction to Semantic HTML\n\nSemantic HTML elements are tags that describe the meaning of the content they contain. They make code readable, improve SEO, and ensure accessibility for screen readers.\n\nKey Semantic Tags:\n• <header> - Defines top headers/navigation.\n• <main> - Contains primary body content.\n• <article> - Represents self-contained text.\n• <footer> - Holds footer metadata.\n• <aside> - Content aside from page content (e.g. sidebar).`
+                    },
+                    {
+                        id: 'fe-html-forms',
+                        title: '2. Advanced Form Handling & Dynamic Validations',
+                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+                        notes: `### Form Inputs & Validations\n\nHandling user inputs is crucial for security and user experience. Always use target attributes:\n\nKey Practices:\n• Use type="email" for automated browser check.\n• Use required to block empty submissions.\n• Apply pattern attributes for custom phone structures.\n• Implement client-side validations to provide immediate feedback.`
+                    }
+                ]
+            },
+            {
+                title: 'Module 2: Styling and CSS3 Architecture',
+                lessons: [
+                    {
+                        id: 'fe-css-flex',
+                        title: '3. Flexbox & Grid layouts for Brutalist Design',
+                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+                        notes: `### Flexbox vs Grid\n\nUse Flexbox for one-dimensional layouts (rows or columns) and Grid for multi-dimensional tabular alignment.\n\nKey Code Snippets:\n• display: flex; gap: 1rem; - Horizontal row alignment.\n• display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) - Perfect responsive cards.`
+                    },
+                    {
+                        id: 'fe-css-neo',
+                        title: '4. Neo-Brutalist Styling Tokens & Variables',
+                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+                        notes: `### Neo-brutalist Styling\n\nCharacterized by flat UI controls, thick dark borders, and bright primary color systems.\n\nDesign Tokens:\n• border: 3px solid #000; - Flat container borders.\n• box-shadow: 4px 4px 0 #000; - Offset card shadows.\n• background: var(--accent-r); - Vibrant accents.`
+                    }
+                ]
+            }
+        ]
+    },
+    'Backend Engineering': {
+        description: 'Build robust servers, secure APIs, handle authentication, and orchestrate SQL databases.',
+        modules: [
+            {
+                title: 'Module 1: Server architecture with Node.js & Express',
+                lessons: [
+                    {
+                        id: 'be-node-intro',
+                        title: '1. Building HTTP Servers & Routing API requests',
+                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+                        notes: `### Node.js HTTP Basics\n\nNode.js enables JS execution server-side. Express.js is a lightweight wrapper to easily parse routes.\n\nCode Example:\nconst express = require('express');\nconst app = express();\napp.get("/api/v1/users", (req, res) => {\n    res.status(200).json({ status: "success" });\n});`
+                    },
+                    {
+                        id: 'be-node-db',
+                        title: '2. Connecting Supabase Client & PostgreSQL Tables',
+                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+                        notes: `### Postgres & Supabase CRUD\n\nConnect safely using Service Role keys or Anon keys depending on read/write policies.\n\nExample Select:\nconst { data, error } = await supabase\n    .from("registrations")\n    .select("*");`
+                    }
+                ]
+            }
+        ]
+    },
+    'Product Design (UI/UX)': {
+        description: 'Learn modern design standards, components, grid systems, and functional prototypes.',
+        modules: [
+            {
+                title: 'Module 1: Wireframing and Design Tokens',
+                lessons: [
+                    {
+                        id: 'pd-figma-intro',
+                        title: '1. Figma Grids, Spacing & Layout guidelines',
+                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+                        notes: `### Layout Grids in Figma\n\nAlways use standard 8px grid systems for responsive alignment.\n\nViewport Layouts:\n• Mobile viewport grid: 4 columns, 16px gutter.\n• Desktop viewport grid: 12 columns, 24px gutter.`
+                    }
+                ]
+            }
+        ]
+    }
+};
+
+const AcademyDashboard = () => {
+    const [selectedCourse, setSelectedCourse] = useState('Frontend Engineering');
+    const course = ACADEMY_COURSES[selectedCourse];
+    const firstLesson = course.modules[0].lessons[0];
+    const [selectedLesson, setSelectedLesson] = useState(firstLesson);
+    
+    // Scratchpad notes state
+    const [noteText, setNoteText] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+    
+    // Sync selected lesson when course changes
+    useEffect(() => {
+        const newFirstLesson = course.modules[0].lessons[0];
+        setSelectedLesson(newFirstLesson);
+    }, [selectedCourse]);
+
+    // Load saved notes when lesson changes
+    useEffect(() => {
+        const saved = localStorage.getItem(`fta-notes-${selectedLesson.id}`) || '';
+        setNoteText(saved);
+    }, [selectedLesson]);
+
+    const handleNoteChange = (e) => {
+        const val = e.target.value;
+        setNoteText(val);
+        setIsSaving(true);
+        localStorage.setItem(`fta-notes-${selectedLesson.id}`, val);
+        setTimeout(() => setIsSaving(false), 500);
+    };
+
+    const handleDownloadNotes = () => {
+        const blob = new Blob([noteText], { type: 'text/plain;charset=utf-8' });
+        download(blob, `FTA-Notes-${selectedLesson.id}.txt`, 'text/plain');
+    };
+
+    const handleClearNotes = () => {
+        if (confirm('Are you sure you want to clear your scratchpad notes for this lesson?')) {
+            setNoteText('');
+            localStorage.removeItem(`fta-notes-${selectedLesson.id}`);
+        }
+    };
+
+    return (
+        <div style={{ maxWidth: '1200px', margin: '2rem auto 5rem auto', padding: '0 1.5rem' }}>
+            {/* Header branding */}
+            <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '2rem', boxShadow: '8px 8px 0 #000000', marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ background: '#000', color: '#fff', padding: '0.8rem', border: '2px solid #000', borderRadius: '8px' }}>
+                        <BookOpen size={28} />
+                    </div>
+                    <div>
+                        <h1 style={{ fontSize: '1.8rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }}>Future Tech Academy (FTA)</h1>
+                        <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px' }}>LEARNING PORTAL</span>
+                    </div>
+                </div>
+                <p style={{ color: '#555', margin: 0, fontSize: '0.95rem', lineHeight: '1.5' }}>
+                    Select your track and access high-value programming curriculum. Access coding lectures, check curator notes, and jot down study notes on the interactive scratchpad.
+                </p>
+            </div>
+
+            {/* Course Selector Tabs */}
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                {Object.keys(ACADEMY_COURSES).map(cKey => (
+                    <button
+                        key={cKey}
+                        onClick={() => setSelectedCourse(cKey)}
+                        style={{
+                            background: selectedCourse === cKey ? 'var(--accent-r)' : '#ffffff',
+                            color: selectedCourse === cKey ? '#ffffff' : '#000000',
+                            border: '3px solid #000000',
+                            boxShadow: selectedCourse === cKey ? '2px 2px 0 #000000' : '4px 4px 0 #000000',
+                            padding: '0.8rem 1.6rem',
+                            fontWeight: 900,
+                            textTransform: 'uppercase',
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.1s ease'
+                        }}
+                    >
+                        {cKey}
+                    </button>
+                ))}
+            </div>
+
+            {/* Main Dashboard Layout */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 320px) 1fr', gap: '2rem', alignItems: 'start' }} className="academy-grid">
+                
+                {/* SIDEBAR: Curriculum Content */}
+                <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000' }}>
+                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', textTransform: 'uppercase', margin: '0 0 1.2rem 0', paddingBottom: '0.8rem', borderBottom: '3px solid #000' }}>
+                        Curriculum
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: '#666', lineHeight: '1.4', marginBottom: '1.5rem' }}>
+                        {course.description}
+                    </p>
+
+                    {course.modules.map((mod, modIdx) => (
+                        <div key={modIdx} style={{ marginBottom: '1.5rem' }}>
+                            <h4 style={{ fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--accent-r)', margin: '0 0 0.8rem 0' }}>
+                                {mod.title}
+                            </h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                {mod.lessons.map(les => (
+                                    <button
+                                        key={les.id}
+                                        onClick={() => setSelectedLesson(les)}
+                                        style={{
+                                            textAlign: 'left',
+                                            padding: '0.75rem',
+                                            background: selectedLesson.id === les.id ? '#000000' : '#fafafa',
+                                            color: selectedLesson.id === les.id ? '#ffffff' : '#000000',
+                                            border: '2px solid #000000',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 700,
+                                            cursor: 'pointer',
+                                            width: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            gap: '0.5rem'
+                                        }}
+                                    >
+                                        <span>{les.title}</span>
+                                        <Play size={12} style={{ flexShrink: 0, opacity: selectedLesson.id === les.id ? 1 : 0.4 }} />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* MAIN CONTENT AREA */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    
+                    {/* VIDEO PLAYER CARD */}
+                    <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '8px 8px 0 #000000' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
+                            <div style={{ background: 'var(--accent-r)', color: '#fff', padding: '0.4rem 0.8rem', border: '2px solid #000', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                                Lecture Video
+                            </div>
+                            <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0 }}>
+                                {selectedLesson.title}
+                            </h2>
+                        </div>
+
+                        {/* HTML5 video element */}
+                        <div style={{ background: '#000000', border: '3px solid #000000', position: 'relative', overflow: 'hidden', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <video
+                                key={selectedLesson.id}
+                                src={selectedLesson.videoUrl}
+                                controls
+                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                poster={`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="90" viewBox="0 0 160 90"><rect width="160" height="90" fill="%23000"/><text x="80" y="45" font-family="Outfit, sans-serif" font-weight="900" font-size="6" fill="%23e11d48" text-anchor="middle">FUTURE TECH ACADEMY</text></svg>`}
+                            />
+                        </div>
+                    </div>
+
+                    {/* NOTES & SCRATCHPAD CONTAINER */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="notes-grid">
+                        
+                        {/* LEFT COLUMN: Lecture Takeaways */}
+                        <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000', display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
+                                <FileText size={18} style={{ color: 'var(--accent-r)' }} />
+                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase' }}>
+                                    Lecture Takeaways
+                                </h3>
+                            </div>
+                            <div style={{ 
+                                fontSize: '0.85rem', 
+                                lineHeight: '1.6', 
+                                color: '#333', 
+                                overflowY: 'auto', 
+                                maxHeight: '280px',
+                                whiteSpace: 'pre-line',
+                                fontFamily: 'Inter, sans-serif'
+                            }}>
+                                {selectedLesson.notes}
+                            </div>
+                        </div>
+
+                        {/* RIGHT COLUMN: Interactive notepad */}
+                        <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000', display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                    <Pencil size={16} style={{ color: 'var(--accent-r)' }} />
+                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase' }}>
+                                        Interactive Scratchpad
+                                    </h3>
+                                </div>
+                                <span style={{ fontSize: '0.7rem', color: isSaving ? 'var(--accent-r)' : '#888', fontWeight: 'bold' }}>
+                                    {isSaving ? 'Saving...' : 'Auto-Saved'}
+                                </span>
+                            </div>
+                            <textarea
+                                value={noteText}
+                                onChange={handleNoteChange}
+                                placeholder="Jot down quick thoughts, code snippets, or notes from the lecture here..."
+                                style={{
+                                    width: '100%',
+                                    minHeight: '180px',
+                                    padding: '0.8rem',
+                                    border: '2px solid #000000',
+                                    borderRadius: '4px',
+                                    outline: 'none',
+                                    fontSize: '0.85rem',
+                                    fontFamily: 'monospace',
+                                    background: '#fcfcfc',
+                                    resize: 'vertical',
+                                    boxSizing: 'border-box',
+                                    marginBottom: '1rem'
+                                }}
+                            />
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: 'auto' }}>
+                                <button
+                                    onClick={handleDownloadNotes}
+                                    disabled={!noteText}
+                                    style={{
+                                        background: '#000000',
+                                        color: '#ffffff',
+                                        border: '2px solid #000000',
+                                        padding: '0.5rem 1rem',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 900,
+                                        textTransform: 'uppercase',
+                                        cursor: noteText ? 'pointer' : 'not-allowed',
+                                        opacity: noteText ? 1 : 0.5,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.4rem'
+                                    }}
+                                >
+                                    <Download size={12} /> Download (.txt)
+                                </button>
+                                <button
+                                    onClick={handleClearNotes}
+                                    disabled={!noteText}
+                                    style={{
+                                        background: '#ffffff',
+                                        color: 'var(--accent-r)',
+                                        border: '2px solid var(--accent-r)',
+                                        padding: '0.5rem 1rem',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 900,
+                                        textTransform: 'uppercase',
+                                        cursor: noteText ? 'pointer' : 'not-allowed',
+                                        opacity: noteText ? 1 : 0.5,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.4rem'
+                                    }}
+                                >
+                                    <Trash2 size={12} /> Clear
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    );
+};
+
+/* ───────────────────────────────────────────
    TECH WAITLIST SECTION (FUTURE TECH ACADEMY - FTA)
    ─────────────────────────────────────────── */
 const TechWaitlistSection = () => {
@@ -3715,16 +4068,15 @@ const TechWaitlistSection = () => {
         setLoading(true);
         setError(null);
 
-        // Check if email already registered for this tech waitlist
+        // Check if email already registered globally (email is UNIQUE in the registrations table)
         const { data: existing, error: checkError } = await supabase
             .from('registrations')
             .select('email')
             .eq('email', formData.email)
-            .like('ticket_type', 'tech_waitlist_%')
             .maybeSingle();
 
         if (existing) {
-            setError('You have already joined the Future Tech Academy (FTA) waitlist.');
+            setError('This email address is already registered in our system. Please use a different email.');
             setLoading(false);
             return;
         }
@@ -3736,7 +4088,7 @@ const TechWaitlistSection = () => {
             .insert([{
                 name: formData.name,
                 email: formData.email,
-                ticket_type: `tech_waitlist_${formData.track.toLowerCase().replace(/\\s+/g, '_')}`,
+                ticket_type: `tech_waitlist_${formData.track.toLowerCase().replace(/\s+/g, '_')}`,
                 ticket_id: ticketId,
                 whatsapp_number: formData.whatsapp,
                 company_name: formData.track,
@@ -3745,7 +4097,11 @@ const TechWaitlistSection = () => {
 
         if (insertError) {
             console.error('Waitlist Supabase Error:', insertError);
-            setError('Failed to join the waitlist. Please check your connection.');
+            if (insertError.code === '23505') {
+                setError('This email address is already registered in our system. Please use a different email.');
+            } else {
+                setError('Failed to join the waitlist. Please check your connection.');
+            }
             setLoading(false);
             return;
         }
@@ -4647,7 +5003,7 @@ export default function App() {
     const [view, setView] = useState('site'); // 'site', 'admin-login', 'admin', 'founders'
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isRegModalOpen, setIsRegModalOpen] = useState(false);
-    const [isCelebrationOpen, setIsCelebrationOpen] = useState(true);
+    const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
     const [selectedTicketType, setSelectedTicketType] = useState('Standard');
     const [isProDisclaimerOpen, setIsProDisclaimerOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -4665,6 +5021,8 @@ export default function App() {
         fetchCMSData();
         if (window.location.pathname === '/techwaitlist' || window.location.pathname === '/techwaitlist/') {
             setView('techwaitlist');
+        } else if (window.location.pathname === '/academy' || window.location.pathname === '/academy/') {
+            setView('academy');
         }
     }, []);
 
@@ -4857,6 +5215,31 @@ export default function App() {
                     </div>
                     <TechWaitlistSection />
                 </div>
+            ) : view === 'academy' ? (
+                <div style={{ paddingTop: '8rem' }}>
+                    <div className="container" style={{ marginBottom: '2rem' }}>
+                        <button
+                            onClick={() => {
+                                setView('site');
+                                window.history.pushState({}, '', '/');
+                            }}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontWeight: 900,
+                                fontSize: '1rem',
+                                color: 'var(--accent-r)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
+                        </button>
+                    </div>
+                    <AcademyDashboard />
+                </div>
             ) : view === 'verify' ? (
                 <VerificationPortal onBack={() => setView('site')} />
             ) : (
@@ -4885,11 +5268,6 @@ export default function App() {
                 setView('admin-login'); 
             }} />
 
-
-            <CelebrationModal
-                isOpen={isCelebrationOpen}
-                onClose={() => setIsCelebrationOpen(false)}
-            />
 
             <RegisterModal
                 isOpen={isRegModalOpen}

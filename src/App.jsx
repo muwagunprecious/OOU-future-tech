@@ -6,7 +6,7 @@ import { supabase } from './lib/supabase';
 import {
     ChevronRight, ChevronDown, Github, Twitter, Linkedin, Mail,
     MapPin, Calendar, Users, Cpu, Shield, Globe, Award,
-    Zap, Code2, Mic, Network, Lightbulb, Rocket,
+    Zap, Code2, Mic, Network, Lightbulb, Rocket, Lock,
     Download, CheckCircle, Ticket, X, Trash2, Store, Menu, Camera as CameraIcon,
     PartyPopper, Heart, Sparkles, Building2, UserPlus, Scale, Pencil,
     FileText, Upload, AlertCircle, ArrowLeft, Paperclip, Terminal, Send, Play, BookOpen, Video

@@ -4964,31 +4964,31 @@ const AcademyDashboard = () => {
         // 1. Admin cohort lock check
         const cohortLocks = JSON.parse(localStorage.getItem('fta-cohort-locks') || '{}');
         const isModuleLockedByAdmin = cohortLocks[`${studentCohort}-${selectedCourse}-module-${modIdx}`];
-        if (isModuleLockedByAdmin) {
+        
+        // If explicitly locked by admin -> locked
+        if (isModuleLockedByAdmin === true) {
             return true;
         }
-
-        // 2. Sequential assignment submission lock check
-        if (modIdx === 0 && lesIdx === 0) return false;
-
-        // Find the previous lesson in the course
-        let prevLesson = null;
-        if (lesIdx > 0) {
-            prevLesson = course.modules[modIdx].lessons[lesIdx - 1];
-        } else if (modIdx > 0) {
-            const prevMod = course.modules[modIdx - 1];
-            prevLesson = prevMod.lessons[prevMod.lessons.length - 1];
+        // If explicitly unlocked from the admin page -> unlock all topics
+        if (isModuleLockedByAdmin === false) {
+            return false;
         }
 
-        if (prevLesson) {
-            const scoreStr = localStorage.getItem(`fta-exercise-score-mod-${modIdx === 0 ? 0 : modIdx - 1}`);
-            if (!scoreStr) {
-                return true;
-            }
-            const scoreVal = parseInt(scoreStr);
-            if (isNaN(scoreVal) || scoreVal < 75) {
-                return true;
-            }
+        // 2. Sequential module progression check (default behavior when not overridden by admin)
+        // First module is unlocked by default
+        if (modIdx === 0) {
+            return false;
+        }
+
+        // Higher modules are locked until the previous module is passed (score >= 75)
+        const prevModIdx = modIdx - 1;
+        const scoreStr = localStorage.getItem(`fta-exercise-score-mod-${prevModIdx}`);
+        if (!scoreStr) {
+            return true;
+        }
+        const scoreVal = parseInt(scoreStr);
+        if (isNaN(scoreVal) || scoreVal < 75) {
+            return true;
         }
 
         return false;

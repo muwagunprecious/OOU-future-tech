@@ -9,7 +9,7 @@ import {
     Zap, Code2, Mic, Network, Lightbulb, Rocket, Lock,
     Download, CheckCircle, Ticket, X, Trash2, Store, Menu, Camera as CameraIcon,
     PartyPopper, Heart, Sparkles, Building2, UserPlus, Scale, Pencil, User,
-    FileText, Upload, AlertCircle, ArrowLeft, Paperclip, Terminal, Send, Play, BookOpen, Video
+    FileText, Upload, AlertCircle, ArrowLeft, Paperclip, Terminal, Send, Play, BookOpen, Video, PlayCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

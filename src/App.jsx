@@ -5489,124 +5489,34 @@ const AcademyDashboard = () => {
                 </div>
             </div>
 
-            {/* Academy Sub-tabs with Unread Numerical Badges */}
+            {/* Mobile course modules menu trigger (hidden on desktop via CSS) */}
             {(() => {
                 const activePostsList = peerPosts.length > 0 ? peerPosts : [
-                    {
-                        id: 1,
-                        title: 'Getting TypeError: Illegal constructor in React',
-                        body: 'I noticed this error occurs when referencing Lock without importing it from lucide-react. Make sure you check your imports at the top of main or App!',
-                        tag: 'Bug 🐛',
-                        author: 'Ogunkoya Samuel Opemipo',
-                        authorAvatar: '',
-                        date: '7/19/2026',
-                        cohort: studentCohort,
-                        replies: [
-                            { author: 'Ademuwagun Precious', authorAvatar: '', body: 'Thanks Samuel! This saved me hours of debugging.', date: '7/19/2026' }
-                        ]
-                    },
-                    {
-                        id: 2,
-                        title: 'HTML Intro grading fails - help!',
-                        body: 'I keep getting 55/100 and Failed on the HTML introduction assignment. I included h1, p, and a tags. What else is needed?',
-                        tag: 'Question ❓',
-                        author: 'Chioma Okafor',
-                        authorAvatar: '',
-                        date: '7/19/2026',
-                        cohort: studentCohort,
-                        replies: [
-                            { author: 'Omotoyosi Agboola', authorAvatar: '', body: 'Make sure you add the exact DOCTYPE declaration: <!doctype html> at the very top. The strict AI grader validates the entire skeleton!', date: '7/19/2026' }
-                        ]
-                    }
+                    { id: 1, title: 'Getting TypeError: Illegal constructor in React', body: '', tag: 'Bug 🐛', author: 'Ogunkoya Samuel Opemipo', authorAvatar: '', date: '7/19/2026', cohort: studentCohort, replies: [{ author: 'Ademuwagun Precious', authorAvatar: '', body: 'Thanks Samuel!', date: '7/19/2026' }] },
+                    { id: 2, title: 'HTML Intro grading fails - help!', body: '', tag: 'Question ❓', author: 'Chioma Okafor', authorAvatar: '', date: '7/19/2026', cohort: studentCohort, replies: [{ author: 'Omotoyosi Agboola', authorAvatar: '', body: 'Add DOCTYPE!', date: '7/19/2026' }] }
                 ];
-
                 const cohortFilteredPosts = activePostsList.filter(p => p.cohort === studentCohort);
-                const unreadPeerCount = cohortFilteredPosts.filter(p => !readPostIds.includes(p.id)).length;
+                // keep unreadPeerCount in scope for badge updates
+                void cohortFilteredPosts.filter(p => !readPostIds.includes(p.id)).length;
 
                 return (
-                    <>
-                        {/* MOBILE MENU ICON TRIGGER BAR */}
-                        <div className="fta-mobile-menu-trigger" style={{ gap: '0.8rem', marginBottom: '1.5rem', width: '100%', flexWrap: 'wrap' }}>
-                            <button
-                                onClick={() => setShowMobileModulesDrawer(true)}
-                                style={{
-                                    flex: 1,
-                                    padding: '0.85rem 1.2rem',
-                                    background: '#000000',
-                                    color: '#ffffff',
-                                    border: '3px solid #000',
-                                    fontWeight: 950,
-                                    fontFamily: 'Outfit',
-                                    fontSize: '0.85rem',
-                                    textTransform: 'uppercase',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.6rem',
-                                    boxShadow: '4px 4px 0 var(--accent-r)',
-                                    borderRadius: '0.6rem'
-                                }}
-                            >
-                                <Menu size={20} />
-                                📚 Course Modules Menu 🍔
-                            </button>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '3px solid #000', paddingBottom: '1rem' }} className="fta-subtabs">
-                            {[
-                                { id: 'curriculum', label: '📚 Curriculum', unread: 0 },
-                                { id: 'peers', label: '👥 Peer Hub', unread: unreadPeerCount },
-                                { id: 'notifications', label: '🔔 Notifications', unread: unreadCount }
-                            ].map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => {
-                                        setAcademyTab(tab.id);
-                                        if (tab.id === 'notifications') {
-                                            const updated = notifications.map(n => ({ ...n, read: true }));
-                                            setNotifications(updated);
-                                            localStorage.setItem('fta-notifications', JSON.stringify(updated));
-                                            setUnreadCount(0);
-                                        }
-                                        if (tab.id === 'peers') {
-                                            const allIds = cohortFilteredPosts.map(p => p.id);
-                                            setReadPostIds(allIds);
-                                            localStorage.setItem('fta-read-posts', JSON.stringify(allIds));
-                                        }
-                                    }}
-                                    style={{
-                                        padding: '0.7rem 1.4rem', border: '3px solid #000', borderRadius: '0.8rem',
-                                        background: academyTab === tab.id ? '#000' : '#fff',
-                                        color: academyTab === tab.id ? '#fff' : '#000',
-                                        fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem',
-                                        cursor: 'pointer', textTransform: 'uppercase',
-                                        boxShadow: academyTab === tab.id ? 'none' : '4px 4px 0 #000',
-                                        display: 'flex', alignItems: 'center', gap: '0.4rem'
-                                    }}
-                                >
-                                    {tab.label}
-                                    {tab.unread > 0 && (
-                                        <span style={{
-                                            background: '#dc2626',
-                                            color: '#ffffff',
-                                            fontSize: '0.68rem',
-                                            fontWeight: 900,
-                                            padding: '0.15rem 0.55rem',
-                                            borderRadius: '1rem',
-                                            border: '1.5px solid #000',
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            boxShadow: '1px 1px 0 #000'
-                                        }}>
-                                            {tab.unread}
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    </>
+                    <div className="fta-mobile-menu-trigger" style={{ gap: '0.8rem', marginBottom: '1.5rem', width: '100%', flexWrap: 'wrap' }}>
+                        <button
+                            onClick={() => setShowMobileModulesDrawer(true)}
+                            style={{
+                                flex: 1, padding: '0.85rem 1.2rem',
+                                background: '#000000', color: '#ffffff',
+                                border: '3px solid #000', fontWeight: 950,
+                                fontFamily: 'Outfit', fontSize: '0.85rem',
+                                textTransform: 'uppercase', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                gap: '0.6rem', boxShadow: '4px 4px 0 var(--accent-r)', borderRadius: '0.6rem'
+                            }}
+                        >
+                            <Menu size={20} />
+                            📚 Course Modules Menu 🍔
+                        </button>
+                    </div>
                 );
             })()}
 

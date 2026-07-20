@@ -4950,6 +4950,7 @@ const AcademyDashboard = () => {
     // Header Brand Dropdown State
     const [showHeaderDropdown, setShowHeaderDropdown] = useState(false);
     const [showProfileDropdownDesktop, setShowProfileDropdownDesktop] = useState(false);
+    const [openReplyBoxes, setOpenReplyBoxes] = useState({});
 
     // Cohort — assigned by admin, NOT student-selectable
     const studentCohort = localStorage.getItem('fta-admin-assigned-cohort') || 'Cohort 1';
@@ -5263,19 +5264,63 @@ const AcademyDashboard = () => {
                                                     <div style={{ fontSize: '0.8rem', color: '#334155', fontWeight: 650, marginLeft: '1.8rem' }}>{rep.body}</div>
                                                 </div>
                                             ))}
-                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Add a reply..."
-                                                    value={replyInputs[post.id] || ''}
-                                                    onChange={e => setReplyInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
-                                                    style={{ flex: 1, border: '2px solid #000', padding: '0.5rem 0.8rem', fontFamily: 'Outfit', fontSize: '0.8rem', borderRadius: '0.4rem' }}
-                                                    onKeyDown={e => e.key === 'Enter' && handleAddReply(post.id)}
-                                                />
-                                                <button onClick={() => handleAddReply(post.id)} style={{ background: '#000', color: '#fff', border: '2px solid #000', padding: '0.5rem 1rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem' }}>
-                                                    <Send size={14} />
+                                            {!openReplyBoxes[post.id] ? (
+                                                <button
+                                                    onClick={() => setOpenReplyBoxes(prev => ({ ...prev, [post.id]: true }))}
+                                                    style={{
+                                                        marginTop: '0.8rem',
+                                                        background: 'transparent',
+                                                        border: '2px solid #000',
+                                                        padding: '0.4rem 0.9rem',
+                                                        borderRadius: '0.4rem',
+                                                        fontFamily: 'Outfit',
+                                                        fontWeight: 900,
+                                                        fontSize: '0.75rem',
+                                                        cursor: 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.3rem',
+                                                        boxShadow: '2px 2px 0 #000',
+                                                        transition: 'all 0.1s ease'
+                                                    }}
+                                                    onMouseOver={e => e.currentTarget.style.background = '#f1f5f9'}
+                                                    onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                                                >
+                                                    💬 Reply
                                                 </button>
-                                            </div>
+                                            ) : (
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.8rem', background: '#f8fafc', padding: '0.8rem', borderRadius: '0.6rem', border: '2px dashed #cbd5e1' }}>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Add a reply..."
+                                                        value={replyInputs[post.id] || ''}
+                                                        onChange={e => setReplyInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                                                        style={{ flex: 1, border: '2px solid #000', padding: '0.5rem 0.8rem', fontFamily: 'Outfit', fontSize: '0.8rem', borderRadius: '0.4rem' }}
+                                                        onKeyDown={e => {
+                                                            if (e.key === 'Enter') {
+                                                                handleAddReply(post.id);
+                                                                setOpenReplyBoxes(prev => ({ ...prev, [post.id]: false }));
+                                                            }
+                                                        }}
+                                                        autoFocus
+                                                    />
+                                                    <button 
+                                                        onClick={() => {
+                                                            handleAddReply(post.id);
+                                                            setOpenReplyBoxes(prev => ({ ...prev, [post.id]: false }));
+                                                        }} 
+                                                        style={{ background: 'var(--accent-r)', color: '#fff', border: '2px solid #000', padding: '0.5rem 1rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem', boxShadow: '2px 2px 0 #000' }}
+                                                    >
+                                                        <Send size={14} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => setOpenReplyBoxes(prev => ({ ...prev, [post.id]: false }))} 
+                                                        style={{ background: '#fff', color: '#000', border: '2px solid #000', padding: '0.5rem 1rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem' }}
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))
@@ -6445,20 +6490,63 @@ const AcademyDashboard = () => {
                                                     </div>
                                                 ))}
 
-                                                {/* ADD COMMENT FORM */}
-                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                    <input
-                                                        type="text"
-                                                        value={replyInputs[post.id] || ''}
-                                                        onChange={e => setReplyInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
-                                                        placeholder="Write a reply or suggest a fix..."
-                                                        style={{ flex: 1, border: '2px solid #000', padding: '0.5rem', fontSize: '0.75rem', borderRadius: '4px', fontFamily: 'Outfit', fontWeight: 700 }}
-                                                    />
+                                                {!openReplyBoxes[post.id] ? (
                                                     <button
-                                                        onClick={() => handleAddReply(post.id)}
-                                                        style={{ padding: '0.5rem 1rem', background: '#000', color: '#fff', border: '2px solid #000', fontWeight: 900, fontSize: '0.75rem', cursor: 'pointer' }}
-                                                    >Reply</button>
-                                                </div>
+                                                        onClick={() => setOpenReplyBoxes(prev => ({ ...prev, [post.id]: true }))}
+                                                        style={{
+                                                            marginTop: '0.8rem',
+                                                            background: 'transparent',
+                                                            border: '2px solid #000',
+                                                            padding: '0.4rem 0.9rem',
+                                                            borderRadius: '0.4rem',
+                                                            fontFamily: 'Outfit',
+                                                            fontWeight: 900,
+                                                            fontSize: '0.75rem',
+                                                            cursor: 'pointer',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '0.3rem',
+                                                            boxShadow: '2px 2px 0 #000',
+                                                            transition: 'all 0.1s ease'
+                                                        }}
+                                                        onMouseOver={e => e.currentTarget.style.background = '#f1f5f9'}
+                                                        onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        💬 Reply
+                                                    </button>
+                                                ) : (
+                                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.8rem', background: '#f8fafc', padding: '0.8rem', borderRadius: '0.6rem', border: '2px dashed #cbd5e1' }}>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Add a reply..."
+                                                            value={replyInputs[post.id] || ''}
+                                                            onChange={e => setReplyInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                                                            style={{ flex: 1, border: '2px solid #000', padding: '0.5rem 0.8rem', fontFamily: 'Outfit', fontSize: '0.8rem', borderRadius: '0.4rem' }}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter') {
+                                                                    handleAddReply(post.id);
+                                                                    setOpenReplyBoxes(prev => ({ ...prev, [post.id]: false }));
+                                                                }
+                                                            }}
+                                                            autoFocus
+                                                        />
+                                                        <button 
+                                                            onClick={() => {
+                                                                handleAddReply(post.id);
+                                                                setOpenReplyBoxes(prev => ({ ...prev, [post.id]: false }));
+                                                            }} 
+                                                            style={{ background: 'var(--accent-r)', color: '#fff', border: '2px solid #000', padding: '0.5rem 1rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem', boxShadow: '2px 2px 0 #000' }}
+                                                        >
+                                                            <Send size={14} />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => setOpenReplyBoxes(prev => ({ ...prev, [post.id]: false }))} 
+                                                            style={{ background: '#fff', color: '#000', border: '2px solid #000', padding: '0.5rem 1rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem' }}
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     ))

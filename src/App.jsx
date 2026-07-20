@@ -2481,6 +2481,14 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [uploading, setUploading] = useState(false);
     const [totalStats, setTotalStats] = useState({ total: 0, standard: 0, pro: 0, pitches: 0 });
 
+    // FTA Control panel states — must be declared unconditionally (Rules of Hooks)
+    const [ftaTab, setFtaTab] = useState('cohort');
+    const [selectedCohortAdmin, setSelectedCohortAdmin] = useState('Cohort 1');
+    const [selectedTrackAdmin, setSelectedTrackAdmin] = useState('Frontend Engineering');
+    const [cohortLocks, setCohortLocks] = useState(() => JSON.parse(localStorage.getItem('fta-cohort-locks') || '{}'));
+    const [notifTitle, setNotifTitle] = useState('');
+    const [notifBody, setNotifBody] = useState('');
+
     useEffect(() => {
         fetchRegistrations();
         fetchPitches();
@@ -2841,6 +2849,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                     <TabButton id="partners" label="Partners CMS" icon={Store} />
                     <TabButton id="speakers" label="Speakers CMS" icon={Mic} />
                     <TabButton id="team" label="Team CMS" icon={Users} />
+                    <TabButton id="fta-control" label="FTA Control" icon={BookOpen} />
                     <TabButton id="settings" label="Site Controls" icon={Zap} />
                 </div>
 
@@ -3514,6 +3523,243 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                         </div>
                     )
                 }
+
+                {/* ─── FTA CONTROL PANEL ─── */}
+                {activeTab === 'fta-control' && (() => {
+                    const COHORTS = ['Cohort 1', 'Cohort 2', 'Cohort 3', 'Cohort 4', 'Cohort 5'];
+                    const TRACKS = ['Frontend Engineering', 'Backend Engineering', 'Product Design'];
+                    const MODULE_NAMES = [
+                        'Module 1: Internet & Web Fundamentals',
+                        'Module 2: Frontend Basics',
+                        'Module 3: JavaScript & APIs',
+                        'Module 4: Advanced Frontend'
+                    ];
+                    // (states declared at top of AdminDashboard to follow Rules of Hooks)
+
+                    const toggleModuleLock = (modIdx) => {
+                        const key = `${selectedCohortAdmin}-${selectedTrackAdmin}-module-${modIdx}`;
+                        const updated = { ...cohortLocks, [key]: !cohortLocks[key] };
+                        setCohortLocks(updated);
+                        localStorage.setItem('fta-cohort-locks', JSON.stringify(updated));
+                    };
+
+                    const assignCohort = (cohort) => {
+                        localStorage.setItem('fta-admin-assigned-cohort', cohort);
+                        alert(`✅ Active cohort set to "${cohort}". Students will now see this cohort on their portal.`);
+                    };
+
+                    const sendNotification = () => {
+                        if (!notifTitle.trim() || !notifBody.trim()) { alert('Fill in both title and body!'); return; }
+                        const existing = JSON.parse(localStorage.getItem('fta-notifications') || '[]');
+                        const updated = [{ id: Date.now(), title: notifTitle, body: notifBody, date: new Date().toLocaleDateString(), read: false }, ...existing];
+                        localStorage.setItem('fta-notifications', JSON.stringify(updated));
+                        setNotifTitle('');
+                        setNotifBody('');
+                        alert('📣 Notification broadcast sent to all students!');
+                    };
+
+                    // Build leaderboard from localStorage
+                    const LESSON_IDS = ['fe-internet-https','fe-html-intro','fe-css-basics','fe-js-intro','fe-js-dom-api','fe-api-intro','fe-git-intro','fe-react-vite'];
+                    const waitlistRaw = JSON.parse(localStorage.getItem('fta-waitlist') || '[]');
+                    const leaderboard = waitlistRaw.map(s => {
+                        const scores = LESSON_IDS.map(id => localStorage.getItem(`fta-assignment-score-${id}`)).filter(Boolean).map(Number);
+                        return { name: s.name || s.email, cohort: s.cohort || 'Cohort 1', done: scores.length, avg: scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0, passed: scores.filter(sc=>sc>=75).length };
+                    }).sort((a,b) => b.passed - a.passed || b.avg - a.avg);
+
+                    const ftaTabs = [
+                        { id: 'cohort', label: '👥 Cohort Control' },
+                        { id: 'curriculum', label: '🔒 Curriculum Locks' },
+                        { id: 'notify', label: '📣 Send Notification' },
+                        { id: 'leaderboard', label: '🏆 Leaderboard' },
+                    ];
+
+                    return (
+                        <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                            {/* FTA Panel header */}
+                            <div style={{ background: '#000', color: '#fff', border: '3px solid #000', padding: '1.5rem 2rem', marginBottom: '2rem', boxShadow: '6px 6px 0 var(--accent-r)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <BookOpen size={28} color="#fff" />
+                                <div>
+                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.4rem', margin: 0, textTransform: 'uppercase' }}>FTA Admin Control Panel</h2>
+                                    <p style={{ margin: 0, fontSize: '0.8rem', color: '#aaa' }}>Manage cohorts, curriculum locks, notifications and leaderboard</p>
+                                </div>
+                            </div>
+
+                            {/* Sub-tab bar */}
+                            <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                                {ftaTabs.map(t => (
+                                    <button key={t.id} onClick={() => setFtaTab(t.id)} style={{
+                                        padding: '0.7rem 1.4rem', border: '3px solid #000', background: ftaTab === t.id ? '#000' : '#fff',
+                                        color: ftaTab === t.id ? '#fff' : '#000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem',
+                                        cursor: 'pointer', textTransform: 'uppercase', boxShadow: ftaTab === t.id ? 'none' : '4px 4px 0 #000', borderRadius: '0.6rem'
+                                    }}>{t.label}</button>
+                                ))}
+                            </div>
+
+                            {/* ── COHORT CONTROL ── */}
+                            {ftaTab === 'cohort' && (
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
+                                    {COHORTS.map(cohort => {
+                                        const isCurrent = localStorage.getItem('fta-admin-assigned-cohort') === cohort || (!localStorage.getItem('fta-admin-assigned-cohort') && cohort === 'Cohort 1');
+                                        return (
+                                            <div key={cohort} style={{ background: '#fff', border: `3px solid ${isCurrent ? 'var(--accent-r)' : '#000'}`, padding: '1.5rem', boxShadow: isCurrent ? '6px 6px 0 var(--accent-r)' : '6px 6px 0 #000', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0 }}>{cohort}</h3>
+                                                        {isCurrent && <span style={{ fontSize: '0.65rem', fontWeight: 900, background: 'var(--accent-r)', color: '#fff', padding: '0.2rem 0.5rem', borderRadius: '0.3rem' }}>CURRENTLY ACTIVE</span>}
+                                                    </div>
+                                                    <Users size={24} color={isCurrent ? 'var(--accent-r)' : '#000'} />
+                                                </div>
+                                                <button
+                                                    onClick={() => assignCohort(cohort)}
+                                                    style={{ padding: '0.8rem', background: isCurrent ? 'var(--accent-r)' : '#000', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', boxShadow: '3px 3px 0 rgba(0,0,0,0.3)' }}
+                                                >{isCurrent ? '✅ Active Cohort' : `Set as Active Cohort`}</button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {/* ── CURRICULUM LOCKS ── */}
+                            {ftaTab === 'curriculum' && (
+                                <div>
+                                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                                        {COHORTS.map(c => (
+                                            <button key={c} onClick={() => setSelectedCohortAdmin(c)} style={{
+                                                padding: '0.6rem 1.2rem', border: '3px solid #000', background: selectedCohortAdmin === c ? '#000' : '#fff',
+                                                color: selectedCohortAdmin === c ? '#fff' : '#000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer',
+                                                boxShadow: selectedCohortAdmin === c ? 'none' : '3px 3px 0 #000'
+                                            }}>{c}</button>
+                                        ))}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                                        {TRACKS.map(t => (
+                                            <button key={t} onClick={() => setSelectedTrackAdmin(t)} style={{
+                                                padding: '0.6rem 1.2rem', border: '3px solid #000', background: selectedTrackAdmin === t ? 'var(--accent-r)' : '#fff',
+                                                color: selectedTrackAdmin === t ? '#fff' : '#000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer',
+                                                boxShadow: selectedTrackAdmin === t ? 'none' : '3px 3px 0 #000'
+                                            }}>{t}</button>
+                                        ))}
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.2rem' }}>
+                                        {MODULE_NAMES.map((modName, modIdx) => {
+                                            const key = `${selectedCohortAdmin}-${selectedTrackAdmin}-module-${modIdx}`;
+                                            const isLocked = !!cohortLocks[key];
+                                            return (
+                                                <div key={modIdx} style={{ background: '#fff', border: `3px solid ${isLocked ? '#dc2626' : '#059669'}`, padding: '1.5rem', boxShadow: `6px 6px 0 ${isLocked ? '#dc2626' : '#059669'}` }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', margin: 0 }}>{modName}</h4>
+                                                        {isLocked ? <Lock size={20} color="#dc2626" /> : <CheckCircle size={20} color="#059669" />}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '1rem', color: isLocked ? '#dc2626' : '#059669' }}>
+                                                        {isLocked ? '🔴 LOCKED — Students cannot access' : '🟢 UNLOCKED — Students can access'}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => toggleModuleLock(modIdx)}
+                                                        style={{ width: '100%', padding: '0.8rem', background: isLocked ? '#059669' : '#dc2626', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '3px 3px 0 rgba(0,0,0,0.4)' }}
+                                                    >{isLocked ? '🔓 Unlock Module' : '🔒 Lock Module'}</button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ── SEND NOTIFICATION ── */}
+                            {ftaTab === 'notify' && (
+                                <div style={{ maxWidth: '700px' }}>
+                                    <div style={{ background: '#fff', border: '3px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        <div>
+                                            <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: '0 0 0.3rem 0', textTransform: 'uppercase' }}>📣 Broadcast Notification</h3>
+                                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#71717a', fontWeight: 700 }}>This notification will appear instantly in all students' Notification inbox on the FTA portal.</p>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.5rem', color: '#71717a' }}>Notification Title</label>
+                                            <input
+                                                type="text"
+                                                value={notifTitle}
+                                                onChange={e => setNotifTitle(e.target.value)}
+                                                placeholder="e.g. Class session moved to Saturday"
+                                                style={{ border: '3px solid #000', padding: '0.8rem 1rem', width: '100%', borderRadius: '0.6rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.9rem' }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.5rem', color: '#71717a' }}>Notification Body</label>
+                                            <textarea
+                                                value={notifBody}
+                                                onChange={e => setNotifBody(e.target.value)}
+                                                placeholder="Write the full message content here..."
+                                                rows={5}
+                                                style={{ border: '3px solid #000', padding: '0.8rem 1rem', width: '100%', borderRadius: '0.6rem', fontFamily: 'Outfit', fontWeight: 650, fontSize: '0.85rem', resize: 'vertical' }}
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={sendNotification}
+                                            style={{ padding: '1rem 2rem', background: '#000', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', fontSize: '1rem', cursor: 'pointer', boxShadow: '4px 4px 0 var(--accent-r)' }}
+                                        >📣 Send Broadcast to All Students</button>
+
+                                        {/* Existing notifications list */}
+                                        {(() => {
+                                            const existing = JSON.parse(localStorage.getItem('fta-notifications') || '[]');
+                                            if (!existing.length) return null;
+                                            return (
+                                                <div style={{ borderTop: '3px solid #000', paddingTop: '1.5rem' }}>
+                                                    <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, margin: '0 0 1rem 0', textTransform: 'uppercase', fontSize: '0.9rem' }}>Sent Notifications ({existing.length})</h4>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                                        {existing.slice(0, 5).map(n => (
+                                                            <div key={n.id} style={{ background: '#f8fafc', border: '2px solid #000', padding: '0.8rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '1rem' }}>
+                                                                <div>
+                                                                    <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem' }}>{n.title}</div>
+                                                                    <div style={{ fontSize: '0.75rem', color: '#71717a', fontWeight: 700, marginTop: '0.2rem' }}>{n.body.slice(0, 80)}{n.body.length > 80 ? '...' : ''}</div>
+                                                                </div>
+                                                                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', flexShrink: 0 }}>{n.date}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ── LEADERBOARD ── */}
+                            {ftaTab === 'leaderboard' && (
+                                <div>
+                                    <div style={{ background: '#fff', border: '3px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
+                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: '0 0 1.5rem 0', textTransform: 'uppercase' }}>🏆 Student Leaderboard</h3>
+                                        {leaderboard.length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '3rem', color: '#71717a' }}>
+                                                <p style={{ fontWeight: 800 }}>No students have completed assignments yet. Check back after grading begins.</p>
+                                            </div>
+                                        ) : (
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <thead>
+                                                    <tr style={{ borderBottom: '3px solid #000' }}>
+                                                        {['#', 'Student', 'Cohort', 'Lessons Done', 'Avg Score', 'Passed'].map(h => (
+                                                            <th key={h} style={{ textAlign: 'left', padding: '0.6rem 0.8rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', color: '#71717a' }}>{h}</th>
+                                                        ))}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {leaderboard.slice(0, 20).map((s, i) => (
+                                                        <tr key={i} style={{ borderBottom: '1px solid #e5e7eb', background: i === 0 ? '#fefce8' : i === 1 ? '#f0fdf4' : i === 2 ? '#eff6ff' : '#fff' }}>
+                                                            <td style={{ padding: '0.8rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem' }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
+                                                            <td style={{ padding: '0.8rem', fontFamily: 'Outfit', fontWeight: 800, fontSize: '0.85rem' }}>{s.name}</td>
+                                                            <td style={{ padding: '0.8rem', fontSize: '0.8rem', fontWeight: 700, color: '#6d28d9' }}>{s.cohort}</td>
+                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900 }}>{s.done}/8</td>
+                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900, color: s.avg >= 75 ? '#059669' : '#dc2626' }}>{s.avg}/100</td>
+                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900, color: '#059669' }}>{s.passed}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
             </div >
         </div >
     );

@@ -4949,6 +4949,7 @@ const AcademyDashboard = () => {
 
     // Header Brand Dropdown State
     const [showHeaderDropdown, setShowHeaderDropdown] = useState(false);
+    const [showProfileDropdownDesktop, setShowProfileDropdownDesktop] = useState(false);
 
     // Cohort — assigned by admin, NOT student-selectable
     const studentCohort = localStorage.getItem('fta-admin-assigned-cohort') || 'Cohort 1';
@@ -5379,125 +5380,250 @@ const AcademyDashboard = () => {
                     <div style={{ background: '#000', color: '#fff', padding: '0.8rem', border: '2px solid #000', borderRadius: '8px' }}>
                         <BookOpen size={28} />
                     </div>
-                    {/* FTA DROPDOWN TRIGGER */}
-                    <div style={{ flex: 1, position: 'relative' }}>
-                        <button
-                            onClick={() => setShowHeaderDropdown(v => !v)}
-                            style={{
-                                display: 'flex', alignItems: 'flex-start', flexDirection: 'column',
-                                gap: '0.1rem', background: 'none', border: 'none',
-                                cursor: 'pointer', padding: 0, textAlign: 'left'
-                            }}
-                            aria-haspopup="true"
-                            aria-expanded={showHeaderDropdown}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <h1 style={{ fontSize: '1.8rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }} className="fta-header-title">
+                    {/* FTA NAVIGATION (DESKTOP NAV BAR / MOBILE DROPDOWN) */}
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', position: 'relative' }}>
+                        
+                        {/* 1. MOBILE ONLY DROPDOWN TRIGGER & MENU */}
+                        <div className="fta-mobile-dropdown-trigger" style={{ flex: 1, position: 'relative' }}>
+                            <button
+                                onClick={() => setShowHeaderDropdown(v => !v)}
+                                style={{
+                                    display: 'flex', alignItems: 'flex-start', flexDirection: 'column',
+                                    gap: '0.1rem', background: 'none', border: 'none',
+                                    cursor: 'pointer', padding: 0, textAlign: 'left'
+                                }}
+                                aria-haspopup="true"
+                                aria-expanded={showHeaderDropdown}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <h1 style={{ fontSize: '1.8rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }} className="fta-header-title">
+                                        Future Tech Academy (FTA)
+                                    </h1>
+                                    <span style={{
+                                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                        width: '22px', height: '22px', background: '#000', color: '#fff',
+                                        borderRadius: '4px', fontSize: '0.7rem', fontWeight: 900,
+                                        transform: showHeaderDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                                        transition: 'transform 0.2s ease', flexShrink: 0
+                                    }}>▾</span>
+                                </div>
+                                <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px' }}>LEARNING PORTAL</span>
+                            </button>
+
+                            {/* DROPDOWN MENU */}
+                            {showHeaderDropdown && (
+                                <>
+                                    {/* Click-away overlay */}
+                                    <div
+                                        style={{ position: 'fixed', inset: 0, zIndex: 998 }}
+                                        onClick={() => setShowHeaderDropdown(false)}
+                                    />
+                                    <div style={{
+                                        position: 'absolute', top: 'calc(100% + 10px)', left: 0,
+                                        background: '#fff', border: '3px solid #000',
+                                        boxShadow: '8px 8px 0 #000', zIndex: 999,
+                                        minWidth: '260px', animation: 'slideUp 0.18s ease-out',
+                                        overflow: 'hidden', borderRadius: '0.5rem'
+                                    }}>
+                                        {/* Menu Header */}
+                                        <div style={{ background: '#000', color: '#fff', padding: '0.8rem 1rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                            📚 FTA Navigation
+                                        </div>
+
+                                        {[
+                                            { icon: '🎓', label: 'Curriculum', sub: 'Videos & Lessons', tab: 'curriculum' },
+                                            { icon: '👥', label: 'Peer Hub', sub: 'Bug Board & Help', tab: 'peers' },
+                                            { icon: '🔔', label: 'Notifications', sub: `${unreadCount} unread`, tab: 'notifications' },
+                                        ].map(item => (
+                                            <button
+                                                key={item.tab}
+                                                onClick={() => { setAcademyTab(item.tab); setShowHeaderDropdown(false); }}
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', gap: '0.8rem',
+                                                    width: '100%', padding: '0.9rem 1rem',
+                                                    background: academyTab === item.tab ? '#fff8f8' : '#fff',
+                                                    border: 'none', borderBottom: '2px solid #f1f5f9',
+                                                    cursor: 'pointer', textAlign: 'left',
+                                                    borderLeft: academyTab === item.tab ? '4px solid var(--accent-r)' : '4px solid transparent',
+                                                    transition: 'background 0.1s ease'
+                                                }}
+                                                onMouseOver={e => e.currentTarget.style.background = '#f8fafc'}
+                                                onMouseOut={e => e.currentTarget.style.background = academyTab === item.tab ? '#fff8f8' : '#fff'}
+                                            >
+                                                <span style={{ fontSize: '1.2rem', width: '28px', textAlign: 'center' }}>{item.icon}</span>
+                                                <div>
+                                                    <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', color: '#000' }}>{item.label}</div>
+                                                    <div style={{ fontFamily: 'Outfit', fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>{item.sub}</div>
+                                                </div>
+                                                {academyTab === item.tab && <span style={{ marginLeft: 'auto', color: 'var(--accent-r)', fontWeight: 900, fontSize: '0.8rem' }}>●</span>}
+                                            </button>
+                                        ))}
+
+                                        {/* Divider */}
+                                        <div style={{ borderTop: '2px solid #000', margin: '0' }} />
+
+                                        {/* Profile — expanded card with avatar + stats */}
+                                        <div style={{ padding: '1rem', background: '#fafafa', borderTop: '2px solid #000' }}>
+                                            {/* Avatar Row */}
+                                            <div
+                                                onClick={() => { setEditNameInput(studentName); setShowProfileModal(true); setShowHeaderDropdown(false); }}
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', marginBottom: '0.9rem' }}
+                                                title="Edit profile picture"
+                                            >
+                                                {studentAvatar ? (
+                                                    <img src={studentAvatar} alt={studentName} style={{ width: '46px', height: '46px', borderRadius: '50%', border: '3px solid #000', objectFit: 'cover', flexShrink: 0 }} />
+                                                ) : (
+                                                    <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, border: '3px solid #000', fontSize: '1rem', flexShrink: 0 }}>
+                                                        <User size={22} />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.95rem', color: '#000' }}>{studentName}</div>
+                                                    <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700 }}>🟢 Active Student</div>
+                                                    <div style={{ fontSize: '0.6rem', color: 'var(--accent-r)', fontWeight: 800, marginTop: '0.1rem' }}>📷 Edit Profile Picture</div>
+                                                </div>
+                                            </div>
+
+                                            {/* Stat Cards 2x2 Grid */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                                                {[
+                                                    { label: 'Modules Done', val: `${completedCount}/4`, color: '#000' },
+                                                    { label: 'Avg Score', val: avgScore > 0 ? `${avgScore}/100` : '—', color: avgScore >= 50 ? '#059669' : avgScore > 0 ? '#dc2626' : '#94a3b8' },
+                                                    { label: 'Passed', val: `${passedCount}/4`, color: '#059669' },
+                                                    { label: 'Cohort', val: studentCohort, color: '#6d28d9' },
+                                                ].map((stat, i) => (
+                                                    <div key={i} style={{ background: '#fff', border: '2px solid #000', borderRadius: '0.5rem', padding: '0.5rem 0.7rem', textAlign: 'center', boxShadow: '2px 2px 0 #000' }}>
+                                                        <div style={{ fontSize: '0.55rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8', fontFamily: 'Outfit' }}>{stat.label}</div>
+                                                        <div style={{ fontSize: '1rem', fontWeight: 900, color: stat.color, fontFamily: 'Outfit', marginTop: '0.1rem' }}>{stat.val}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* 2. DESKTOP ONLY NAVBAR (MENU BAR ON WIDESCREENS) */}
+                        <div className="fta-desktop-navbar" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.5rem' }}>
+                            {/* Static Branding */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                                <h1 style={{ fontSize: '1.6rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }}>
                                     Future Tech Academy (FTA)
                                 </h1>
-                                <span style={{
-                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                                    width: '22px', height: '22px', background: '#000', color: '#fff',
-                                    borderRadius: '4px', fontSize: '0.7rem', fontWeight: 900,
-                                    transform: showHeaderDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                                    transition: 'transform 0.2s ease', flexShrink: 0
-                                }}>▾</span>
+                                <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.8rem', letterSpacing: '1px' }}>LEARNING PORTAL</span>
                             </div>
-                            <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px' }}>LEARNING PORTAL</span>
-                        </button>
 
-                        {/* DROPDOWN MENU */}
-                        {showHeaderDropdown && (
-                            <>
-                                {/* Click-away overlay */}
-                                <div
-                                    style={{ position: 'fixed', inset: 0, zIndex: 998 }}
-                                    onClick={() => setShowHeaderDropdown(false)}
-                                />
-                                <div style={{
-                                    position: 'absolute', top: 'calc(100% + 10px)', left: 0,
-                                    background: '#fff', border: '3px solid #000',
-                                    boxShadow: '8px 8px 0 #000', zIndex: 999,
-                                    minWidth: '260px', animation: 'slideUp 0.18s ease-out',
-                                    overflow: 'hidden', borderRadius: '0.5rem'
-                                }}>
-                                    {/* Menu Header */}
-                                    <div style={{ background: '#000', color: '#fff', padding: '0.8rem 1rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                        📚 FTA Navigation
-                                    </div>
+                            {/* Menu links bar */}
+                            <div style={{ display: 'flex', gap: '0.4rem', background: '#f1f5f9', padding: '0.3rem', border: '3px solid #000', borderRadius: '0.8rem', boxShadow: '3px 3px 0 #000', marginLeft: '2rem' }}>
+                                {[
+                                    { icon: '📚', label: 'Curriculum', tab: 'curriculum' },
+                                    { icon: '👥', label: 'Peer Hub', tab: 'peers' },
+                                    { icon: '🔔', label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, tab: 'notifications' },
+                                ].map(item => (
+                                    <button
+                                        key={item.tab}
+                                        onClick={() => setAcademyTab(item.tab)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            background: academyTab === item.tab ? '#000' : 'transparent',
+                                            color: academyTab === item.tab ? '#fff' : '#000',
+                                            border: 'none',
+                                            borderRadius: '0.5rem',
+                                            fontFamily: 'Outfit',
+                                            fontWeight: 900,
+                                            fontSize: '0.8rem',
+                                            textTransform: 'uppercase',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease'
+                                        }}
+                                    >
+                                        <span>{item.icon}</span>
+                                        <span>{item.label}</span>
+                                    </button>
+                                ))}
+                            </div>
 
-                                    {[
-                                        { icon: '🎓', label: 'Curriculum', sub: 'Videos & Lessons', tab: 'curriculum' },
-                                        { icon: '👥', label: 'Peer Hub', sub: 'Bug Board & Help', tab: 'peers' },
-                                        { icon: '🔔', label: 'Notifications', sub: `${unreadCount} unread`, tab: 'notifications' },
-                                    ].map(item => (
-                                        <button
-                                            key={item.tab}
-                                            onClick={() => { setAcademyTab(item.tab); setShowHeaderDropdown(false); }}
-                                            style={{
-                                                display: 'flex', alignItems: 'center', gap: '0.8rem',
-                                                width: '100%', padding: '0.9rem 1rem',
-                                                background: academyTab === item.tab ? '#fff8f8' : '#fff',
-                                                border: 'none', borderBottom: '2px solid #f1f5f9',
-                                                cursor: 'pointer', textAlign: 'left',
-                                                borderLeft: academyTab === item.tab ? '4px solid var(--accent-r)' : '4px solid transparent',
-                                                transition: 'background 0.1s ease'
-                                            }}
-                                            onMouseOver={e => e.currentTarget.style.background = '#f8fafc'}
-                                            onMouseOut={e => e.currentTarget.style.background = academyTab === item.tab ? '#fff8f8' : '#fff'}
-                                        >
-                                            <span style={{ fontSize: '1.2rem', width: '28px', textAlign: 'center' }}>{item.icon}</span>
-                                            <div>
-                                                <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', color: '#000' }}>{item.label}</div>
-                                                <div style={{ fontFamily: 'Outfit', fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>{item.sub}</div>
-                                            </div>
-                                            {academyTab === item.tab && <span style={{ marginLeft: 'auto', color: 'var(--accent-r)', fontWeight: 900, fontSize: '0.8rem' }}>●</span>}
-                                        </button>
-                                    ))}
+                            {/* Profile Dropdown Button */}
+                            <div style={{ position: 'relative', marginLeft: 'auto' }}>
+                                <button
+                                    onClick={() => setShowProfileDropdownDesktop(v => !v)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.6rem',
+                                        background: '#fff',
+                                        border: '3px solid #000',
+                                        borderRadius: '0.8rem',
+                                        padding: '0.4rem 0.8rem',
+                                        cursor: 'pointer',
+                                        boxShadow: '3px 3px 0 #000',
+                                        transition: 'transform 0.1s ease',
+                                    }}
+                                    onMouseDown={e => e.currentTarget.style.transform = 'translate(2px, 2px)'}
+                                    onMouseUp={e => e.currentTarget.style.transform = 'none'}
+                                >
+                                    {studentAvatar ? (
+                                        <img src={studentAvatar} alt={studentName} style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2px solid #000', objectFit: 'cover' }} />
+                                    ) : (
+                                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, border: '2px solid #000', fontSize: '0.7rem' }}>
+                                            <User size={14} />
+                                        </div>
+                                    )}
+                                    <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.78rem', textTransform: 'uppercase', color: '#000' }}>My Profile</span>
+                                    <span style={{ fontSize: '0.7rem', transform: showProfileDropdownDesktop ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
+                                </button>
 
-                                    {/* Divider */}
-                                    <div style={{ borderTop: '2px solid #000', margin: '0' }} />
-
-                                    {/* Profile — expanded card with avatar + stats */}
-                                    <div style={{ padding: '1rem', background: '#fafafa', borderTop: '2px solid #000' }}>
-                                        {/* Avatar Row */}
-                                        <div
-                                            onClick={() => { setEditNameInput(studentName); setShowProfileModal(true); setShowHeaderDropdown(false); }}
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', marginBottom: '0.9rem' }}
-                                            title="Edit profile picture"
-                                        >
-                                            {studentAvatar ? (
-                                                <img src={studentAvatar} alt={studentName} style={{ width: '46px', height: '46px', borderRadius: '50%', border: '3px solid #000', objectFit: 'cover', flexShrink: 0 }} />
-                                            ) : (
-                                                <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, border: '3px solid #000', fontSize: '1rem', flexShrink: 0 }}>
-                                                    <User size={22} />
+                                {showProfileDropdownDesktop && (
+                                    <>
+                                        <div style={{ position: 'fixed', inset: 0, zIndex: 998 }} onClick={() => setShowProfileDropdownDesktop(false)} />
+                                        <div style={{
+                                            position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                                            background: '#fff', border: '3px solid #000', borderRadius: '0.8rem',
+                                            boxShadow: '6px 6px 0 #000', zIndex: 999, width: '280px',
+                                            padding: '1rem', animation: 'slideUp 0.15s ease-out'
+                                        }}>
+                                            <div
+                                                onClick={() => { setEditNameInput(studentName); setShowProfileModal(true); setShowProfileDropdownDesktop(false); }}
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', marginBottom: '0.8rem', borderBottom: '2px dashed #eee', paddingBottom: '0.8rem' }}
+                                                title="Edit profile picture"
+                                            >
+                                                {studentAvatar ? (
+                                                    <img src={studentAvatar} alt={studentName} style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid #000', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, border: '2px solid #000' }}>
+                                                        <User size={18} />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.85rem', color: '#000' }}>{studentName}</div>
+                                                    <div style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 700 }}>🟢 Active Student</div>
+                                                    <div style={{ fontSize: '0.55rem', color: 'var(--accent-r)', fontWeight: 800 }}>📷 Edit Profile Picture</div>
                                                 </div>
-                                            )}
-                                            <div>
-                                                <div style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.95rem', color: '#000' }}>{studentName}</div>
-                                                <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700 }}>🟢 Active Student</div>
-                                                <div style={{ fontSize: '0.6rem', color: 'var(--accent-r)', fontWeight: 800, marginTop: '0.1rem' }}>📷 Edit Profile Picture</div>
+                                            </div>
+                                            {/* Stat Cards 2x2 Grid */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+                                                {[
+                                                    { label: 'Modules Done', val: `${completedCount}/4`, color: '#000' },
+                                                    { label: 'Avg Score', val: avgScore > 0 ? `${avgScore}/100` : '—', color: avgScore >= 50 ? '#059669' : avgScore > 0 ? '#dc2626' : '#94a3b8' },
+                                                    { label: 'Passed', val: `${passedCount}/4`, color: '#059669' },
+                                                    { label: 'Cohort', val: studentCohort, color: '#6d28d9' },
+                                                ].map((stat, i) => (
+                                                    <div key={i} style={{ background: '#f8fafc', border: '2px solid #000', borderRadius: '0.4rem', padding: '0.4rem 0.5rem', textAlign: 'center', boxShadow: '2px 2px 0 #000' }}>
+                                                        <div style={{ fontSize: '0.5rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8', fontFamily: 'Outfit' }}>{stat.label}</div>
+                                                        <div style={{ fontSize: '0.8rem', fontWeight: 900, color: stat.color, fontFamily: 'Outfit', marginTop: '0.1rem' }}>{stat.val}</div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
 
-                                        {/* Stat Cards 2x2 Grid */}
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                                            {[
-                                                { label: 'Modules Done', val: `${completedCount}/4`, color: '#000' },
-                                                { label: 'Avg Score', val: avgScore > 0 ? `${avgScore}/100` : '—', color: avgScore >= 50 ? '#059669' : avgScore > 0 ? '#dc2626' : '#94a3b8' },
-                                                { label: 'Passed', val: `${passedCount}/4`, color: '#059669' },
-                                                { label: 'Cohort', val: studentCohort, color: '#6d28d9' },
-                                            ].map((stat, i) => (
-                                                <div key={i} style={{ background: '#fff', border: '2px solid #000', borderRadius: '0.5rem', padding: '0.5rem 0.7rem', textAlign: 'center', boxShadow: '2px 2px 0 #000' }}>
-                                                    <div style={{ fontSize: '0.55rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8', fontFamily: 'Outfit' }}>{stat.label}</div>
-                                                    <div style={{ fontSize: '1rem', fontWeight: 900, color: stat.color, fontFamily: 'Outfit', marginTop: '0.1rem' }}>{stat.val}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </>
-                        )}
                     </div>
                 </div>
                 <p style={{ color: '#555', margin: 0, fontSize: '0.95rem', lineHeight: '1.5' }}>

@@ -639,4 +639,23 @@ button {
   flex-direction: column;
   gap: 1.2rem;
 }
+
+/* Responsive visibility rules for desktop vs mobile navigation */
+@media (min-width: 901px) {
+  .fta-mobile-dropdown-trigger {
+    display: none !important;
+  }
+  .fta-desktop-navbar {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .fta-mobile-dropdown-trigger {
+    display: flex !important;
+  }
+  .fta-desktop-navbar {
+    display: none !important;
+  }
+}
 

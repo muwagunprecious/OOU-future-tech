@@ -4895,6 +4895,9 @@ const AcademyDashboard = () => {
     // Mobile Modules Drawer State
     const [showMobileModulesDrawer, setShowMobileModulesDrawer] = useState(false);
 
+    // Post Challenge Popup State
+    const [showPostForm, setShowPostForm] = useState(false);
+
     // Cohort — assigned by admin, NOT student-selectable
     const studentCohort = localStorage.getItem('fta-admin-assigned-cohort') || 'Cohort 1';
     const [assignmentText, setAssignmentText] = useState('');
@@ -5135,113 +5138,184 @@ const AcademyDashboard = () => {
                             </button>
                         </div>
 
-                        {/* PEER HUB CONTENT GRID */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 420px) 1fr', gap: '2rem', alignItems: 'start' }} className="peer-hub-grid">
+                        {/* PEER HUB CONTENT GRID — full-width feed + floating modal */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-                            {/* POST CREATOR PANEL */}
-                            <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '2rem', boxShadow: '8px 8px 0 #000000', display: 'flex', flexDirection: 'column', gap: '1.2rem', height: 'fit-content' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
-                                    <Cpu size={20} style={{ color: 'var(--accent-r)' }} />
-                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', margin: 0, textTransform: 'uppercase' }}>🚀 Post Challenge</h3>
-                                </div>
-                                <p style={{ fontSize: '0.75rem', color: '#666', lineHeight: '1.4', margin: 0 }}>
-                                    Ask for bug fixes, share structural design issues, or request coding assistance from peers in <strong>{studentCohort}</strong>.
-                                </p>
-                                <form onSubmit={handleCreatePost} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Title / Bug Area</label>
-                                        <input type="text" value={peerTitle} onChange={e => setPeerTitle(e.target.value)} placeholder="e.g. CSS Grid alignment issue" style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.6rem', fontFamily: 'Outfit', fontWeight: 700 }} />
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Tag</label>
-                                        <select value={peerTag} onChange={e => setPeerTag(e.target.value)} style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.6rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer' }}>
-                                            <option value="Bug 🐛">Bug 🐛</option>
-                                            <option value="Question ❓">Question ❓</option>
-                                            <option value="Challenge 🎯">Challenge 🎯</option>
-                                            <option value="Idea 💡">Idea 💡</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Describe the Problem</label>
-                                        <textarea value={peerBody} onChange={e => setPeerBody(e.target.value)} rows={5} placeholder="Paste your code or describe the problem clearly..." style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.6rem', fontFamily: 'monospace', fontSize: '0.85rem', resize: 'vertical' }} />
-                                    </div>
-                                    <button type="submit" style={{ background: 'var(--accent-r)', color: '#fff', border: '3px solid #000', padding: '0.9rem', fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.9rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '4px 4px 0 #000', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                        <Send size={18} /> Post to Peer Hub
-                                    </button>
-                                </form>
+                            {/* Bug Board header + Post Challenge button */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #000', paddingBottom: '0.8rem', flexWrap: 'wrap', gap: '0.8rem' }}>
+                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0, textTransform: 'uppercase' }}>
+                                    🐛 Bug Board ({cohortFilteredPosts.length})
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#71717a', marginLeft: '0.8rem', textTransform: 'none' }}>— {studentCohort}</span>
+                                </h3>
+                                <button
+                                    onClick={() => setShowPostForm(true)}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                        background: 'var(--accent-r)', color: '#fff',
+                                        border: '3px solid #000', padding: '0.65rem 1.4rem',
+                                        fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.9rem',
+                                        textTransform: 'uppercase', cursor: 'pointer',
+                                        boxShadow: '4px 4px 0 #000', borderRadius: '0.4rem',
+                                        transition: 'transform 0.1s ease, box-shadow 0.1s ease'
+                                    }}
+                                    onMouseOver={e => { e.currentTarget.style.transform = 'translate(-2px,-2px)'; e.currentTarget.style.boxShadow = '6px 6px 0 #000'; }}
+                                    onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '4px 4px 0 #000'; }}
+                                >
+                                    <Cpu size={16} /> Post Challenge
+                                </button>
                             </div>
 
-                            {/* POSTS FEED */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #000', paddingBottom: '0.6rem' }}>
-                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', margin: 0, textTransform: 'uppercase' }}>
-                                        Bug Board ({cohortFilteredPosts.length})
-                                    </h3>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#71717a' }}>Viewing only challenges for {studentCohort}</span>
+                            {/* Posts Feed */}
+                            {cohortFilteredPosts.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '5rem 2rem', color: '#71717a', border: '3px dashed #ccc', background: '#fff', borderRadius: '1rem' }}>
+                                    <Users size={36} style={{ marginBottom: '1rem', opacity: 0.25, display: 'inline-block' }} />
+                                    <p style={{ fontWeight: 800, fontSize: '1rem', margin: '0 0 0.5rem' }}>Clean Board!</p>
+                                    <p style={{ fontSize: '0.8rem', margin: 0 }}>No active bugs posted in your cohort yet. Be the first to drop a challenge.</p>
                                 </div>
-
-                                {cohortFilteredPosts.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '4rem', color: '#71717a', border: '3px dashed #ccc', background: '#fff', borderRadius: '1rem' }}>
-                                        <Users size={32} style={{ marginBottom: '1rem', opacity: 0.3, display: 'inline-block' }} />
-                                        <p style={{ fontWeight: 800 }}>Clean Board! No active bugs posted in your cohort yet.</p>
-                                    </div>
-                                ) : (
-                                    cohortFilteredPosts.map((post) => (
-                                        <div key={post.id} style={{ background: '#fff', border: '3px solid #000', padding: '1.5rem', boxShadow: '6px 6px 0 #000', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                    {post.authorAvatar ? (
-                                                        <img src={post.authorAvatar} alt={post.author} style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #000', objectFit: 'cover' }} />
-                                                    ) : (
-                                                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem', border: '2px solid #000' }}>
-                                                            {post.author.charAt(0)}
-                                                        </div>
-                                                    )}
-                                                    <div>
-                                                        <div style={{ fontSize: '0.85rem', fontWeight: 950, color: '#000', fontFamily: 'Outfit' }}>{post.author}</div>
-                                                        <div style={{ fontSize: '0.65rem', color: '#71717a', fontWeight: 700 }}>Posted on {post.date} • {post.cohort}</div>
+                            ) : (
+                                cohortFilteredPosts.map((post) => (
+                                    <div key={post.id} style={{ background: '#fff', border: '3px solid #000', padding: '1.5rem', boxShadow: '6px 6px 0 #000', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                {post.authorAvatar ? (
+                                                    <img src={post.authorAvatar} alt={post.author} style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #000', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem', border: '2px solid #000' }}>
+                                                        {post.author.charAt(0)}
                                                     </div>
+                                                )}
+                                                <div>
+                                                    <div style={{ fontSize: '0.9rem', fontWeight: 950, color: '#000', fontFamily: 'Outfit' }}>{post.author}</div>
+                                                    <div style={{ fontSize: '0.65rem', color: '#71717a', fontWeight: 700 }}>Posted on {post.date} • {post.cohort}</div>
                                                 </div>
-                                                <span style={{ background: '#000', color: '#fff', padding: '0.2rem 0.6rem', border: '1px solid #000', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase' }}>{post.tag}</span>
                                             </div>
-                                            <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0 }}>{post.title}</h4>
-                                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#334155', fontWeight: 650, lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.body}</p>
-                                            <div style={{ background: '#f8fafc', borderTop: '2px solid #000', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '0.5rem' }}>
-                                                <div style={{ fontSize: '0.7rem', fontWeight: 955, textTransform: 'uppercase', color: '#71717a' }}>Replies ({post.replies?.length || 0})</div>
-                                                {(post.replies || []).map((rep, idx) => (
-                                                    <div key={idx} style={{ paddingBottom: '0.5rem', borderBottom: idx < post.replies.length - 1 ? '1px dashed #cbd5e1' : 'none' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
-                                                            {rep.authorAvatar ? (
-                                                                <img src={rep.authorAvatar} alt={rep.author} style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1px solid #000', objectFit: 'cover' }} />
-                                                            ) : (
-                                                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.65rem', border: '1px solid #000' }}>{rep.author.charAt(0)}</div>
-                                                            )}
-                                                            <div style={{ fontSize: '0.7rem', fontWeight: 900, color: rep.author === studentName ? 'var(--accent-r)' : '#000' }}>
-                                                                {rep.author} <span style={{ fontWeight: 400, color: '#94a3b8' }}>• {rep.date}</span>
-                                                            </div>
+                                            <span style={{ background: '#000', color: '#fff', padding: '0.2rem 0.7rem', border: '1px solid #000', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', borderRadius: '0.3rem' }}>{post.tag}</span>
+                                        </div>
+                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0 }}>{post.title}</h4>
+                                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#334155', fontWeight: 650, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{post.body}</p>
+                                        <div style={{ background: '#f8fafc', borderTop: '2px solid #000', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '0.5rem' }}>
+                                            <div style={{ fontSize: '0.7rem', fontWeight: 955, textTransform: 'uppercase', color: '#71717a' }}>Replies ({post.replies?.length || 0})</div>
+                                            {(post.replies || []).map((rep, idx) => (
+                                                <div key={idx} style={{ paddingBottom: '0.5rem', borderBottom: idx < post.replies.length - 1 ? '1px dashed #cbd5e1' : 'none' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
+                                                        {rep.authorAvatar ? (
+                                                            <img src={rep.authorAvatar} alt={rep.author} style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1px solid #000', objectFit: 'cover' }} />
+                                                        ) : (
+                                                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.65rem', border: '1px solid #000' }}>{rep.author.charAt(0)}</div>
+                                                        )}
+                                                        <div style={{ fontSize: '0.7rem', fontWeight: 900, color: rep.author === studentName ? 'var(--accent-r)' : '#000' }}>
+                                                            {rep.author} <span style={{ fontWeight: 400, color: '#94a3b8' }}>• {rep.date}</span>
                                                         </div>
-                                                        <div style={{ fontSize: '0.8rem', color: '#334155', fontWeight: 650, marginLeft: '1.8rem' }}>{rep.body}</div>
                                                     </div>
-                                                ))}
-                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Add a reply..."
-                                                        value={replyInputs[post.id] || ''}
-                                                        onChange={e => setReplyInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
-                                                        style={{ flex: 1, border: '2px solid #000', padding: '0.5rem 0.8rem', fontFamily: 'Outfit', fontSize: '0.8rem', borderRadius: '0.4rem' }}
-                                                        onKeyDown={e => e.key === 'Enter' && handleAddReply(post.id)}
-                                                    />
-                                                    <button onClick={() => handleAddReply(post.id)} style={{ background: '#000', color: '#fff', border: '2px solid #000', padding: '0.5rem 1rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem' }}>
-                                                        <Send size={14} />
-                                                    </button>
+                                                    <div style={{ fontSize: '0.8rem', color: '#334155', fontWeight: 650, marginLeft: '1.8rem' }}>{rep.body}</div>
                                                 </div>
+                                            ))}
+                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Add a reply..."
+                                                    value={replyInputs[post.id] || ''}
+                                                    onChange={e => setReplyInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                                                    style={{ flex: 1, border: '2px solid #000', padding: '0.5rem 0.8rem', fontFamily: 'Outfit', fontSize: '0.8rem', borderRadius: '0.4rem' }}
+                                                    onKeyDown={e => e.key === 'Enter' && handleAddReply(post.id)}
+                                                />
+                                                <button onClick={() => handleAddReply(post.id)} style={{ background: '#000', color: '#fff', border: '2px solid #000', padding: '0.5rem 1rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem' }}>
+                                                    <Send size={14} />
+                                                </button>
                                             </div>
                                         </div>
-                                    ))
-                                )}
-                            </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
+
+                        {/* POST CHALLENGE MODAL POPUP */}
+                        {showPostForm && (
+                            <div
+                                onClick={() => setShowPostForm(false)}
+                                style={{
+                                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
+                                    backdropFilter: 'blur(4px)', zIndex: 9000,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    padding: '1rem', animation: 'fadeIn 0.2s ease-out'
+                                }}
+                            >
+                                <div
+                                    onClick={e => e.stopPropagation()}
+                                    style={{
+                                        background: '#fff', border: '3px solid #000',
+                                        boxShadow: '10px 10px 0 #000', padding: '2rem',
+                                        width: '100%', maxWidth: '520px', borderRadius: '0.5rem',
+                                        display: 'flex', flexDirection: 'column', gap: '1.2rem',
+                                        animation: 'slideUp 0.25s ease-out', maxHeight: '90vh', overflowY: 'auto'
+                                    }}
+                                >
+                                    {/* Modal Header */}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000', paddingBottom: '0.8rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                            <Cpu size={20} color="var(--accent-r)" />
+                                            <h3 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.2rem', margin: 0, textTransform: 'uppercase' }}>🚀 Post a Challenge</h3>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowPostForm(false)}
+                                            style={{ background: 'none', border: '2px solid #000', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1rem', color: '#000' }}
+                                        >✕</button>
+                                    </div>
+
+                                    <p style={{ fontSize: '0.8rem', color: '#555', lineHeight: '1.5', margin: 0 }}>
+                                        Ask peers in <strong>{studentCohort}</strong> for help on bugs, design questions, or coding challenges.
+                                    </p>
+
+                                    <form onSubmit={(e) => { handleCreatePost(e); setShowPostForm(false); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Title / Bug Area *</label>
+                                            <input
+                                                type="text"
+                                                value={peerTitle}
+                                                onChange={e => setPeerTitle(e.target.value)}
+                                                placeholder="e.g. CSS Grid alignment issue"
+                                                autoFocus
+                                                style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.9rem', boxSizing: 'border-box' }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Tag</label>
+                                            <select value={peerTag} onChange={e => setPeerTag(e.target.value)} style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.5rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', boxSizing: 'border-box' }}>
+                                                <option value="Bug 🐛">Bug 🐛</option>
+                                                <option value="Question ❓">Question ❓</option>
+                                                <option value="Challenge 🎯">Challenge 🎯</option>
+                                                <option value="Idea 💡">Idea 💡</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Describe the Problem *</label>
+                                            <textarea
+                                                value={peerBody}
+                                                onChange={e => setPeerBody(e.target.value)}
+                                                rows={5}
+                                                placeholder="Paste your code or describe the problem clearly..."
+                                                style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.5rem', fontFamily: 'monospace', fontSize: '0.85rem', resize: 'vertical', boxSizing: 'border-box' }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'flex-end', borderTop: '2px solid #eee', paddingTop: '1rem' }}>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPostForm(false)}
+                                                style={{ background: '#fff', color: '#000', border: '2px solid #000', padding: '0.7rem 1.2rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem' }}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                style={{ background: 'var(--accent-r)', color: '#fff', border: '3px solid #000', padding: '0.7rem 1.6rem', fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.9rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '4px 4px 0 #000', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '0.4rem' }}
+                                            >
+                                                <Send size={16} /> Post to Hub
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 );
             })()}

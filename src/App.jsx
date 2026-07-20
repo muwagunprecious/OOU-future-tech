@@ -4329,16 +4329,181 @@ const ACADEMY_COURSES = {
         ]
     },
     'Product Design (UI/UX)': {
-        description: 'Learn modern design standards, components, grid systems, and functional prototypes.',
+        description: 'Master User Experience (UX), Behavioral Psychology, Figma UI Design, Design Systems, and AI-Assisted Workflows.',
         modules: [
             {
-                title: 'Module 1: Wireframing and Design Tokens',
+                title: 'Module 1: Foundations of UX & Behavioral Psychology',
+                lessons: [
+                    {
+                        id: 'pd-ux-intro',
+                        title: '1. What is UX Design',
+                        videoUrl: 'https://www.youtube.com/embed/ziQEqGZB8GE',
+                        notes: `### What is User Experience (UX) Design?\n\nUser Experience (UX) design is the process design teams use to create products that provide meaningful and relevant experiences to users.\n\n*   **Usability**: How easy and intuitive a product is to navigate.\n*   **Utility**: Whether the product solves real problems for users.\n*   **Desirability**: The visual and emotional appeal of the product.`
+                    },
+                    {
+                        id: 'pd-fogg-model',
+                        title: '2. BJ Fogg’s Behavior Model',
+                        videoUrl: 'https://www.youtube.com/embed/P0Dpi4KbW4g',
+                        notes: `### BJ Fogg's Behavior Model (B = MAP)\n\nBehavior occurs when three elements converge at the same moment: Motivation, Ability, and a Prompt.\n\n*   **B = MAP**: Behavior = Motivation × Ability × Prompt.\n*   **Motivation**: High vs. low user desire to perform an action.\n*   **Ability**: Making the target behavior simpler to increase likelihood.\n*   **Prompt**: The trigger that cues the user to act.`
+                    },
+                    {
+                        id: 'pd-action-funnel',
+                        title: '3. How to Use Action Funnel in UX',
+                        videoUrl: 'https://www.youtube.com/embed/86-ARkNt_d4',
+                        notes: `### The Action Funnel in UX\n\nUnderstand how users progress through steps in a conversion flow.\n\n*   **Awareness**: User notices the prompt or call-to-action.\n*   **Evaluation**: User weighs effort vs reward.\n*   **Execution**: Completing the action with minimal friction.`
+                    },
+                    {
+                        id: 'pd-thinking-spectrum',
+                        title: '4. Spectrum of Thinking Interventions',
+                        videoUrl: 'https://www.youtube.com/embed/3u-EoqRu2k4',
+                        notes: `### Spectrum of Thinking Interventions\n\nDesigning interfaces that match cognitive load and user decision-making styles.\n\n*   **Fast Thinking (System 1)**: Intuitive, automatic, low effort.\n*   **Slow Thinking (System 2)**: Deliberate, analytical, high effort.`
+                    },
+                    {
+                        id: 'pd-vs-uiux',
+                        title: '5. Product Design vs UI/UX',
+                        videoUrl: 'https://www.youtube.com/embed/Vs4LZM1oirM',
+                        notes: `### Product Design vs UI/UX Design\n\nClarifying roles and scope across digital product creation:\n\n*   **UX Design**: Focuses on user journey, wireframing, architecture, and research.\n*   **UI Design**: Focuses on visual styling, typography, colors, and layout.\n*   **Product Design**: Encompasses end-to-end business strategy, user needs, and product execution.`
+                    }
+                ]
+            },
+            {
+                title: 'Module 2: UX Research, Strategy & Design Principles',
+                lessons: [
+                    {
+                        id: 'pd-ucd-principles',
+                        title: '6. User Centered Design (UCD)',
+                        videoUrl: 'https://www.youtube.com/embed/4OVptMIxsT4',
+                        notes: `### User-Centered Design (UCD)\n\nAn iterative design process where designers focus on users and their needs in each phase of design.\n\n*   **Understand Context**: Research user environments and goals.\n*   **Specify Requirements**: Define key user stories and pain points.\n*   **Design & Evaluate**: Test prototypes directly with real users.`
+                    },
+                    {
+                        id: 'pd-collaborative-design',
+                        title: '7. Collaboration Design',
+                        videoUrl: 'https://www.youtube.com/embed/7vMpLXog6tA',
+                        notes: `### Collaborative Design & Co-Creation\n\nInvolving cross-functional teams (developers, product managers, stakeholders) early in the design process to ensure alignment and technical feasibility.`
+                    },
+                    {
+                        id: 'pd-heat-maps',
+                        title: '8. Heat Maps & User Analytics',
+                        videoUrl: 'https://www.youtube.com/embed/tokYjWcu5ok',
+                        notes: `### Utilizing Heat Maps in UX\n\nVisual data representations showing where users click, scroll, and spend attention on your web pages.\n\n*   **Click Maps**: Identify hot spots vs ignored CTAs.\n*   **Scroll Maps**: See drop-off rates across page length.`
+                    },
+                    {
+                        id: 'pd-journey-mapping',
+                        title: '9. Customer Journey Mapping',
+                        videoUrl: 'https://www.youtube.com/embed/NdJV8yuqBEA',
+                        notes: `### Journey Mapping\n\nA visual roadmap depicting the end-to-end experience a user has with a product or service.\n\n*   **Touchpoints**: Key interactions between user and product.\n*   **Emotions**: Tracking user feelings at each phase.`
+                    },
+                    {
+                        id: 'pd-problem-statements',
+                        title: '10. Defining Problem Statements',
+                        videoUrl: 'https://www.youtube.com/embed/yPofFSXctik',
+                        notes: `### Problem Statements\n\nClear, concise descriptions of the issue that needs to be addressed before jumping into visual solutions.\n\n*   **Format**: [User] needs [Need] because [Insight].`
+                    },
+                    {
+                        id: 'pd-hmw-questions',
+                        title: '11. How Might We (HMW) Questions',
+                        videoUrl: 'https://www.youtube.com/embed/51SX9CpFBnc',
+                        notes: `### How Might We (HMW) Framework\n\nReframe insights and problem statements into actionable brainstorming opportunities.\n\n*   **How**: Presumes solutions exist.\n*   **Might**: Encourages wild/creative ideas.\n*   **We**: Fosters team collaboration.`
+                    },
+                    {
+                        id: 'pd-business-user-needs',
+                        title: '12. Balancing Business & User Needs',
+                        videoUrl: 'https://www.youtube.com/embed/mPTHwlgtt0M',
+                        notes: `### Aligning Business Goals with User Needs\n\nGreat product design sits at the intersection of user desirability, business viability, and technical feasibility.`
+                    },
+                    {
+                        id: 'pd-prioritization',
+                        title: '13. Prioritization Frameworks',
+                        videoUrl: 'https://www.youtube.com/embed/CP30xxUdo-g',
+                        notes: `### Feature Prioritization Frameworks\n\nDeciding what features to build first when resources and time are limited:\n\n*   **MoSCoW Method**: Must have, Should have, Could have, Won't have.\n*   **RICE Scoring**: Reach, Impact, Confidence, Effort.`
+                    }
+                ]
+            },
+            {
+                title: 'Module 3: UI Design Tools, Wireframing & Layout Rules',
                 lessons: [
                     {
                         id: 'pd-figma-intro',
-                        title: '1. Figma Grids, Spacing & Layout guidelines',
-                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
-                        notes: `### Layout Grids in Figma\n\nAlways use standard 8px grid systems for responsive alignment.\n\nViewport Layouts:\n• Mobile viewport grid: 4 columns, 16px gutter.\n• Desktop viewport grid: 12 columns, 24px gutter.`
+                        title: '14. Introduction to Figma',
+                        videoUrl: 'https://www.youtube.com/embed/kbZejnPXyLM',
+                        notes: `### Introduction to Figma\n\nFigma is the industry-standard collaborative vector graphics and prototyping tool.\n\n*   **Frames**: Containers for UI layouts.\n*   **Auto Layout**: Dynamic responsive alignment.`
+                    },
+                    {
+                        id: 'pd-sketch-ui',
+                        title: '15. Sketch: Intro to User Interface',
+                        videoUrl: 'https://www.youtube.com/embed/kbZejnPXyLM',
+                        notes: `### Interface Fundamentals in Sketch & Digital Tools\n\nUnderstanding vector editing, symbols, artboards, and export options.`
+                    },
+                    {
+                        id: 'pd-balsamiq',
+                        title: '16. Low-Fidelity Wireframing with Balsamiq',
+                        videoUrl: 'https://www.youtube.com/embed/dwqHdlXDCBQ',
+                        notes: `### Wireframing with Balsamiq\n\nRapid low-fidelity prototyping to iterate on visual hierarchy and copy before committing to high-fidelity UI.`
+                    },
+                    {
+                        id: 'pd-layout-rules',
+                        title: '17. Good Layout Rules & Grid Systems',
+                        videoUrl: 'https://www.youtube.com/embed/PKfZ1gnVJ44',
+                        notes: `### UI Layout Rules & Grid Systems\n\n*   **8px Grid System**: Maintain mathematical consistency across padding, margins, and sizes.\n*   **Visual Hierarchy**: Size, contrast, and spacing to guide the eye.`
+                    },
+                    {
+                        id: 'pd-figma-prototyping',
+                        title: '18. Interactive Prototyping in Figma',
+                        videoUrl: 'https://www.youtube.com/embed/k1iwiHJrAWI',
+                        notes: `### Figma Prototyping\n\nConnecting frames with transitions, smart animate, overlay triggers, and interactive components.`
+                    }
+                ]
+            },
+            {
+                title: 'Module 4: Advanced UI, Design Systems & AI-Assisted Design',
+                lessons: [
+                    {
+                        id: 'pd-laws-of-ux',
+                        title: '19. Laws of UX',
+                        videoUrl: 'https://www.youtube.com/embed/fYs2Mdyasuc',
+                        notes: `### Key Laws of UX\n\nPsychological principles every UI/UX designer must know:\n\n*   **Fitts's Law**: Target size and distance dictate acquisition time.\n*   **Hick's Law**: Decision time increases with number of choices.\n*   **Jakob's Law**: Users expect your site to work like other sites.`
+                    },
+                    {
+                        id: 'pd-motion-interactions',
+                        title: '20. Motion Design & Micro-Interactions',
+                        videoUrl: 'https://www.youtube.com/embed/-L_MwLVYWDs',
+                        notes: `### Motion and Micro-Interactions\n\nEnhancing UI feedback with subtle animations, hover states, and smooth transitions.`
+                    },
+                    {
+                        id: 'pd-content-design',
+                        title: '21. Content Design & UX Writing',
+                        videoUrl: 'https://www.youtube.com/embed/Bir6IayQ-Bw',
+                        notes: `### UX Writing & Content Design\n\nWriting clear, concise, and helpful copy for buttons, empty states, error messages, and onboarding.`
+                    },
+                    {
+                        id: 'pd-ai-assisted-design',
+                        title: '22. AI-Assisted Design Workflows',
+                        videoUrl: 'https://www.youtube.com/embed/2u6bH17NIQk',
+                        notes: `### Leveraging AI in Product Design\n\nUsing AI tools for user research synthesis, copy generation, wireframe ideas, and design inspiration.`
+                    },
+                    {
+                        id: 'pd-design-systems',
+                        title: '23. Building & Scaling Design Systems',
+                        videoUrl: 'https://www.youtube.com/embed/YLo6g58vUm0',
+                        notes: `### Design Systems\n\nA collection of reusable components and guidelines governing product design across platforms.\n\n*   **Tokens**: Colors, typography, spacing.\n*   **Components**: Buttons, inputs, modals.`
+                    },
+                    {
+                        id: 'pd-multi-platform',
+                        title: '24. Multi-Platform & Responsive Design',
+                        videoUrl: 'https://www.youtube.com/embed/tOQ8llEwNHI',
+                        notes: `### Cross-Platform UI Design\n\nAdapting design patterns across Mobile (iOS/Android) and Desktop viewports.`
+                    },
+                    {
+                        id: 'pd-ai-figma',
+                        title: '25. AI Features in Figma',
+                        videoUrl: 'https://www.youtube.com/embed/qJoGFDHjLSE',
+                        notes: `### Exploring Figma AI Capabilities\n\nUsing Figma AI for automated layer renaming, image generation, component search, and rapid layout generation.`
+                    },
+                    {
+                        id: 'pd-full-design-project',
+                        title: '26. Creating a Full Design Project in Figma',
+                        videoUrl: 'https://www.youtube.com/embed/21t4YfNILg4',
+                        notes: `### End-to-End Figma Design Project\n\nPutting it all together: From problem statement and wireframes to high-fidelity UI, design system components, and interactive prototype.`
                     }
                 ]
             }
@@ -4394,7 +4559,36 @@ const getModuleExercise = (courseKey, modIdx) => {
             };
         }
     }
-    // Backend / Design fallbacks
+    if (courseKey.includes('Product Design') || courseKey.includes('Design')) {
+        switch (modIdx) {
+            case 0: return {
+                title: 'Module 1 Design Exercise: UX Psychology & Behavior Analysis',
+                instruction: `Write a comprehensive UX case study outline applying BJ Fogg’s Behavior Model (B=MAP: Motivation, Ability, Prompt) and the Action Funnel to solve a user onboarding problem.\n\nYour write-up must include:\n1. Problem overview & Target User definition\n2. BJ Fogg Behavior Model breakdown (Motivation factors, Ability simplification, Prompt strategy)\n3. Action Funnel analysis (Awareness -> Evaluation -> Execution)\n4. Distinction between System 1 (fast) & System 2 (slow) thinking interventions\n5. Clear contrast between Product Design vs UI/UX scope\n\nInclude section headers and detailed design notes.`,
+                langHint: 'text'
+            };
+            case 1: return {
+                title: 'Module 2 Design Exercise: User Research & Journey Mapping',
+                instruction: `Create a detailed User Research & Strategy document for a mobile app idea.\n\nYour write-up must include:\n1. A primary User Persona outline\n2. Customer Journey Map touchpoints and emotion tracking\n3. Clear Problem Statement in the format: [User] needs [Need] because [Insight]\n4. At least 3 "How Might We" (HMW) brainstorming questions\n5. Balancing Business Goals vs User Needs analysis\n6. Feature Prioritization matrix using MoSCoW (Must, Should, Could, Won't) or RICE framework\n7. Heat map analytics strategy (Click maps & Scroll maps)\n\nInclude section headers and structured bullet points.`,
+                langHint: 'text'
+            };
+            case 2: return {
+                title: 'Module 3 Design Exercise: Layout Systems & Wireframing',
+                instruction: `Provide a detailed UI Layout & Wireframe Architecture specification for a 3-screen mobile flow (Home, Item Details, Checkout).\n\nYour write-up must include:\n1. Layout Grid specifications (8px grid system, columns, gutters, margins)\n2. Typography scale & hierarchy (Headings, Body, Labels)\n3. Low-fidelity Balsamiq wireframe structure description\n4. Auto Layout rules & component spacing in Figma\n5. Interactive Prototype triggers & transitions (Smart Animate, Overlays)\n\nInclude clear documentation and structure.`,
+                langHint: 'text'
+            };
+            case 3: return {
+                title: 'Module 4 Design Exercise: Design System & UX Principles',
+                instruction: `Write a complete Design System & UX Governance specification.\n\nYour write-up must include:\n1. Design Tokens breakdown (Primary/Secondary Colors, Typography, Spacing, Shadows)\n2. Component Library variants (Buttons, Inputs, Cards, Modals)\n3. Application of Laws of UX (Hick's Law, Fitts's Law, Jakob's Law)\n4. Micro-interactions & Motion design guidelines\n5. UX Copy / Content Design standards\n6. AI-assisted design workflow integration in Figma\n7. Multi-platform responsive adaptations (Desktop vs Mobile)\n\nInclude detailed section headers and design rationale.`,
+                langHint: 'text'
+            };
+            default: return {
+                title: `Module ${modIdx + 1} Design Exercise`,
+                instruction: `Write a comprehensive design case study outlining research, wireframes, and design system components for this module.`,
+                langHint: 'text'
+            };
+        }
+    }
+    // Backend fallbacks
     return {
         title: `Module ${modIdx + 1} Coding Exercise`,
         instruction: `Write a complete code solution demonstrating all core concepts from this module. Include detailed inline comments.`,
@@ -4624,8 +4818,28 @@ const runAIGrader = (modIdx, code, courseKey) => {
                 steps.push('❌ Step 4 — No executable code found. (+0)');
             }
         }
+    } else if (courseKey.includes('Product Design') || courseKey.includes('Design')) {
+        // Product Design (UI/UX) Course Evaluation
+        const designChecks = [
+            { test: lowerCode.includes('fogg') || lowerCode.includes('b=map') || lowerCode.includes('motivation') || lowerCode.includes('behavior'), label: 'Behavioral Psychology / Fogg Model concepts', pts: 12 },
+            { test: lowerCode.includes('user') || lowerCode.includes('persona') || lowerCode.includes('target') || lowerCode.includes('research'), label: 'User Persona / Target Audience definition', pts: 12 },
+            { test: lowerCode.includes('journey') || lowerCode.includes('touchpoint') || lowerCode.includes('funnel') || lowerCode.includes('problem'), label: 'Journey Mapping / Funnel / Problem Statement', pts: 12 },
+            { test: lowerCode.includes('grid') || lowerCode.includes('layout') || lowerCode.includes('8px') || lowerCode.includes('spacing'), label: 'Grid Systems & Spacing Rules', pts: 12 },
+            { test: lowerCode.includes('figma') || lowerCode.includes('wireframe') || lowerCode.includes('balsamiq') || lowerCode.includes('sketch') || lowerCode.includes('component'), label: 'UI Prototyping & Design Tooling (Figma/Balsamiq)', pts: 12 },
+            { test: lowerCode.includes('law') || lowerCode.includes('fitts') || lowerCode.includes('hick') || lowerCode.includes('jakob') || lowerCode.includes('heuristic'), label: 'Laws of UX / Heuristic Evaluation', pts: 12 },
+            { test: lowerCode.includes('system') || lowerCode.includes('token') || lowerCode.includes('variant') || lowerCode.includes('prototype') || lowerCode.includes('motion'), label: 'Design System Tokens & Component Governance', pts: 10 }
+        ];
+
+        designChecks.forEach((c, i) => {
+            if (c.test) {
+                steps.push(`✅ Step ${i + 4} — ${c.label}: PASSED. (+${c.pts})`);
+                score += c.pts;
+            } else {
+                steps.push(`❌ Step ${i + 4} — ${c.label}: FAILED. (+0)`);
+            }
+        });
     } else {
-        // Non-frontend courses: generic check
+        // Non-frontend & Non-design courses: generic check
         const hasCode = lowerCode.includes('function') || lowerCode.includes('const') || lowerCode.includes('class') || lowerCode.includes('import');
         if (hasCode) {
             steps.push('✅ Step 4 — Code structure detected. (+20)');

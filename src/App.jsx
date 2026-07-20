@@ -4867,6 +4867,8 @@ const AcademyDashboard = () => {
     const course = ACADEMY_COURSES[selectedCourse];
     const firstLesson = course.modules[0].lessons[0];
     const [selectedLesson, setSelectedLesson] = useState(firstLesson);
+    const [selectedModIdx, setSelectedModIdx] = useState(0);
+    const [selectedLesIdx, setSelectedLesIdx] = useState(0);
     
     // Accordion state
     const [expandedModules, setExpandedModules] = useState({ 0: true });
@@ -4925,6 +4927,8 @@ const AcademyDashboard = () => {
     useEffect(() => {
         const newFirstLesson = course.modules[0].lessons[0];
         setSelectedLesson(newFirstLesson);
+        setSelectedModIdx(0);
+        setSelectedLesIdx(0);
         setExpandedModules({ 0: true });
     }, [selectedCourse]);
 

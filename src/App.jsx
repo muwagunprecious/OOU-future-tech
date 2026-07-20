@@ -4349,237 +4349,303 @@ const ACADEMY_COURSES = {
 /* ───────────────────────────────────────────
    FTA LEARNING MODULES ASSIGNMENT SYSTEM
    ─────────────────────────────────────────── */
-const getAssignmentInstruction = (lesson) => {
-    switch (lesson.id) {
-        case 'fe-internet-https':
-            return 'Explain in your own words the difference between HTTP and HTTPS, and how SSL/TLS encryption works.';
-        case 'fe-html-intro':
-            return 'Write a basic HTML5 skeleton snippet containing a header tag (<h1>), a paragraph tag (<p>), and an anchor link tag (<a>) pointing to "https://google.com".';
-        case 'fe-css-basics':
-            return 'Write a CSS block targeting a class named ".brutalist-button" that applies a solid black border of 3px and a black box-shadow of 4px.';
-        case 'fe-js-intro':
-            return 'Write a JavaScript code snippet that prints "Hello FutureTech" using console.log.';
-        case 'fe-js-dom-api':
-            return 'Write a JavaScript expression using document.querySelector to select an element with the class ".title-card" and change its style.color to "red".';
-        case 'fe-api-intro':
-            return 'Write an asynchronous JavaScript function named "fetchUsers" that uses fetch() to call "https://api.com/users" and logs the response.';
-        case 'fe-git-intro':
-            return 'List the exact sequence of 3 git commands to stage all changes, commit them with the message "initial release", and push them to the origin main remote.';
-        case 'fe-react-vite':
-            return 'Write a simple functional React component named "Profile" that returns a div containing your name inside an h2 tag.';
-        default:
-            return `Write a code snippet or a brief explanation demonstrating the core concept of the current lesson: "${lesson.title}".`;
+const getModuleExercise = (courseKey, modIdx) => {
+    if (courseKey === 'Frontend Engineering') {
+        switch (modIdx) {
+            case 0: return {
+                title: 'Module 1 Coding Exercise: HTML Document Structure',
+                instruction: `Write a complete, valid HTML5 document that includes:\n1. A <!DOCTYPE html> declaration\n2. An <html> tag wrapping the entire document\n3. A <head> section with a <title> tag containing "My Portfolio"\n4. A <body> section containing:\n   - An <h1> heading with your full name\n   - A <p> paragraph explaining what HTTPS encryption does (mention SSL/TLS)\n   - A <table> with at least 2 rows and 2 columns showing "Protocol" and "Port" (HTTP=80, HTTPS=443)\n   - An <a> anchor link pointing to "https://google.com"\n\nYour code must be properly indented and include HTML comments (<!-- -->) explaining at least 2 sections.`,
+                langHint: 'html'
+            };
+            case 1: return {
+                title: 'Module 2 Coding Exercise: CSS Styling Challenge',
+                instruction: `Write a complete CSS stylesheet that includes:\n1. A class selector ".brutalist-card" with:\n   - border: 3px solid black\n   - box-shadow: 6px 6px 0 #000\n   - padding: 2rem\n   - background: #ffffff\n2. A class selector ".brutalist-button" with:\n   - border: 3px solid black\n   - box-shadow: 4px 4px 0 #000\n   - font-weight: 900\n   - text-transform: uppercase\n   - cursor: pointer\n3. A media query (@media) targeting max-width: 768px that changes .brutalist-card padding to 1rem\n4. Use at least one CSS variable (custom property) with var()\n\nAll property declarations must end with semicolons. Include CSS comments explaining each block.`,
+                langHint: 'css'
+            };
+            case 2: return {
+                title: 'Module 3 Coding Exercise: JavaScript Fundamentals',
+                instruction: `Write a JavaScript program that:\n1. Declares a const variable named "greeting" with the value "Hello FutureTech"\n2. Uses console.log() to print the greeting\n3. Declares a function named "calculateAge" that takes a birth year (number) parameter and returns the current year minus the birth year\n4. Calls calculateAge() with a sample year and logs the result\n5. Creates an array named "students" with at least 3 string names\n6. Uses .forEach() to iterate over the array and log each name\n7. Uses .filter() to create a new array of names longer than 5 characters\n8. Uses strict equality (===) in at least one comparison\n\nAll statements must end with semicolons. Include inline comments (//) on every major line explaining what it does.`,
+                langHint: 'javascript'
+            };
+            case 3: return {
+                title: 'Module 4 Coding Exercise: DOM Manipulation & Async JS',
+                instruction: `Write JavaScript code that:\n1. Uses document.querySelector() to select an element with class ".title-card"\n2. Changes its .style.color to "red"\n3. Uses document.getElementById() to select an element and updates its .textContent\n4. Adds an event listener (addEventListener) for "click" on a button element\n5. Writes an async function named "fetchData" that:\n   - Uses await fetch("https://api.example.com/data")\n   - Parses the response with .json()\n   - Logs the result with console.log\n   - Has a try/catch block for error handling\n6. Calls fetchData()\n\nAll statements must end with semicolons. Include inline comments (//) explaining each step.`,
+                langHint: 'javascript'
+            };
+            case 4: return {
+                title: 'Module 5 Coding Exercise: API Integration',
+                instruction: `Write an async JavaScript function named "fetchUsers" that:\n1. Declares the function with the "async" keyword\n2. Uses await fetch() to call "https://api.com/users"\n3. Parses the JSON response\n4. Logs the data using console.log\n5. Includes a complete try/catch/finally error handling block\n6. Demonstrates understanding of REST by including comments explaining GET, POST, PUT, DELETE verbs\n7. Shows the difference between REST and GraphQL in a multi-line comment block\n\nInclude inline comments on every line. All statements must end with semicolons.`,
+                langHint: 'javascript'
+            };
+            case 5: return {
+                title: 'Module 6 Coding Exercise: Git Version Control',
+                instruction: `Write the exact sequence of terminal commands (as a bash script) to:\n1. Initialize a new git repository (git init)\n2. Configure your git user name and email (git config)\n3. Create a .gitignore file listing node_modules and .env\n4. Stage all files (git add .)\n5. Create an initial commit with message "initial release" (git commit)\n6. Add a remote origin URL (git remote add)\n7. Push the code to the main branch (git push)\n8. Show how to pull updates (git pull)\n9. Demonstrate creating and merging a feature branch\n\nEach command must be on its own line. Include bash comments (#) explaining each step.`,
+                langHint: 'bash'
+            };
+            case 6: return {
+                title: 'Module 7 Coding Exercise: React Component',
+                instruction: `Write a complete functional React component named "Profile" that:\n1. Imports React and useState from 'react'\n2. Declares a state variable "count" initialized to 0 using useState\n3. Returns JSX containing:\n   - A <div> wrapper\n   - An <h2> tag with your full name\n   - A <p> tag showing the count state value\n   - A <button> with onClick handler that increments count\n4. Exports the component as default\n5. Uses proper JSX syntax with className (not class)\n6. Includes a useEffect that logs "Component mounted" on first render\n\nInclude inline comments explaining props, state, and lifecycle concepts.`,
+                langHint: 'jsx'
+            };
+            default: return {
+                title: `Module ${modIdx + 1} Coding Exercise`,
+                instruction: `Write a complete code solution demonstrating all core concepts from this module. Include inline comments explaining each step.`,
+                langHint: 'javascript'
+            };
+        }
     }
+    // Backend / Design fallbacks
+    return {
+        title: `Module ${modIdx + 1} Coding Exercise`,
+        instruction: `Write a complete code solution demonstrating all core concepts from this module. Include detailed inline comments.`,
+        langHint: courseKey.includes('Backend') ? 'javascript' : 'text'
+    };
 };
 
-const runAIGrader = (lessonId, code) => {
-    let score = 100;
-    let feedback = "";
+const runAIGrader = (modIdx, code, courseKey) => {
     const trimmedCode = code.trim();
     const lowerCode = trimmedCode.toLowerCase();
+    let steps = [];
+    let score = 5; // Start at 5/100 — must EARN every point
 
-    // 1. Strict length check
-    if (trimmedCode.length < 35) {
-        return {
-            score: 30,
-            feedback: "AI Strict Review: Rejected. The submission is way too brief. A comprehensive solution with proper syntax and explanation is required."
-        };
+    // ═══ UNIVERSAL PRE-CHECKS ═══
+    // Step 1: Length check
+    if (trimmedCode.length < 60) {
+        steps.push('❌ Step 1 — Code Length: FAILED. Submission is extremely short (< 60 chars). A comprehensive solution is required. (+0)');
+        return { score: 5, feedback: steps.join('\n'), steps };
+    } else if (trimmedCode.length < 150) {
+        steps.push('⚠️ Step 1 — Code Length: PARTIAL. Submission is short. Expect deductions for missing logic. (+2)');
+        score += 2;
+    } else {
+        steps.push('✅ Step 1 — Code Length: PASSED. Substantial code submitted. (+5)');
+        score += 5;
     }
 
-    // 2. Formatting quality check (Common syntax checks)
-    let syntaxDeductions = 0;
-    let syntaxCritique = [];
-
-    // JS-specific formatting check
-    if (['fe-js-intro', 'fe-js-dom-api', 'fe-api-intro'].includes(lessonId)) {
-        if (!trimmedCode.endsWith(';')) {
-            syntaxDeductions += 15;
-            syntaxCritique.push("Missing terminal semicolon ';'");
+    // Step 2: Comments check
+    const hasComments = trimmedCode.includes('//') || trimmedCode.includes('/*') || trimmedCode.includes('<!--') || trimmedCode.includes('#');
+    if (hasComments) {
+        const commentCount = (trimmedCode.match(/\/\/|\/\*|\<\!--|#/g) || []).length;
+        if (commentCount >= 3) {
+            steps.push(`✅ Step 2 — Inline Documentation: PASSED. Found ${commentCount} comment markers. (+8)`);
+            score += 8;
+        } else {
+            steps.push(`⚠️ Step 2 — Inline Documentation: PARTIAL. Only ${commentCount} comment(s) found, minimum 3 required. (+3)`);
+            score += 3;
         }
-        if (!trimmedCode.includes('//')) {
-            syntaxDeductions += 10;
-            syntaxCritique.push("Missing inline documentation/comments explaining code behavior");
+    } else {
+        steps.push('❌ Step 2 — Inline Documentation: FAILED. No comments found. Code must include inline documentation. (+0)');
+    }
+
+    // Step 3: Indentation / formatting quality
+    const lines = trimmedCode.split('\n');
+    const indentedLines = lines.filter(l => l.startsWith('  ') || l.startsWith('\t'));
+    if (indentedLines.length >= 2) {
+        steps.push(`✅ Step 3 — Code Formatting: PASSED. Proper indentation detected (${indentedLines.length} indented lines). (+5)`);
+        score += 5;
+    } else {
+        steps.push('❌ Step 3 — Code Formatting: FAILED. Code lacks proper indentation. All nested blocks must be indented. (+0)');
+    }
+
+    // ═══ MODULE-SPECIFIC CHECKS ═══
+    if (courseKey === 'Frontend Engineering') {
+        if (modIdx === 0) {
+            // Module 1: HTML & Internet
+            const checks = [
+                { test: lowerCode.includes('<!doctype html>'), label: 'DOCTYPE declaration', pts: 10 },
+                { test: lowerCode.includes('<html') && lowerCode.includes('</html>'), label: '<html> wrapper', pts: 8 },
+                { test: lowerCode.includes('<head') && lowerCode.includes('</head>'), label: '<head> section', pts: 8 },
+                { test: lowerCode.includes('<title') && lowerCode.includes('</title>'), label: '<title> tag', pts: 5 },
+                { test: lowerCode.includes('<body') && lowerCode.includes('</body>'), label: '<body> section', pts: 8 },
+                { test: lowerCode.includes('<h1') && lowerCode.includes('</h1>'), label: '<h1> heading', pts: 8 },
+                { test: lowerCode.includes('<p') && lowerCode.includes('</p>'), label: '<p> paragraph', pts: 5 },
+                { test: (lowerCode.includes('ssl') || lowerCode.includes('tls')) && (lowerCode.includes('encrypt') || lowerCode.includes('https')), label: 'HTTPS/SSL/TLS mention', pts: 8 },
+                { test: lowerCode.includes('<table') && lowerCode.includes('</table>'), label: '<table> element', pts: 8 },
+                { test: (lowerCode.includes('80') && lowerCode.includes('443')), label: 'Port 80 & 443 data', pts: 5 },
+                { test: lowerCode.includes('<a') && lowerCode.includes('href=') && lowerCode.includes('google.com'), label: '<a> anchor link', pts: 7 },
+                { test: lowerCode.includes('<!--'), label: 'HTML comments', pts: 5 },
+            ];
+            checks.forEach((c, i) => {
+                if (c.test) {
+                    steps.push(`✅ Step ${i + 4} — ${c.label}: PASSED. (+${c.pts})`);
+                    score += c.pts;
+                } else {
+                    steps.push(`❌ Step ${i + 4} — ${c.label}: FAILED. Not found in your code. (+0)`);
+                }
+            });
+        } else if (modIdx === 1) {
+            // Module 2: CSS
+            const checks = [
+                { test: lowerCode.includes('.brutalist-card'), label: '.brutalist-card selector', pts: 10 },
+                { test: lowerCode.includes('.brutalist-button'), label: '.brutalist-button selector', pts: 10 },
+                { test: lowerCode.includes('border') && lowerCode.includes('3px') && lowerCode.includes('solid'), label: '3px solid border', pts: 8 },
+                { test: lowerCode.includes('box-shadow'), label: 'box-shadow property', pts: 8 },
+                { test: lowerCode.includes('font-weight') && lowerCode.includes('900'), label: 'font-weight: 900', pts: 5 },
+                { test: lowerCode.includes('text-transform') && lowerCode.includes('uppercase'), label: 'text-transform: uppercase', pts: 5 },
+                { test: lowerCode.includes('cursor') && lowerCode.includes('pointer'), label: 'cursor: pointer', pts: 5 },
+                { test: lowerCode.includes('@media'), label: '@media responsive query', pts: 10 },
+                { test: lowerCode.includes('var('), label: 'CSS variable with var()', pts: 8 },
+                { test: lowerCode.includes('{') && lowerCode.includes('}'), label: 'Proper CSS braces', pts: 5 },
+                { test: trimmedCode.includes(';'), label: 'Semicolons on properties', pts: 5 },
+                { test: lowerCode.includes('/*'), label: 'CSS comments', pts: 3 },
+            ];
+            checks.forEach((c, i) => {
+                if (c.test) {
+                    steps.push(`✅ Step ${i + 4} — ${c.label}: PASSED. (+${c.pts})`);
+                    score += c.pts;
+                } else {
+                    steps.push(`❌ Step ${i + 4} — ${c.label}: FAILED. Not found in your code. (+0)`);
+                }
+            });
+        } else if (modIdx === 2) {
+            // Module 3: JavaScript Fundamentals
+            const checks = [
+                { test: lowerCode.includes('const') && lowerCode.includes('greeting') && code.includes('Hello FutureTech'), label: 'const greeting = "Hello FutureTech"', pts: 8 },
+                { test: lowerCode.includes('console.log'), label: 'console.log() usage', pts: 5 },
+                { test: lowerCode.includes('function') && lowerCode.includes('calculateage'), label: 'function calculateAge()', pts: 10 },
+                { test: lowerCode.includes('return'), label: 'return statement', pts: 5 },
+                { test: lowerCode.includes('students') && (lowerCode.includes('[') && lowerCode.includes(']')), label: 'students array declaration', pts: 8 },
+                { test: lowerCode.includes('.foreach'), label: '.forEach() iterator', pts: 8 },
+                { test: lowerCode.includes('.filter'), label: '.filter() method', pts: 8 },
+                { test: trimmedCode.includes('==='), label: 'Strict equality (===)', pts: 8 },
+                { test: trimmedCode.endsWith(';') || (trimmedCode.match(/;/g) || []).length >= 5, label: 'Semicolons on statements', pts: 8 },
+                { test: (trimmedCode.match(/\/\//g) || []).length >= 4, label: 'Inline comments (// x4+)', pts: 10 },
+                { test: lowerCode.includes('let') || lowerCode.includes('var'), label: 'Variable declarations (let/var)', pts: 4 },
+            ];
+            checks.forEach((c, i) => {
+                if (c.test) {
+                    steps.push(`✅ Step ${i + 4} — ${c.label}: PASSED. (+${c.pts})`);
+                    score += c.pts;
+                } else {
+                    steps.push(`❌ Step ${i + 4} — ${c.label}: FAILED. Not found in your code. (+0)`);
+                }
+            });
+        } else if (modIdx === 3) {
+            // Module 4: DOM & Async
+            const checks = [
+                { test: lowerCode.includes('document.queryselector'), label: 'document.querySelector()', pts: 8 },
+                { test: lowerCode.includes('.style.color') && lowerCode.includes('red'), label: '.style.color = "red"', pts: 8 },
+                { test: lowerCode.includes('document.getelementbyid'), label: 'document.getElementById()', pts: 8 },
+                { test: lowerCode.includes('.textcontent'), label: '.textContent update', pts: 5 },
+                { test: lowerCode.includes('addeventlistener'), label: 'addEventListener()', pts: 8 },
+                { test: lowerCode.includes('click'), label: '"click" event type', pts: 5 },
+                { test: lowerCode.includes('async'), label: 'async keyword', pts: 8 },
+                { test: lowerCode.includes('await') && lowerCode.includes('fetch('), label: 'await fetch() call', pts: 10 },
+                { test: lowerCode.includes('.json()'), label: '.json() parsing', pts: 5 },
+                { test: lowerCode.includes('try') && lowerCode.includes('catch'), label: 'try/catch error handling', pts: 8 },
+                { test: (trimmedCode.match(/\/\//g) || []).length >= 3, label: 'Inline comments', pts: 7 },
+                { test: trimmedCode.endsWith(';') || (trimmedCode.match(/;/g) || []).length >= 4, label: 'Semicolons', pts: 3 },
+            ];
+            checks.forEach((c, i) => {
+                if (c.test) {
+                    steps.push(`✅ Step ${i + 4} — ${c.label}: PASSED. (+${c.pts})`);
+                    score += c.pts;
+                } else {
+                    steps.push(`❌ Step ${i + 4} — ${c.label}: FAILED. (+0)`);
+                }
+            });
+        } else if (modIdx === 4) {
+            // Module 5: APIs
+            const checks = [
+                { test: lowerCode.includes('async'), label: 'async keyword', pts: 8 },
+                { test: lowerCode.includes('function') && lowerCode.includes('fetchusers'), label: 'Function named fetchUsers', pts: 10 },
+                { test: lowerCode.includes('await') && lowerCode.includes('fetch('), label: 'await fetch() call', pts: 10 },
+                { test: lowerCode.includes('api.com/users'), label: 'API endpoint URL', pts: 8 },
+                { test: lowerCode.includes('.json()'), label: '.json() response parsing', pts: 5 },
+                { test: lowerCode.includes('try') && lowerCode.includes('catch'), label: 'try/catch block', pts: 8 },
+                { test: lowerCode.includes('finally'), label: 'finally block', pts: 5 },
+                { test: lowerCode.includes('get') && lowerCode.includes('post'), label: 'REST verbs (GET/POST)', pts: 8 },
+                { test: lowerCode.includes('put') || lowerCode.includes('delete'), label: 'REST verbs (PUT/DELETE)', pts: 5 },
+                { test: lowerCode.includes('graphql'), label: 'GraphQL mention', pts: 5 },
+                { test: (trimmedCode.match(/\/\//g) || []).length >= 4, label: 'Inline comments (4+)', pts: 8 },
+                { test: (trimmedCode.match(/;/g) || []).length >= 4, label: 'Semicolons (4+)', pts: 3 },
+            ];
+            checks.forEach((c, i) => {
+                if (c.test) {
+                    steps.push(`✅ Step ${i + 4} — ${c.label}: PASSED. (+${c.pts})`);
+                    score += c.pts;
+                } else {
+                    steps.push(`❌ Step ${i + 4} — ${c.label}: FAILED. (+0)`);
+                }
+            });
+        } else if (modIdx === 5) {
+            // Module 6: Git
+            const checks = [
+                { test: lowerCode.includes('git init'), label: 'git init', pts: 8 },
+                { test: lowerCode.includes('git config'), label: 'git config', pts: 8 },
+                { test: lowerCode.includes('.gitignore') || lowerCode.includes('node_modules'), label: '.gitignore file', pts: 5 },
+                { test: lowerCode.includes('git add'), label: 'git add', pts: 8 },
+                { test: lowerCode.includes('git commit') && lowerCode.includes('initial release'), label: 'git commit with message', pts: 10 },
+                { test: lowerCode.includes('git remote add'), label: 'git remote add origin', pts: 8 },
+                { test: lowerCode.includes('git push'), label: 'git push', pts: 8 },
+                { test: lowerCode.includes('git pull'), label: 'git pull', pts: 8 },
+                { test: lowerCode.includes('git branch') || lowerCode.includes('git checkout') || lowerCode.includes('git merge'), label: 'Branch operations', pts: 8 },
+                { test: lowerCode.includes('#'), label: 'Bash comments (#)', pts: 8 },
+                { test: lines.length >= 8, label: 'At least 8 command lines', pts: 5 },
+            ];
+            checks.forEach((c, i) => {
+                if (c.test) {
+                    steps.push(`✅ Step ${i + 4} — ${c.label}: PASSED. (+${c.pts})`);
+                    score += c.pts;
+                } else {
+                    steps.push(`❌ Step ${i + 4} — ${c.label}: FAILED. (+0)`);
+                }
+            });
+        } else if (modIdx === 6) {
+            // Module 7: React
+            const checks = [
+                { test: code.includes('import') && (lowerCode.includes('react') || lowerCode.includes("'react'")), label: 'Import React', pts: 8 },
+                { test: lowerCode.includes('usestate'), label: 'useState hook', pts: 10 },
+                { test: code.includes('Profile'), label: 'Component named Profile', pts: 10 },
+                { test: lowerCode.includes('return'), label: 'return statement', pts: 5 },
+                { test: lowerCode.includes('<div') || lowerCode.includes('<div>'), label: '<div> wrapper in JSX', pts: 5 },
+                { test: lowerCode.includes('<h2') && lowerCode.includes('</h2>'), label: '<h2> tag with name', pts: 8 },
+                { test: lowerCode.includes('<button') || lowerCode.includes('<button>'), label: '<button> element', pts: 5 },
+                { test: lowerCode.includes('onclick'), label: 'onClick handler', pts: 8 },
+                { test: lowerCode.includes('export default') || lowerCode.includes('export {'), label: 'export default', pts: 5 },
+                { test: lowerCode.includes('classname'), label: 'className (not class)', pts: 5 },
+                { test: lowerCode.includes('useeffect'), label: 'useEffect hook', pts: 8 },
+                { test: (trimmedCode.match(/\/\//g) || []).length >= 3, label: 'Inline comments (3+)', pts: 5 },
+            ];
+            checks.forEach((c, i) => {
+                if (c.test) {
+                    steps.push(`✅ Step ${i + 4} — ${c.label}: PASSED. (+${c.pts})`);
+                    score += c.pts;
+                } else {
+                    steps.push(`❌ Step ${i + 4} — ${c.label}: FAILED. (+0)`);
+                }
+            });
+        } else {
+            // Generic module check
+            const hasCode = lowerCode.includes('function') || lowerCode.includes('const') || lowerCode.includes('<') || lowerCode.includes('git');
+            if (hasCode) {
+                steps.push('✅ Step 4 — Code syntax detected. (+15)');
+                score += 15;
+            } else {
+                steps.push('❌ Step 4 — No executable code found. (+0)');
+            }
+        }
+    } else {
+        // Non-frontend courses: generic check
+        const hasCode = lowerCode.includes('function') || lowerCode.includes('const') || lowerCode.includes('class') || lowerCode.includes('import');
+        if (hasCode) {
+            steps.push('✅ Step 4 — Code structure detected. (+20)');
+            score += 20;
+        } else {
+            steps.push('❌ Step 4 — No code structure found. (+0)');
         }
     }
 
-    // CSS-specific check
-    if (lessonId === 'fe-css-basics') {
-        if (!trimmedCode.includes('{') || !trimmedCode.includes('}')) {
-            syntaxDeductions += 25;
-            syntaxCritique.push("Malformed CSS block: missing braces '{ }'");
-        }
-        if (trimmedCode.includes(':') && !trimmedCode.includes(';')) {
-            syntaxDeductions += 15;
-            syntaxCritique.push("Missing closing semicolon ';' on properties");
-        }
+    // Cap at 100
+    score = Math.min(100, score);
+
+    // Final verdict step
+    if (score >= 75) {
+        steps.push(`\n🏁 FINAL VERDICT: PASSED ✅ — Score ${score}/100. Your code meets the minimum quality threshold.`);
+    } else {
+        steps.push(`\n🏁 FINAL VERDICT: FAILED ❌ — Score ${score}/100. You need 75/100 to pass. Review the failed steps and resubmit.`);
     }
 
-    // 3. Specific validation rules
-    if (lessonId === 'fe-internet-https') {
-        const hasHTTPVS = lowerCode.includes('http') && lowerCode.includes('https');
-        const hasEncryption = lowerCode.includes('encrypt') || lowerCode.includes('cryptograph');
-        const hasSSL = lowerCode.includes('ssl') || lowerCode.includes('tls');
-        const hasPorts = lowerCode.includes('443') || lowerCode.includes('80');
-
-        let missing = [];
-        if (!hasHTTPVS) missing.push("Clear distinction between HTTP and HTTPS protocols");
-        if (!hasEncryption) missing.push("Explanation of encryption mechanisms");
-        if (!hasSSL) missing.push("Reference to SSL/TLS handshake protocol");
-        if (!hasPorts) missing.push("Protocol port allocations (Port 80 vs Port 443)");
-
-        if (missing.length > 0) {
-            score = Math.max(30, 90 - (missing.length * 20));
-            feedback = `AI Strict Review: Failed. Your answer is incomplete. Missing: ${missing.join(', ')}.`;
-        } else {
-            score = 92;
-            feedback = "AI Strict Review: Passed. Excellent conceptual overview of network handshakes and cryptography.";
-        }
-    } 
-    else if (lessonId === 'fe-html-intro') {
-        const doctype = lowerCode.includes('<!doctype html>');
-        const htmlTag = lowerCode.includes('<html') && lowerCode.includes('</html>');
-        const h1Tag = lowerCode.includes('<h1') && lowerCode.includes('</h1>');
-        const pTag = lowerCode.includes('<p') && lowerCode.includes('</p>');
-        const aTag = lowerCode.includes('<a') && lowerCode.includes('</a>') && lowerCode.includes('href=') && lowerCode.includes('google.com');
-
-        let missing = [];
-        if (!doctype) missing.push("<!DOCTYPE html> declaration");
-        if (!htmlTag) missing.push("<html> outer wrapper");
-        if (!h1Tag) missing.push("Heading tag (<h1>)");
-        if (!pTag) missing.push("Paragraph tag (<p>)");
-        if (!aTag) missing.push("Anchor tag (<a>) referencing google.com");
-
-        if (missing.length > 0) {
-            score = Math.max(25, 95 - (missing.length * 20));
-            feedback = `AI Strict Review: Failed. Invalid HTML skeleton. Missing: ${missing.join(', ')}.`;
-        } else {
-            score = 96;
-            feedback = "AI Strict Review: Passed. Code conforms fully to modern HTML5 semantics.";
-        }
-    } 
-    else if (lessonId === 'fe-css-basics') {
-        const selector = lowerCode.includes('.brutalist-button');
-        const border = lowerCode.includes('border') && lowerCode.includes('3px') && lowerCode.includes('solid');
-        const shadow = lowerCode.includes('box-shadow') && lowerCode.includes('4px');
-
-        let missing = [];
-        if (!selector) missing.push("Selector targeting '.brutalist-button'");
-        if (!border) missing.push("3px solid border declaration");
-        if (!shadow) missing.push("4px offset box-shadow declaration");
-
-        if (missing.length > 0) {
-            score = Math.max(30, 92 - (missing.length * 25));
-            feedback = `AI Strict Review: Failed. Styling doesn't match design specifications. Missing: ${missing.join(', ')}.`;
-        } else {
-            score = 90 - syntaxDeductions;
-            feedback = "AI Strict Review: Passed. CSS satisfies brutalist formatting specifications.";
-        }
-    } 
-    else if (lessonId === 'fe-js-intro') {
-        const log = lowerCode.includes('console.log');
-        const text = code.includes('Hello FutureTech');
-
-        let missing = [];
-        if (!log) missing.push("console.log invocation");
-        if (!text) missing.push("Case-sensitive string matching 'Hello FutureTech'");
-
-        if (missing.length > 0) {
-            score = 40;
-            feedback = `AI Strict Review: Failed. Script error. Missing: ${missing.join(', ')}.`;
-        } else {
-            score = 95 - syntaxDeductions;
-            feedback = "AI Strict Review: Passed. Accurate JavaScript output.";
-        }
-    } 
-    else if (lessonId === 'fe-js-dom-api') {
-        const select = lowerCode.includes('document.queryselector') && (lowerCode.includes("'.title-card'") || lowerCode.includes('".title-card"'));
-        const color = lowerCode.includes('.style.color') && (lowerCode.includes('red') || lowerCode.includes("'red'") || lowerCode.includes('"red"'));
-
-        let missing = [];
-        if (!select) missing.push("Selector targeting element with class '.title-card'");
-        if (!color) missing.push("Assigning style color to 'red'");
-
-        if (missing.length > 0) {
-            score = 35;
-            feedback = `AI Strict Review: Failed. DOM modification error. Missing: ${missing.join(', ')}.`;
-        } else {
-            score = 93 - syntaxDeductions;
-            feedback = "AI Strict Review: Passed. Dynamic styling assignment is valid.";
-        }
-    } 
-    else if (lessonId === 'fe-api-intro') {
-        const asyncWord = lowerCode.includes('async');
-        const func = lowerCode.includes('function') && lowerCode.includes('fetchusers');
-        const fetchWord = lowerCode.includes('fetch(') && lowerCode.includes('api.com/users');
-        const awaitWord = lowerCode.includes('await');
-
-        let missing = [];
-        if (!asyncWord) missing.push("'async' keyword declaration");
-        if (!func) missing.push("Function named 'fetchUsers'");
-        if (!fetchWord) missing.push("fetch() request to the target API endpoint");
-        if (!awaitWord) missing.push("'await' keyword handler for the promise resolution");
-
-        if (missing.length > 0) {
-            score = Math.max(30, 94 - (missing.length * 20));
-            feedback = `AI Strict Review: Failed. Promise interface configuration error. Missing: ${missing.join(', ')}.`;
-        } else {
-            score = 94 - syntaxDeductions;
-            feedback = "AI Strict Review: Passed. Asynchronous API fetch pipeline is correct.";
-        }
-    } 
-    else if (lessonId === 'fe-git-intro') {
-        const add = lowerCode.includes('git add');
-        const commit = lowerCode.includes('git commit') && lowerCode.includes('initial release');
-        const push = lowerCode.includes('git push');
-
-        let missing = [];
-        if (!add) missing.push("Staging stage: 'git add .'");
-        if (!commit) missing.push("Commit description: 'git commit -m \"initial release\"'");
-        if (!push) missing.push("Push route: 'git push origin main'");
-
-        if (missing.length > 0) {
-            score = 40;
-            feedback = `AI Strict Review: Failed. Workflow commands incomplete. Missing: ${missing.join(', ')}.`;
-        } else {
-            score = 95;
-            feedback = "AI Strict Review: Passed. Accurate version control commands.";
-        }
-    } 
-    else if (lessonId === 'fe-react-vite') {
-        const componentName = code.includes('Profile');
-        const ret = lowerCode.includes('return');
-        const h2 = lowerCode.includes('<h2') && lowerCode.includes('</h2>');
-
-        let missing = [];
-        if (!componentName) missing.push("React component identifier 'Profile'");
-        if (!ret) missing.push("return statement containing JSX block");
-        if (!h2) missing.push("h2 tag containing student name");
-
-        if (missing.length > 0) {
-            score = 45;
-            feedback = `AI Strict Review: Failed. Component configuration error. Missing: ${missing.join(', ')}.`;
-        } else {
-            score = 90 - syntaxDeductions;
-            feedback = "AI Strict Review: Passed. Functional React component compiled successfully.";
-        }
-    } 
-    else {
-        const hasCodeKeyword = lowerCode.includes('function') || lowerCode.includes('const') || lowerCode.includes('let') || lowerCode.includes('<') || lowerCode.includes('git');
-        if (!hasCodeKeyword) {
-            score = 55;
-            feedback = "AI Strict Review: Failed. Your answer must include executable source code templates rather than generic text definitions.";
-        } else {
-            score = 80 - syntaxDeductions;
-            feedback = "AI Strict Review: Passed. Conceptual implementation is syntactically sound.";
-        }
-    }
-
-    if (syntaxCritique.length > 0 && score >= 75) {
-        score = Math.max(50, score - syntaxDeductions);
-        feedback += ` (Formatting Deductions applied: ${syntaxCritique.join(', ')})`;
-    }
-
-    return { score, feedback };
+    return { score, feedback: steps.join('\n'), steps };
 };
 
 const AcademyDashboard = () => {
@@ -4939,17 +5005,17 @@ const AcademyDashboard = () => {
 
                         const handleGradeAssignment = () => {
                             if (!assignmentText.trim()) {
-                                alert('Please type or paste your assignment submission before grading!');
+                                alert('Please type or paste your code submission before grading!');
                                 return;
                             }
                             setIsGrading(true);
                             setTimeout(() => {
-                                const result = runAIGrader(selectedLesson.id, assignmentText);
+                                const result = runAIGrader(selectedModIdx, assignmentText, selectedCourse);
                                 
-                                // Save to localStorage
-                                localStorage.setItem(`fta-assignment-score-${selectedLesson.id}`, result.score.toString());
-                                localStorage.setItem(`fta-assignment-feedback-${selectedLesson.id}`, result.feedback);
-                                localStorage.setItem(`fta-assignment-code-${selectedLesson.id}`, assignmentText);
+                                // Save to localStorage keyed by module
+                                localStorage.setItem(`fta-exercise-score-mod-${selectedModIdx}`, result.score.toString());
+                                localStorage.setItem(`fta-exercise-feedback-mod-${selectedModIdx}`, result.feedback);
+                                localStorage.setItem(`fta-exercise-code-mod-${selectedModIdx}`, assignmentText);
                                 
                                 // Save score to user leaderboard scores tracking
                                 const userScores = JSON.parse(localStorage.getItem('fta-user-scores') || '[]');
@@ -4959,11 +5025,12 @@ const AcademyDashboard = () => {
                                 setGradingResult({
                                     score: result.score,
                                     feedback: result.feedback,
+                                    steps: result.steps || [],
                                     code: assignmentText
                                 });
                                 setIsGrading(false);
                                 setRecentSubmissionCount(prev => prev + 1);
-                            }, 1500);
+                            }, 2500); // longer delay for "step-by-step analysis" feel
                         };
 
                         return (
@@ -5106,119 +5173,224 @@ const AcademyDashboard = () => {
                                     </div>
                                 </div>
 
-                                {/* ASSIGNMENT SUBMISSION & AI GRADING CARD */}
-                                <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '2rem', boxShadow: '8px 8px 0 #000000', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
-                                        <Award size={20} style={{ color: 'var(--accent-r)' }} />
-                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', margin: 0, textTransform: 'uppercase' }}>
-                                            📝 Coding Assignment & AI Grader
-                                        </h3>
-                                    </div>
+                                {/* CODING EXERCISE — ONLY APPEARS ON LAST LESSON OF MODULE */}
+                                {(() => {
+                                    const currentModule = course.modules[selectedModIdx];
+                                    const isLastLessonInModule = selectedLesIdx === currentModule.lessons.length - 1;
+                                    if (!isLastLessonInModule) return null;
 
-                                    <div>
-                                        <div style={{ fontWeight: 950, fontSize: '0.75rem', textTransform: 'uppercase', color: '#71717a', marginBottom: '0.4rem' }}>Task Instructions:</div>
-                                        <div style={{ background: '#f8fafc', border: '2px solid #000', padding: '1rem', borderRadius: '0.8rem', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', lineHeight: '1.5' }}>
-                                            {getAssignmentInstruction(selectedLesson)}
-                                        </div>
-                                    </div>
+                                    const exercise = getModuleExercise(selectedCourse, selectedModIdx);
+                                    const savedScore = localStorage.getItem(`fta-exercise-score-mod-${selectedModIdx}`);
+                                    const savedFeedback = localStorage.getItem(`fta-exercise-feedback-mod-${selectedModIdx}`);
+                                    const savedCode = localStorage.getItem(`fta-exercise-code-mod-${selectedModIdx}`);
+                                    const hasPreviousSubmission = savedScore && !gradingResult;
 
-                                    {gradingResult ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'fadeIn 0.2s ease-out' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: gradingResult.score >= 75 ? '#f0fdf4' : '#fef2f2', border: '2px solid #000', padding: '1rem', borderRadius: '0.8rem' }}>
-                                                <div style={{ 
-                                                    background: gradingResult.score >= 75 ? '#16a34a' : '#dc2626', 
-                                                    color: '#fff', 
-                                                    width: '50px', 
-                                                    height: '50px', 
-                                                    borderRadius: '50%', 
-                                                    display: 'flex', 
-                                                    alignItems: 'center', 
-                                                    justifyContent: 'center', 
-                                                    fontWeight: 900, 
-                                                    fontSize: '1.2rem',
-                                                    border: '2px solid #000',
-                                                    flexShrink: 0
-                                                }}>
-                                                    {gradingResult.score}
+                                    // Line number display helper
+                                    const codeLines = assignmentText.split('\n');
+                                    const lineCount = Math.max(codeLines.length, 15);
+
+                                    return (
+                                        <div style={{ background: '#0d1117', border: '3px solid #000000', boxShadow: '8px 8px 0 var(--accent-r)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                                            {/* Exercise Header */}
+                                            <div style={{ background: '#161b22', padding: '1.2rem 1.5rem', borderBottom: '2px solid #30363d', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <div style={{ background: 'var(--accent-r)', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem', border: '2px solid #000', flexShrink: 0 }}>
+                                                    <Cpu size={16} />
                                                 </div>
                                                 <div>
-                                                    <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.75rem', color: gradingResult.score >= 75 ? '#166534' : '#991b1b' }}>
-                                                        {gradingResult.score >= 75 ? 'Grade: Passed 🟢' : 'Grade: Review Required 🔴'}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 700, marginTop: '0.2rem' }}>
-                                                        {gradingResult.feedback}
+                                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase', color: '#e6edf3' }}>
+                                                        💻 {exercise.title}
+                                                    </h3>
+                                                    <div style={{ fontSize: '0.7rem', color: '#8b949e', fontWeight: 700, marginTop: '0.2rem' }}>
+                                                        Language: {exercise.langHint.toUpperCase()} &nbsp;•&nbsp; Passing Score: 75/100 &nbsp;•&nbsp; AI Strict Mode: ON
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem', color: '#71717a' }}>Your Submitted Code:</label>
-                                                <pre style={{ background: '#f1f5f9', border: '2px solid #000', padding: '1rem', borderRadius: '0.8rem', fontSize: '0.8rem', fontFamily: 'monospace', color: '#0f172a', margin: 0, overflowX: 'auto', whiteSpace: 'pre-wrap' }}>
-                                                    {gradingResult.code}
+                                            {/* Instructions Panel */}
+                                            <div style={{ background: '#161b22', padding: '1.2rem 1.5rem', borderBottom: '2px solid #30363d' }}>
+                                                <div style={{ fontWeight: 950, fontSize: '0.65rem', textTransform: 'uppercase', color: '#f0883e', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>📋 Exercise Instructions</div>
+                                                <pre style={{ background: '#0d1117', border: '1px solid #30363d', padding: '1rem', borderRadius: '0.6rem', fontSize: '0.8rem', fontFamily: "'Fira Code', 'Cascadia Code', 'SF Mono', monospace", color: '#c9d1d9', margin: 0, whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                                                    {exercise.instruction}
                                                 </pre>
                                             </div>
 
-                                            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                🔒 Submission locked. Assignments can only be graded once per cohort.
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            <div>
-                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem', color: '#71717a' }}>Submit Your Code / Answer:</label>
-                                                <textarea
-                                                    value={assignmentText}
-                                                    onChange={(e) => setAssignmentText(e.target.value)}
-                                                    placeholder="// Enter your JavaScript, CSS, HTML or text response here..."
-                                                    disabled={isGrading}
-                                                    style={{
-                                                        width: '100%',
-                                                        minHeight: '120px',
-                                                        padding: '0.8rem',
-                                                        border: '2px solid #000000',
-                                                        borderRadius: '0.8rem',
-                                                        outline: 'none',
-                                                        fontSize: '0.85rem',
-                                                        fontFamily: 'monospace',
-                                                        background: '#fcfcfc',
-                                                        resize: 'vertical',
-                                                        boxSizing: 'border-box'
-                                                    }}
-                                                />
-                                            </div>
+                                            {/* Display previous submission OR new editor */}
+                                            {(gradingResult || hasPreviousSubmission) ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    {/* Score Header */}
+                                                    {(() => {
+                                                        const sc = gradingResult ? gradingResult.score : parseInt(savedScore);
+                                                        const fb = gradingResult ? gradingResult.feedback : savedFeedback;
+                                                        const cd = gradingResult ? gradingResult.code : savedCode;
+                                                        const passed = sc >= 75;
+                                                        return (
+                                                            <>
+                                                                {/* Score Badge */}
+                                                                <div style={{ padding: '1.2rem 1.5rem', background: passed ? '#0d2818' : '#2d1117', borderBottom: '2px solid #30363d', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                                    <div style={{
+                                                                        background: passed ? '#238636' : '#da3633',
+                                                                        color: '#fff',
+                                                                        width: '56px',
+                                                                        height: '56px',
+                                                                        borderRadius: '50%',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        fontWeight: 900,
+                                                                        fontSize: '1.3rem',
+                                                                        border: '3px solid #000',
+                                                                        flexShrink: 0
+                                                                    }}>
+                                                                        {sc}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.85rem', color: passed ? '#3fb950' : '#f85149' }}>
+                                                                            {passed ? '✅ GRADE: PASSED' : '❌ GRADE: FAILED — REVIEW REQUIRED'}
+                                                                        </div>
+                                                                        <div style={{ fontSize: '0.7rem', color: '#8b949e', fontWeight: 700, marginTop: '0.2rem' }}>
+                                                                            Score: {sc}/100 &nbsp;•&nbsp; Threshold: 75/100 &nbsp;•&nbsp; Base Score: 5/100
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-                                            <button
-                                                onClick={handleGradeAssignment}
-                                                disabled={isGrading || !assignmentText.trim()}
-                                                style={{
-                                                    background: isGrading ? '#e2e8f0' : 'var(--accent-r)',
-                                                    color: isGrading ? '#94a3b8' : '#ffffff',
-                                                    border: '3px solid #000000',
-                                                    padding: '1rem',
-                                                    borderRadius: '1rem',
-                                                    fontFamily: 'Outfit',
-                                                    fontWeight: 950,
-                                                    textTransform: 'uppercase',
-                                                    cursor: (isGrading || !assignmentText.trim()) ? 'not-allowed' : 'pointer',
-                                                    boxShadow: (isGrading || !assignmentText.trim()) ? 'none' : '4px 4px 0 #000000',
-                                                    transition: 'all 0.1s ease',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    gap: '0.6rem'
-                                                }}
-                                            >
-                                                {isGrading ? (
-                                                    <>🧠 AI GRADER ANALYZING CODE...</>
-                                                ) : (
-                                                    <>
-                                                        <Cpu size={18} /> SUBMIT & GRADE CODE 🤖
-                                                    </>
-                                                )}
-                                            </button>
+                                                                {/* Step-by-Step Feedback */}
+                                                                <div style={{ padding: '1.2rem 1.5rem', background: '#0d1117', borderBottom: '2px solid #30363d' }}>
+                                                                    <div style={{ fontWeight: 950, fontSize: '0.65rem', textTransform: 'uppercase', color: '#f0883e', marginBottom: '0.8rem', letterSpacing: '0.05em' }}>🔍 AI Step-by-Step Analysis</div>
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                                                        {fb.split('\n').map((line, i) => {
+                                                                            if (!line.trim()) return null;
+                                                                            const isPass = line.startsWith('✅');
+                                                                            const isFail = line.startsWith('❌');
+                                                                            const isPartial = line.startsWith('⚠️');
+                                                                            const isFinal = line.startsWith('🏁');
+                                                                            return (
+                                                                                <div key={i} style={{
+                                                                                    padding: '0.4rem 0.6rem',
+                                                                                    background: isFinal ? '#161b22' : isPass ? '#0d2818' : isFail ? '#2d1117' : isPartial ? '#2d2305' : 'transparent',
+                                                                                    border: isFinal ? '1px solid #30363d' : 'none',
+                                                                                    borderRadius: '0.4rem',
+                                                                                    fontSize: '0.78rem',
+                                                                                    fontFamily: "'Fira Code', monospace",
+                                                                                    color: isFinal ? '#e6edf3' : isPass ? '#3fb950' : isFail ? '#f85149' : isPartial ? '#d29922' : '#8b949e',
+                                                                                    fontWeight: isFinal ? 900 : 600,
+                                                                                    lineHeight: '1.4'
+                                                                                }}>
+                                                                                    {line}
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Submitted Code */}
+                                                                <div style={{ padding: '1.2rem 1.5rem', background: '#0d1117' }}>
+                                                                    <div style={{ fontWeight: 950, fontSize: '0.65rem', textTransform: 'uppercase', color: '#8b949e', marginBottom: '0.5rem' }}>📄 Your Submitted Code</div>
+                                                                    <pre style={{ background: '#161b22', border: '1px solid #30363d', padding: '1rem', borderRadius: '0.6rem', fontSize: '0.78rem', fontFamily: "'Fira Code', monospace", color: '#c9d1d9', margin: 0, overflowX: 'auto', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                                                                        {cd}
+                                                                    </pre>
+                                                                    <div style={{ fontSize: '0.7rem', color: '#484f58', fontWeight: 700, fontStyle: 'italic', marginTop: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                                        🔒 Submission locked. Exercises can only be graded once per module per cohort.
+                                                                    </div>
+                                                                </div>
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            ) : (
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    {/* IDE-like Code Editor */}
+                                                    <div style={{ display: 'flex', background: '#0d1117' }}>
+                                                        {/* Line Numbers */}
+                                                        <div style={{
+                                                            padding: '1rem 0.6rem 1rem 0.8rem',
+                                                            background: '#161b22',
+                                                            borderRight: '1px solid #30363d',
+                                                            textAlign: 'right',
+                                                            userSelect: 'none',
+                                                            minWidth: '40px'
+                                                        }}>
+                                                            {Array.from({ length: lineCount }, (_, i) => (
+                                                                <div key={i} style={{ fontSize: '0.78rem', fontFamily: "'Fira Code', monospace", color: '#484f58', lineHeight: '1.5', height: '1.17rem' }}>
+                                                                    {i + 1}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        {/* Code Input Area */}
+                                                        <textarea
+                                                            value={assignmentText}
+                                                            onChange={(e) => setAssignmentText(e.target.value)}
+                                                            placeholder={`// Write your ${exercise.langHint.toUpperCase()} code here...\n// The AI grader starts you at 5/100.\n// You must EARN every point.\n// Be thorough. Include comments.\n`}
+                                                            disabled={isGrading}
+                                                            spellCheck={false}
+                                                            style={{
+                                                                flex: 1,
+                                                                padding: '1rem',
+                                                                background: '#0d1117',
+                                                                color: '#c9d1d9',
+                                                                border: 'none',
+                                                                outline: 'none',
+                                                                fontSize: '0.85rem',
+                                                                fontFamily: "'Fira Code', 'Cascadia Code', 'SF Mono', 'Consolas', monospace",
+                                                                lineHeight: '1.5',
+                                                                resize: 'vertical',
+                                                                minHeight: '280px',
+                                                                boxSizing: 'border-box',
+                                                                caretColor: '#58a6ff',
+                                                                tabSize: 2
+                                                            }}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Tab') {
+                                                                    e.preventDefault();
+                                                                    const start = e.target.selectionStart;
+                                                                    const end = e.target.selectionEnd;
+                                                                    const newVal = assignmentText.substring(0, start) + '  ' + assignmentText.substring(end);
+                                                                    setAssignmentText(newVal);
+                                                                    setTimeout(() => { e.target.selectionStart = e.target.selectionEnd = start + 2; }, 0);
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                    {/* Submit Bar */}
+                                                    <div style={{ padding: '1rem 1.5rem', background: '#161b22', borderTop: '2px solid #30363d', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                                                        <div style={{ fontSize: '0.7rem', color: '#8b949e', fontWeight: 700 }}>
+                                                            {assignmentText.trim().length} characters &nbsp;•&nbsp; {assignmentText.split('\n').length} lines &nbsp;•&nbsp; {exercise.langHint.toUpperCase()}
+                                                        </div>
+                                                        <button
+                                                            onClick={handleGradeAssignment}
+                                                            disabled={isGrading || !assignmentText.trim()}
+                                                            style={{
+                                                                background: isGrading ? '#21262d' : '#238636',
+                                                                color: isGrading ? '#484f58' : '#ffffff',
+                                                                border: '2px solid #000',
+                                                                padding: '0.8rem 2rem',
+                                                                borderRadius: '0.6rem',
+                                                                fontFamily: 'Outfit',
+                                                                fontWeight: 950,
+                                                                textTransform: 'uppercase',
+                                                                fontSize: '0.85rem',
+                                                                cursor: (isGrading || !assignmentText.trim()) ? 'not-allowed' : 'pointer',
+                                                                boxShadow: (isGrading || !assignmentText.trim()) ? 'none' : '3px 3px 0 #000000',
+                                                                transition: 'all 0.15s ease',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '0.5rem'
+                                                            }}
+                                                        >
+                                                            {isGrading ? (
+                                                                <>🧠 AI Analyzing Code Step-by-Step...</>
+                                                            ) : (
+                                                                <>
+                                                                    <Cpu size={16} /> Submit & Grade Code
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
+                                    );
+                                })()}
                             </>
                         );
                     })()}

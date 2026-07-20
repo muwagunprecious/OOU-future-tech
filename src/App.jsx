@@ -4898,6 +4898,9 @@ const AcademyDashboard = () => {
     // Post Challenge Popup State
     const [showPostForm, setShowPostForm] = useState(false);
 
+    // Header Brand Dropdown State
+    const [showHeaderDropdown, setShowHeaderDropdown] = useState(false);
+
     // Cohort — assigned by admin, NOT student-selectable
     const studentCohort = localStorage.getItem('fta-admin-assigned-cohort') || 'Cohort 1';
     const [assignmentText, setAssignmentText] = useState('');
@@ -5327,9 +5330,106 @@ const AcademyDashboard = () => {
                     <div style={{ background: '#000', color: '#fff', padding: '0.8rem', border: '2px solid #000', borderRadius: '8px' }}>
                         <BookOpen size={28} />
                     </div>
-                    <div style={{ flex: 1 }}>
-                        <h1 style={{ fontSize: '1.8rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }} className="fta-header-title">Future Tech Academy (FTA)</h1>
-                        <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px' }}>LEARNING PORTAL</span>
+                    {/* FTA DROPDOWN TRIGGER */}
+                    <div style={{ flex: 1, position: 'relative' }}>
+                        <button
+                            onClick={() => setShowHeaderDropdown(v => !v)}
+                            style={{
+                                display: 'flex', alignItems: 'flex-start', flexDirection: 'column',
+                                gap: '0.1rem', background: 'none', border: 'none',
+                                cursor: 'pointer', padding: 0, textAlign: 'left'
+                            }}
+                            aria-haspopup="true"
+                            aria-expanded={showHeaderDropdown}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <h1 style={{ fontSize: '1.8rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }} className="fta-header-title">
+                                    Future Tech Academy (FTA)
+                                </h1>
+                                <span style={{
+                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                    width: '22px', height: '22px', background: '#000', color: '#fff',
+                                    borderRadius: '4px', fontSize: '0.7rem', fontWeight: 900,
+                                    transform: showHeaderDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.2s ease', flexShrink: 0
+                                }}>▾</span>
+                            </div>
+                            <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px' }}>LEARNING PORTAL</span>
+                        </button>
+
+                        {/* DROPDOWN MENU */}
+                        {showHeaderDropdown && (
+                            <>
+                                {/* Click-away overlay */}
+                                <div
+                                    style={{ position: 'fixed', inset: 0, zIndex: 998 }}
+                                    onClick={() => setShowHeaderDropdown(false)}
+                                />
+                                <div style={{
+                                    position: 'absolute', top: 'calc(100% + 10px)', left: 0,
+                                    background: '#fff', border: '3px solid #000',
+                                    boxShadow: '8px 8px 0 #000', zIndex: 999,
+                                    minWidth: '260px', animation: 'slideUp 0.18s ease-out',
+                                    overflow: 'hidden', borderRadius: '0.5rem'
+                                }}>
+                                    {/* Menu Header */}
+                                    <div style={{ background: '#000', color: '#fff', padding: '0.8rem 1rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                        📚 FTA Navigation
+                                    </div>
+
+                                    {[
+                                        { icon: '🎓', label: 'Curriculum', sub: 'Videos & Lessons', tab: 'curriculum' },
+                                        { icon: '👥', label: 'Peer Hub', sub: 'Bug Board & Help', tab: 'peers' },
+                                        { icon: '🔔', label: 'Notifications', sub: `${unreadCount} unread`, tab: 'notifications' },
+                                    ].map(item => (
+                                        <button
+                                            key={item.tab}
+                                            onClick={() => { setAcademyTab(item.tab); setShowHeaderDropdown(false); }}
+                                            style={{
+                                                display: 'flex', alignItems: 'center', gap: '0.8rem',
+                                                width: '100%', padding: '0.9rem 1rem',
+                                                background: academyTab === item.tab ? '#fff8f8' : '#fff',
+                                                border: 'none', borderBottom: '2px solid #f1f5f9',
+                                                cursor: 'pointer', textAlign: 'left',
+                                                borderLeft: academyTab === item.tab ? '4px solid var(--accent-r)' : '4px solid transparent',
+                                                transition: 'background 0.1s ease'
+                                            }}
+                                            onMouseOver={e => e.currentTarget.style.background = '#f8fafc'}
+                                            onMouseOut={e => e.currentTarget.style.background = academyTab === item.tab ? '#fff8f8' : '#fff'}
+                                        >
+                                            <span style={{ fontSize: '1.2rem', width: '28px', textAlign: 'center' }}>{item.icon}</span>
+                                            <div>
+                                                <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', color: '#000' }}>{item.label}</div>
+                                                <div style={{ fontFamily: 'Outfit', fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>{item.sub}</div>
+                                            </div>
+                                            {academyTab === item.tab && <span style={{ marginLeft: 'auto', color: 'var(--accent-r)', fontWeight: 900, fontSize: '0.8rem' }}>●</span>}
+                                        </button>
+                                    ))}
+
+                                    {/* Divider */}
+                                    <div style={{ borderTop: '2px solid #000', margin: '0' }} />
+
+                                    {/* Profile */}
+                                    <button
+                                        onClick={() => { setEditNameInput(studentName); setShowProfileModal(true); setShowHeaderDropdown(false); }}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '0.8rem',
+                                            width: '100%', padding: '0.9rem 1rem',
+                                            background: '#fff', border: 'none',
+                                            cursor: 'pointer', textAlign: 'left'
+                                        }}
+                                        onMouseOver={e => e.currentTarget.style.background = '#f8fafc'}
+                                        onMouseOut={e => e.currentTarget.style.background = '#fff'}
+                                    >
+                                        <span style={{ fontSize: '1.2rem', width: '28px', textAlign: 'center' }}>👤</span>
+                                        <div>
+                                            <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', color: '#000' }}>My Profile</div>
+                                            <div style={{ fontFamily: 'Outfit', fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>{studentName}</div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
                     {/* Live Score Stats & Candidate Profile */}
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }} className="fta-header-stats">

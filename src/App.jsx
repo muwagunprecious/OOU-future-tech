@@ -4877,7 +4877,19 @@ const AcademyDashboard = () => {
             [idx]: !prev[idx]
         }));
     };
-    
+    // Candidate Profile State
+    const [studentName, setStudentName] = useState(() => localStorage.getItem('fta-student-name') || 'You (Active Student)');
+    const [studentAvatar, setStudentAvatar] = useState(() => localStorage.getItem('fta-student-avatar') || '');
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [editNameInput, setEditNameInput] = useState(studentName);
+
+    // Read Peer Posts State (for unread counter icon)
+    const [readPostIds, setReadPostIds] = useState(() => JSON.parse(localStorage.getItem('fta-read-posts') || '[]'));
+
+    // Stuck in Task Modal State
+    const [showStuckModal, setShowStuckModal] = useState(false);
+    const [stuckTaskData, setStuckTaskData] = useState(null);
+
     // Cohort — assigned by admin, NOT student-selectable
     const studentCohort = localStorage.getItem('fta-admin-assigned-cohort') || 'Cohort 1';
     const [assignmentText, setAssignmentText] = useState('');
@@ -5012,8 +5024,41 @@ const AcademyDashboard = () => {
                         <h1 style={{ fontSize: '1.8rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }}>Future Tech Academy (FTA)</h1>
                         <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px' }}>LEARNING PORTAL</span>
                     </div>
-                    {/* Live Score Stats */}
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    {/* Live Score Stats & Candidate Profile */}
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                        {/* Candidate Profile Avatar Button */}
+                        <div 
+                            onClick={() => {
+                                setEditNameInput(studentName);
+                                setShowProfileModal(true);
+                            }}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.6rem',
+                                background: '#f8fafc',
+                                border: '2px solid #000',
+                                padding: '0.4rem 0.8rem',
+                                borderRadius: '2rem',
+                                cursor: 'pointer',
+                                boxShadow: '3px 3px 0 #000',
+                                transition: 'all 0.15s ease'
+                            }}
+                            title="Click to edit your candidate profile and upload picture"
+                        >
+                            {studentAvatar ? (
+                                <img src={studentAvatar} alt={studentName} style={{ width: '34px', height: '34px', borderRadius: '50%', border: '2px solid #000', objectFit: 'cover' }} />
+                            ) : (
+                                <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, border: '2px solid #000', fontSize: '0.85rem' }}>
+                                    <User size={18} />
+                                </div>
+                            )}
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 900, fontFamily: 'Outfit', color: '#000' }}>{studentName}</div>
+                                <div style={{ fontSize: '0.58rem', color: '#64748b', fontWeight: 700 }}>📷 Edit Profile Picture</div>
+                            </div>
+                        </div>
+
                         {[
                             { label: 'Lessons Done', val: `${completedCount}/8`, color: '#000' },
                             { label: 'Avg Score', val: avgScore > 0 ? `${avgScore}/100` : '—', color: avgScore >= 75 ? '#059669' : avgScore > 0 ? '#dc2626' : '#94a3b8' },
@@ -5065,31 +5110,96 @@ const AcademyDashboard = () => {
                 </div>
             </div>
 
-            {/* Academy Sub-tabs */}
-            <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '3px solid #000', paddingBottom: '1rem' }}>
-                {[{id:'curriculum',label:'📚 Curriculum'},{id:'peers',label:`👥 Peer Hub`},{id:'notifications',label:`🔔 Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`}].map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => {
-                            setAcademyTab(tab.id);
-                            if (tab.id === 'notifications') {
-                                const updated = notifications.map(n => ({ ...n, read: true }));
-                                setNotifications(updated);
-                                localStorage.setItem('fta-notifications', JSON.stringify(updated));
-                                setUnreadCount(0);
-                            }
-                        }}
-                        style={{
-                            padding: '0.7rem 1.4rem', border: '3px solid #000', borderRadius: '0.8rem',
-                            background: academyTab === tab.id ? '#000' : '#fff',
-                            color: academyTab === tab.id ? '#fff' : '#000',
-                            fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem',
-                            cursor: 'pointer', textTransform: 'uppercase',
-                            boxShadow: academyTab === tab.id ? 'none' : '4px 4px 0 #000'
-                        }}
-                    >{tab.label}</button>
-                ))}
-            </div>
+            {/* Academy Sub-tabs with Unread Numerical Badges */}
+            {(() => {
+                const activePostsList = peerPosts.length > 0 ? peerPosts : [
+                    {
+                        id: 1,
+                        title: 'Getting TypeError: Illegal constructor in React',
+                        body: 'I noticed this error occurs when referencing Lock without importing it from lucide-react. Make sure you check your imports at the top of main or App!',
+                        tag: 'Bug 🐛',
+                        author: 'Ogunkoya Samuel Opemipo',
+                        authorAvatar: '',
+                        date: '7/19/2026',
+                        cohort: studentCohort,
+                        replies: [
+                            { author: 'Ademuwagun Precious', authorAvatar: '', body: 'Thanks Samuel! This saved me hours of debugging.', date: '7/19/2026' }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        title: 'HTML Intro grading fails - help!',
+                        body: 'I keep getting 55/100 and Failed on the HTML introduction assignment. I included h1, p, and a tags. What else is needed?',
+                        tag: 'Question ❓',
+                        author: 'Chioma Okafor',
+                        authorAvatar: '',
+                        date: '7/19/2026',
+                        cohort: studentCohort,
+                        replies: [
+                            { author: 'Omotoyosi Agboola', authorAvatar: '', body: 'Make sure you add the exact DOCTYPE declaration: <!doctype html> at the very top. The strict AI grader validates the entire skeleton!', date: '7/19/2026' }
+                        ]
+                    }
+                ];
+
+                const cohortFilteredPosts = activePostsList.filter(p => p.cohort === studentCohort);
+                const unreadPeerCount = cohortFilteredPosts.filter(p => !readPostIds.includes(p.id)).length;
+
+                return (
+                    <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '3px solid #000', paddingBottom: '1rem' }}>
+                        {[
+                            { id: 'curriculum', label: '📚 Curriculum', unread: 0 },
+                            { id: 'peers', label: '👥 Peer Hub', unread: unreadPeerCount },
+                            { id: 'notifications', label: '🔔 Notifications', unread: unreadCount }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => {
+                                    setAcademyTab(tab.id);
+                                    if (tab.id === 'notifications') {
+                                        const updated = notifications.map(n => ({ ...n, read: true }));
+                                        setNotifications(updated);
+                                        localStorage.setItem('fta-notifications', JSON.stringify(updated));
+                                        setUnreadCount(0);
+                                    }
+                                    if (tab.id === 'peers') {
+                                        const allIds = cohortFilteredPosts.map(p => p.id);
+                                        setReadPostIds(allIds);
+                                        localStorage.setItem('fta-read-posts', JSON.stringify(allIds));
+                                    }
+                                }}
+                                style={{
+                                    padding: '0.7rem 1.4rem', border: '3px solid #000', borderRadius: '0.8rem',
+                                    background: academyTab === tab.id ? '#000' : '#fff',
+                                    color: academyTab === tab.id ? '#fff' : '#000',
+                                    fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem',
+                                    cursor: 'pointer', textTransform: 'uppercase',
+                                    boxShadow: academyTab === tab.id ? 'none' : '4px 4px 0 #000',
+                                    display: 'flex', alignItems: 'center', gap: '0.4rem'
+                                }}
+                            >
+                                {tab.label}
+                                {tab.unread > 0 && (
+                                    <span style={{
+                                        background: '#dc2626',
+                                        color: '#ffffff',
+                                        fontSize: '0.68rem',
+                                        fontWeight: 900,
+                                        padding: '0.15rem 0.55rem',
+                                        borderRadius: '1rem',
+                                        border: '1.5px solid #000',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        boxShadow: '1px 1px 0 #000'
+                                    }}>
+                                        {tab.unread}
+                                    </span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                );
+            })()}
 
             {/* Main Dashboard Layout */}
             <div style={{ display: 'grid', gridTemplateColumns: academyTab === 'curriculum' ? 'minmax(0, 320px) 1fr' : '1fr', gap: '2rem', alignItems: 'start' }} className="academy-grid">
@@ -5106,81 +5216,88 @@ const AcademyDashboard = () => {
 
                     {course.modules.map((mod, modIdx) => {
                         const isExpanded = !!expandedModules[modIdx];
+
                         return (
-                            <div key={modIdx} style={{ marginBottom: '1rem', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.8rem' }}>
-                                <button
+                            <div key={modIdx} style={{ marginBottom: '1rem', border: '2px solid #000', borderRadius: '0.5rem', overflow: 'hidden' }}>
+                                {/* Module Accordion Header */}
+                                <div
                                     onClick={() => toggleModule(modIdx)}
                                     style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        width: '100%',
-                                        background: 'none',
-                                        border: 'none',
-                                        padding: '0.5rem 0',
+                                        background: isExpanded ? '#000000' : '#f8fafc',
+                                        color: isExpanded ? '#ffffff' : '#000000',
+                                        padding: '0.8rem 1rem',
                                         cursor: 'pointer',
-                                        textAlign: 'left',
-                                        color: isExpanded ? 'var(--accent-r)' : '#000000',
-                                        transition: 'color 0.15s ease'
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        userSelect: 'none',
+                                        transition: 'background 0.2s ease'
                                     }}
                                 >
-                                    <span style={{ fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase' }}>
                                         {mod.title}
                                     </span>
-                                    {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                                </button>
-                                <AnimatePresence initial={false}>
-                                    {isExpanded && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            transition={{ duration: 0.2 }}
-                                            style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}
-                                        >
-                                            {mod.lessons.map((les, lesIdx) => {
-                                                const isLocked = isLessonLocked(les, modIdx, lesIdx);
-                                                return (
-                                                    <button
-                                                        key={les.id}
-                                                        disabled={isLocked}
-                                                        onClick={() => setSelectedLesson(les)}
-                                                        style={{
-                                                            textAlign: 'left',
-                                                            padding: '0.75rem',
-                                                            background: selectedLesson.id === les.id ? '#000000' : isLocked ? '#f3f4f6' : '#fafafa',
-                                                            color: selectedLesson.id === les.id ? '#ffffff' : isLocked ? '#9ca3af' : '#000000',
-                                                            border: '2px solid #000000',
-                                                            fontSize: '0.8rem',
-                                                            fontWeight: 700,
-                                                            cursor: isLocked ? 'not-allowed' : 'pointer',
-                                                            width: '100%',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'space-between',
-                                                            gap: '0.5rem',
-                                                            opacity: isLocked ? 0.6 : 1
-                                                        }}
-                                                    >
-                                                        <span style={{ flex: 1 }}>{les.title}</span>
-                                                        {isLocked ? (
-                                                            <Lock size={12} style={{ flexShrink: 0, color: '#9ca3af' }} />
-                                                        ) : (
-                                                            <Play size={10} style={{ flexShrink: 0, opacity: selectedLesson.id === les.id ? 1 : 0.4 }} />
-                                                        )}
-                                                    </button>
-                                                );
-                                            })}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                    {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                                </div>
+
+                                {/* Module Lessons List */}
+                                {isExpanded && (
+                                    <div style={{ background: '#ffffff', padding: '0.5rem' }}>
+                                        {mod.lessons.map((les, lesIdx) => {
+                                            const isSelected = selectedLesson.id === les.id;
+                                            const locked = isLessonLocked(les, modIdx, lesIdx);
+
+                                            return (
+                                                <button
+                                                    key={les.id}
+                                                    onClick={() => {
+                                                        if (!locked) {
+                                                            setSelectedLesson(les);
+                                                        }
+                                                    }}
+                                                    disabled={locked}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.6rem',
+                                                        width: '100%',
+                                                        padding: '0.6rem 0.8rem',
+                                                        margin: '0.2rem 0',
+                                                        border: '2px solid',
+                                                        borderColor: isSelected ? 'var(--accent-r)' : 'transparent',
+                                                        background: isSelected ? '#fff0f3' : locked ? '#f1f5f9' : 'transparent',
+                                                        borderRadius: '0.4rem',
+                                                        cursor: locked ? 'not-allowed' : 'pointer',
+                                                        textAlign: 'left',
+                                                        color: locked ? '#94a3b8' : '#000000',
+                                                        fontWeight: isSelected ? 900 : 700,
+                                                        fontSize: '0.8rem',
+                                                        opacity: locked ? 0.7 : 1,
+                                                        transition: 'all 0.1s ease'
+                                                    }}
+                                                >
+                                                    {locked ? (
+                                                        <Lock size={14} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                                                    ) : isSelected ? (
+                                                        <CheckCircle size={14} style={{ color: 'var(--accent-r)', flexShrink: 0 }} />
+                                                    ) : (
+                                                        <PlayCircle size={14} style={{ color: '#64748b', flexShrink: 0 }} />
+                                                    )}
+                                                    <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        {les.title}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
                 </div>
                 )}
 
-                {/* MAIN CONTENT AREA */}
+                {/* MAIN CONTENT AREA: Video, Notes & Coding Assignment */}
                 {academyTab === 'curriculum' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     {(() => {
@@ -5201,17 +5318,17 @@ const AcademyDashboard = () => {
 
                         if (isLocked) {
                             return (
-                                <div style={{ background: '#fef2f2', border: '3px solid #000000', padding: '4rem 2rem', textAlign: 'center', boxShadow: '8px 8px 0 #000000', borderRadius: '2rem', animation: 'fadeIn 0.2s ease-out' }}>
-                                    <div style={{ display: 'inline-flex', background: '#fee2e2', color: '#dc2626', padding: '1.2rem', borderRadius: '2rem', border: '3px solid #000', marginBottom: '1.5rem' }}>
-                                        <Lock size={44} />
+                                <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '3rem 2rem', boxShadow: '8px 8px 0 #000000', textAlign: 'center' }}>
+                                    <div style={{ background: '#fee2e2', color: '#dc2626', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto', border: '3px solid #000' }}>
+                                        <Lock size={30} />
                                     </div>
-                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: 955, fontSize: '1.8rem', color: '#000', textTransform: 'uppercase', margin: 0 }}>
-                                        Lesson Locked
+                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', fontSize: '1.5rem', margin: '0 0 1rem 0' }}>
+                                        {isLockedByAdmin ? "Module Locked by Administrator" : "Lecture Locked"}
                                     </h2>
-                                    <p style={{ maxWidth: '500px', margin: '1rem auto 0 auto', color: '#555', fontWeight: 700, fontSize: '0.95rem', lineHeight: '1.5' }}>
+                                    <p style={{ color: '#475569', fontSize: '0.95rem', fontWeight: 700, maxWidth: '500px', margin: '0 auto 1.5rem auto', lineHeight: '1.6' }}>
                                         {isLockedByAdmin 
-                                          ? `The administrator has locked ${course.modules[selectedModIdx]?.title || 'this module'} for students in ${studentCohort}.` 
-                                          : "You must complete the previous lesson's coding assignment to unlock this lecture. Sequential learning is required!"}
+                                           ? `The administrator has locked ${course.modules[selectedModIdx]?.title || 'this module'} for students in ${studentCohort}.` 
+                                           : "You must complete the previous lesson's coding assignment to unlock this lecture. Sequential learning is required!"}
                                     </p>
                                 </div>
                             );
@@ -5244,145 +5361,117 @@ const AcademyDashboard = () => {
                                 });
                                 setIsGrading(false);
                                 setRecentSubmissionCount(prev => prev + 1);
-                            }, 2500); // longer delay for "step-by-step analysis" feel
+
+                                // Trigger Pop-up Prompt if candidate is stuck (score < 75)
+                                if (result.score < 75) {
+                                    const exercise = getModuleExercise(selectedCourse, selectedModIdx);
+                                    setStuckTaskData({
+                                        title: exercise.title,
+                                        code: assignmentText,
+                                        feedback: result.feedback,
+                                        score: result.score
+                                    });
+                                    setShowStuckModal(true);
+                                }
+                            }, 2500);
                         };
 
                         return (
                             <>
                                 {/* VIDEO PLAYER CARD */}
                                 <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '8px 8px 0 #000000' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
-                                        <div style={{ background: 'var(--accent-r)', color: '#fff', padding: '0.4rem 0.8rem', border: '2px solid #000', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>
-                                            Lecture Video
-                                        </div>
-                                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.8rem' }}>
+                                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0, textTransform: 'uppercase' }}>
                                             {selectedLesson.title}
                                         </h2>
+                                        <span style={{ background: 'var(--accent-r)', color: '#ffffff', padding: '0.3rem 0.8rem', border: '2px solid #000', borderRadius: '0.5rem', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase' }}>
+                                            Lesson {selectedLesIdx + 1} of {course.modules[selectedModIdx].lessons.length}
+                                        </span>
                                     </div>
 
-                                    {/* HTML5 or YouTube video element */}
-                                    <div style={{ background: '#000000', border: '3px solid #000000', position: 'relative', overflow: 'hidden', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        {selectedLesson.videoUrl.includes('youtube.com') || selectedLesson.videoUrl.includes('youtu.be') ? (
-                                            <iframe
-                                                key={selectedLesson.id}
-                                                width="100%"
-                                                height="100%"
-                                                src={selectedLesson.videoUrl}
-                                                title={selectedLesson.title}
-                                                frameBorder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                allowFullScreen
-                                                style={{ border: 'none', width: '100%', height: '100%' }}
-                                            />
-                                        ) : (
-                                            <video
-                                                key={selectedLesson.id}
-                                                src={selectedLesson.videoUrl}
-                                                controls
-                                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                                poster={`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="90" viewBox="0 0 160 90"><rect width="160" height="90" fill="%23000"/><text x="80" y="45" font-family="Outfit, sans-serif" font-weight="900" font-size="6" fill="%23e11d48" text-anchor="middle">FUTURE TECH ACADEMY</text></svg>`}
-                                            />
-                                        )}
+                                    {/* Responsive 16:9 Video Container */}
+                                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', border: '3px solid #000000', background: '#000000', marginBottom: '1.5rem' }}>
+                                        <iframe
+                                            src={selectedLesson.videoUrl}
+                                            title={selectedLesson.title}
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
                                     </div>
                                 </div>
 
-                                {/* NOTES & SCRATCHPAD CONTAINER */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="notes-grid">
-                                    
-                                    {/* LEFT COLUMN: Lecture Takeaways */}
-                                    <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000', display: 'flex', flexDirection: 'column' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
+                                {/* TABBED NOTES & SCRATCHPAD CONTAINER */}
+                                <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '8px 8px 0 #000000' }}>
+                                    <div style={{ display: 'flex', gap: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.8rem', marginBottom: '1.5rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, textTransform: 'uppercase', fontFamily: 'Outfit', fontSize: '1rem', color: '#000' }}>
                                             <FileText size={18} style={{ color: 'var(--accent-r)' }} />
-                                            <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase' }}>
-                                                Lecture Takeaways
-                                            </h3>
-                                        </div>
-                                        <div style={{ 
-                                            fontSize: '0.85rem', 
-                                            lineHeight: '1.6', 
-                                            color: '#333', 
-                                            overflowY: 'auto', 
-                                            maxHeight: '280px',
-                                            whiteSpace: 'pre-line',
-                                            fontFamily: 'Inter, sans-serif'
-                                        }}>
-                                            {selectedLesson.notes}
+                                            Curator Notes & Scratchpad
                                         </div>
                                     </div>
 
-                                    {/* RIGHT COLUMN: Interactive notepad */}
-                                    <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000', display: 'flex', flexDirection: 'column' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                                                <Pencil size={16} style={{ color: 'var(--accent-r)' }} />
-                                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase' }}>
-                                                    Interactive Scratchpad
-                                                </h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }} className="notes-scratchpad-grid">
+                                        {/* Left Side: Curator Notes */}
+                                        <div style={{ background: '#f8fafc', border: '2px solid #000', padding: '1.2rem', borderRadius: '0.8rem' }}>
+                                            <div style={{ fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.8rem', letterSpacing: '0.05em' }}>
+                                                📌 Curator Study Notes
                                             </div>
-                                            <span style={{ fontSize: '0.7rem', color: isSaving ? 'var(--accent-r)' : '#888', fontWeight: 'bold' }}>
-                                                {isSaving ? 'Saving...' : 'Auto-Saved'}
-                                            </span>
+                                            <div style={{ fontSize: '0.85rem', color: '#1e293b', lineHeight: '1.6', fontWeight: 650 }}>
+                                                {selectedLesson.notes.split('\n').map((line, idx) => {
+                                                    if (line.startsWith('### ')) return <h4 key={idx} style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem', marginTop: idx > 0 ? '1rem' : 0, marginBottom: '0.4rem', color: '#0f172a' }}>{line.replace('### ', '')}</h4>;
+                                                    if (line.startsWith('• ')) return <li key={idx} style={{ marginLeft: '1rem', marginBottom: '0.2rem' }}>{line.replace('• ', '')}</li>;
+                                                    if (line.startsWith('const ') || line.includes('function') || line.includes('import')) {
+                                                        return <pre key={idx} style={{ background: '#0f172a', color: '#38bdf8', padding: '0.6rem', borderRadius: '0.4rem', fontSize: '0.75rem', overflowX: 'auto', margin: '0.4rem 0' }}>{line}</pre>;
+                                                    }
+                                                    return <p key={idx} style={{ margin: '0.4rem 0' }}>{line}</p>;
+                                                })}
+                                            </div>
                                         </div>
-                                        <textarea
-                                            value={noteText}
-                                            onChange={handleNoteChange}
-                                            placeholder="Jot down quick thoughts, code snippets, or notes from the lecture here..."
-                                            style={{
-                                                width: '100%',
-                                                minHeight: '180px',
-                                                padding: '0.8rem',
-                                                border: '2px solid #000000',
-                                                borderRadius: '4px',
-                                                outline: 'none',
-                                                fontSize: '0.85rem',
-                                                fontFamily: 'monospace',
-                                                background: '#fcfcfc',
-                                                resize: 'vertical',
-                                                boxSizing: 'border-box',
-                                                marginBottom: '1rem'
-                                            }}
-                                        />
-                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: 'auto' }}>
-                                            <button
-                                                onClick={handleDownloadNotes}
-                                                disabled={!noteText}
+
+                                        {/* Right Side: Interactive Scratchpad */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <label style={{ fontSize: '0.75rem', fontWeight: 955, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+                                                    📝 Your Personal Scratchpad
+                                                </label>
+                                                {isSaving && <span style={{ fontSize: '0.65rem', color: '#059669', fontWeight: 800 }}>Saved ✓</span>}
+                                            </div>
+
+                                            <textarea
+                                                value={noteText}
+                                                onChange={handleNoteChange}
+                                                placeholder="Take notes while watching the lecture... (Auto-saves to browser storage)"
                                                 style={{
-                                                    background: '#000000',
-                                                    color: '#ffffff',
+                                                    width: '100%',
+                                                    minHeight: '220px',
+                                                    padding: '1rem',
                                                     border: '2px solid #000000',
-                                                    padding: '0.5rem 1rem',
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: 900,
-                                                    textTransform: 'uppercase',
-                                                    cursor: noteText ? 'pointer' : 'not-allowed',
-                                                    opacity: noteText ? 1 : 0.5,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '0.4rem'
+                                                    borderRadius: '0.8rem',
+                                                    outline: 'none',
+                                                    fontSize: '0.85rem',
+                                                    fontFamily: 'monospace',
+                                                    background: '#fffbeb',
+                                                    color: '#1e293b',
+                                                    lineHeight: '1.5',
+                                                    resize: 'vertical',
+                                                    boxSizing: 'border-box'
                                                 }}
-                                            >
-                                                <Download size={12} /> Download (.txt)
-                                            </button>
-                                            <button
-                                                onClick={handleClearNotes}
-                                                disabled={!noteText}
-                                                style={{
-                                                    background: '#ffffff',
-                                                    color: 'var(--accent-r)',
-                                                    border: '2px solid var(--accent-r)',
-                                                    padding: '0.5rem 1rem',
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: 900,
-                                                    textTransform: 'uppercase',
-                                                    cursor: noteText ? 'pointer' : 'not-allowed',
-                                                    opacity: noteText ? 1 : 0.5,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '0.4rem'
-                                                }}
-                                            >
-                                                <Trash2 size={12} /> Clear
-                                            </button>
+                                            />
+
+                                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                                <button
+                                                    onClick={handleClearNotes}
+                                                    style={{ background: '#f1f5f9', border: '2px solid #000', padding: '0.4rem 0.8rem', borderRadius: '0.4rem', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}
+                                                >
+                                                    Clear Notes
+                                                </button>
+                                                <button
+                                                    onClick={handleDownloadNotes}
+                                                    style={{ background: '#000', color: '#fff', border: '2px solid #000', padding: '0.4rem 0.8rem', borderRadius: '0.4rem', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                >
+                                                    <Download size={12} /> Save to TXT
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -5431,7 +5520,7 @@ const AcademyDashboard = () => {
                                             {/* Display previous submission OR new editor */}
                                             {(gradingResult || hasPreviousSubmission) ? (
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    {/* Score Header */}
+                                                    {/* Score Header & Stuck Action */}
                                                     {(() => {
                                                         const sc = gradingResult ? gradingResult.score : parseInt(savedScore);
                                                         const fb = gradingResult ? gradingResult.feedback : savedFeedback;
@@ -5439,32 +5528,51 @@ const AcademyDashboard = () => {
                                                         const passed = sc >= 75;
                                                         return (
                                                             <>
-                                                                {/* Score Badge */}
-                                                                <div style={{ padding: '1.2rem 1.5rem', background: passed ? '#0d2818' : '#2d1117', borderBottom: '2px solid #30363d', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                                    <div style={{
-                                                                        background: passed ? '#238636' : '#da3633',
-                                                                        color: '#fff',
-                                                                        width: '56px',
-                                                                        height: '56px',
-                                                                        borderRadius: '50%',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        fontWeight: 900,
-                                                                        fontSize: '1.3rem',
-                                                                        border: '3px solid #000',
-                                                                        flexShrink: 0
-                                                                    }}>
-                                                                        {sc}
-                                                                    </div>
-                                                                    <div>
-                                                                        <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.85rem', color: passed ? '#3fb950' : '#f85149' }}>
-                                                                            {passed ? '✅ GRADE: PASSED' : '❌ GRADE: FAILED — REVIEW REQUIRED'}
+                                                                {/* Score Badge & Stuck Action */}
+                                                                <div style={{ padding: '1.2rem 1.5rem', background: passed ? '#0d2818' : '#2d1117', borderBottom: '2px solid #30363d', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                                        <div style={{
+                                                                            background: passed ? '#238636' : '#da3633',
+                                                                            color: '#fff',
+                                                                            width: '56px',
+                                                                            height: '56px',
+                                                                            borderRadius: '50%',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
+                                                                            fontWeight: 900,
+                                                                            fontSize: '1.3rem',
+                                                                            border: '3px solid #000',
+                                                                            flexShrink: 0
+                                                                        }}>
+                                                                            {sc}
                                                                         </div>
-                                                                        <div style={{ fontSize: '0.7rem', color: '#8b949e', fontWeight: 700, marginTop: '0.2rem' }}>
-                                                                            Score: {sc}/100 &nbsp;•&nbsp; Threshold: 75/100 &nbsp;•&nbsp; Base Score: 5/100
+                                                                        <div>
+                                                                            <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.85rem', color: passed ? '#3fb950' : '#f85149' }}>
+                                                                                {passed ? '✅ GRADE: PASSED' : '❌ GRADE: FAILED — REVIEW REQUIRED'}
+                                                                            </div>
+                                                                            <div style={{ fontSize: '0.7rem', color: '#8b949e', fontWeight: 700, marginTop: '0.2rem' }}>
+                                                                                Score: {sc}/100 &nbsp;•&nbsp; Threshold: 75/100 &nbsp;•&nbsp; Base Score: 5/100
+                                                                            </div>
                                                                         </div>
                                                                     </div>
+
+                                                                    {!passed && (
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setStuckTaskData({
+                                                                                    title: exercise.title,
+                                                                                    code: cd,
+                                                                                    feedback: fb,
+                                                                                    score: sc
+                                                                                });
+                                                                                setShowStuckModal(true);
+                                                                            }}
+                                                                            style={{ background: 'var(--accent-r)', color: '#fff', border: '2px solid #000', padding: '0.6rem 1.2rem', borderRadius: '0.5rem', fontFamily: 'Outfit', fontWeight: 950, textTransform: 'uppercase', fontSize: '0.78rem', cursor: 'pointer', boxShadow: '2px 2px 0 #000' }}
+                                                                        >
+                                                                            🚨 Stuck? Drop Task on Peer Hub
+                                                                        </button>
+                                                                    )}
                                                                 </div>
 
                                                                 {/* Step-by-Step Feedback */}
@@ -5624,7 +5732,8 @@ const AcademyDashboard = () => {
                             title: peerTitle,
                             body: peerBody,
                             tag: peerTag,
-                            author: 'You (Active Student)',
+                            author: studentName,
+                            authorAvatar: studentAvatar,
                             date: new Date().toLocaleDateString(),
                             cohort: studentCohort,
                             replies: []
@@ -5648,7 +5757,8 @@ const AcademyDashboard = () => {
                                 return {
                                     ...p,
                                     replies: [...(p.replies || []), {
-                                        author: 'You (Active Student)',
+                                        author: studentName,
+                                        authorAvatar: studentAvatar,
                                         body: replyText,
                                         date: new Date().toLocaleDateString()
                                     }]
@@ -5669,10 +5779,11 @@ const AcademyDashboard = () => {
                             body: 'I noticed this error occurs when referencing Lock without importing it from lucide-react. Make sure you check your imports at the top of main or App!',
                             tag: 'Bug 🐛',
                             author: 'Ogunkoya Samuel Opemipo',
+                            authorAvatar: '',
                             date: '7/19/2026',
                             cohort: studentCohort,
                             replies: [
-                                { author: 'Ademuwagun Precious', body: 'Thanks Samuel! This saved me hours of debugging.', date: '7/19/2026' }
+                                { author: 'Ademuwagun Precious', authorAvatar: '', body: 'Thanks Samuel! This saved me hours of debugging.', date: '7/19/2026' }
                             ]
                         },
                         {
@@ -5681,10 +5792,11 @@ const AcademyDashboard = () => {
                             body: 'I keep getting 55/100 and Failed on the HTML introduction assignment. I included h1, p, and a tags. What else is needed?',
                             tag: 'Question ❓',
                             author: 'Chioma Okafor',
+                            authorAvatar: '',
                             date: '7/19/2026',
                             cohort: studentCohort,
                             replies: [
-                                { author: 'Omotoyosi Agboola', body: 'Make sure you add the exact DOCTYPE declaration: <!doctype html> at the very top. The strict AI grader validates the entire skeleton!', date: '7/19/2026' }
+                                { author: 'Omotoyosi Agboola', authorAvatar: '', body: 'Make sure you add the exact DOCTYPE declaration: <!doctype html> at the very top. The strict AI grader validates the entire skeleton!', date: '7/19/2026' }
                             ]
                         }
                     ];
@@ -5765,12 +5877,23 @@ const AcademyDashboard = () => {
                                 ) : (
                                     cohortFilteredPosts.map((post) => (
                                         <div key={post.id} style={{ background: '#fff', border: '3px solid #000', padding: '1.5rem', boxShadow: '6px 6px 0 #000', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                                <div>
-                                                    <span style={{ background: '#000', color: '#fff', padding: '0.2rem 0.6rem', border: '1px solid #000', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', marginRight: '0.5rem' }}>{post.tag}</span>
-                                                    <span style={{ fontSize: '0.7rem', color: '#71717a', fontWeight: 700 }}>Posted by {post.author} on {post.date}</span>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                    {post.authorAvatar ? (
+                                                        <img src={post.authorAvatar} alt={post.author} style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #000', objectFit: 'cover' }} />
+                                                    ) : (
+                                                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem', border: '2px solid #000' }}>
+                                                            {post.author.charAt(0)}
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <div style={{ fontSize: '0.85rem', fontWeight: 950, color: '#000', fontFamily: 'Outfit' }}>{post.author}</div>
+                                                        <div style={{ fontSize: '0.65rem', color: '#71717a', fontWeight: 700 }}>Posted on {post.date} • {post.cohort}</div>
+                                                    </div>
                                                 </div>
+                                                <span style={{ background: '#000', color: '#fff', padding: '0.2rem 0.6rem', border: '1px solid #000', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase' }}>{post.tag}</span>
                                             </div>
+
                                             <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0 }}>{post.title}</h4>
                                             <p style={{ margin: 0, fontSize: '0.85rem', color: '#334155', fontWeight: 650, lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.body}</p>
 
@@ -5780,10 +5903,19 @@ const AcademyDashboard = () => {
                                                 
                                                 {(post.replies || []).map((rep, idx) => (
                                                     <div key={idx} style={{ paddingBottom: '0.5rem', borderBottom: idx < post.replies.length - 1 ? '1px dashed #cbd5e1' : 'none' }}>
-                                                        <div style={{ fontSize: '0.65rem', fontWeight: 900, color: rep.author === 'You (Active Student)' ? 'var(--accent-r)' : '#000' }}>
-                                                            {rep.author} <span style={{ fontWeight: 400, color: '#94a3b8' }}>• {rep.date}</span>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
+                                                            {rep.authorAvatar ? (
+                                                                <img src={rep.authorAvatar} alt={rep.author} style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1px solid #000', objectFit: 'cover' }} />
+                                                            ) : (
+                                                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.65rem', border: '1px solid #000' }}>
+                                                                    {rep.author.charAt(0)}
+                                                                </div>
+                                                            )}
+                                                            <div style={{ fontSize: '0.7rem', fontWeight: 900, color: rep.author === studentName ? 'var(--accent-r)' : '#000' }}>
+                                                                {rep.author} <span style={{ fontWeight: 400, color: '#94a3b8' }}>• {rep.date}</span>
+                                                            </div>
                                                         </div>
-                                                        <div style={{ fontSize: '0.8rem', color: '#334155', fontWeight: 650, marginTop: '0.2rem' }}>{rep.body}</div>
+                                                        <div style={{ fontSize: '0.8rem', color: '#334155', fontWeight: 650, marginLeft: '1.8rem' }}>{rep.body}</div>
                                                     </div>
                                                 ))}
 
@@ -5838,7 +5970,7 @@ const AcademyDashboard = () => {
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                                <h4 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1rem', margin: 0 }}>{note.title}</h4>
+                                                <h4 style={{ fontFamily: 'Outfit', fontWeight: 955, fontSize: '1rem', margin: 0 }}>{note.title}</h4>
                                                 <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700 }}>{note.date}</span>
                                             </div>
                                             <p style={{ margin: '0.6rem 0 0 0', fontSize: '0.85rem', color: '#334155', fontWeight: 650, lineHeight: '1.5' }}>{note.body}</p>

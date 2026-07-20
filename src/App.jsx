@@ -4892,6 +4892,9 @@ const AcademyDashboard = () => {
     const [showStuckModal, setShowStuckModal] = useState(false);
     const [stuckTaskData, setStuckTaskData] = useState(null);
 
+    // Mobile Modules Drawer State
+    const [showMobileModulesDrawer, setShowMobileModulesDrawer] = useState(false);
+
     // Cohort — assigned by admin, NOT student-selectable
     const studentCohort = localStorage.getItem('fta-admin-assigned-cohort') || 'Cohort 1';
     const [assignmentText, setAssignmentText] = useState('');
@@ -5148,59 +5151,89 @@ const AcademyDashboard = () => {
                 const unreadPeerCount = cohortFilteredPosts.filter(p => !readPostIds.includes(p.id)).length;
 
                 return (
-                    <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '3px solid #000', paddingBottom: '1rem' }} className="fta-subtabs">
-                        {[
-                            { id: 'curriculum', label: '📚 Curriculum', unread: 0 },
-                            { id: 'peers', label: '👥 Peer Hub', unread: unreadPeerCount },
-                            { id: 'notifications', label: '🔔 Notifications', unread: unreadCount }
-                        ].map(tab => (
+                    <>
+                        {/* MOBILE MENU ICON TRIGGER BAR */}
+                        <div className="fta-mobile-menu-trigger" style={{ gap: '0.8rem', marginBottom: '1.5rem', width: '100%', flexWrap: 'wrap' }}>
                             <button
-                                key={tab.id}
-                                onClick={() => {
-                                    setAcademyTab(tab.id);
-                                    if (tab.id === 'notifications') {
-                                        const updated = notifications.map(n => ({ ...n, read: true }));
-                                        setNotifications(updated);
-                                        localStorage.setItem('fta-notifications', JSON.stringify(updated));
-                                        setUnreadCount(0);
-                                    }
-                                    if (tab.id === 'peers') {
-                                        const allIds = cohortFilteredPosts.map(p => p.id);
-                                        setReadPostIds(allIds);
-                                        localStorage.setItem('fta-read-posts', JSON.stringify(allIds));
-                                    }
-                                }}
+                                onClick={() => setShowMobileModulesDrawer(true)}
                                 style={{
-                                    padding: '0.7rem 1.4rem', border: '3px solid #000', borderRadius: '0.8rem',
-                                    background: academyTab === tab.id ? '#000' : '#fff',
-                                    color: academyTab === tab.id ? '#fff' : '#000',
-                                    fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem',
-                                    cursor: 'pointer', textTransform: 'uppercase',
-                                    boxShadow: academyTab === tab.id ? 'none' : '4px 4px 0 #000',
-                                    display: 'flex', alignItems: 'center', gap: '0.4rem'
+                                    flex: 1,
+                                    padding: '0.85rem 1.2rem',
+                                    background: '#000000',
+                                    color: '#ffffff',
+                                    border: '3px solid #000',
+                                    fontWeight: 950,
+                                    fontFamily: 'Outfit',
+                                    fontSize: '0.85rem',
+                                    textTransform: 'uppercase',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.6rem',
+                                    boxShadow: '4px 4px 0 var(--accent-r)',
+                                    borderRadius: '0.6rem'
                                 }}
                             >
-                                {tab.label}
-                                {tab.unread > 0 && (
-                                    <span style={{
-                                        background: '#dc2626',
-                                        color: '#ffffff',
-                                        fontSize: '0.68rem',
-                                        fontWeight: 900,
-                                        padding: '0.15rem 0.55rem',
-                                        borderRadius: '1rem',
-                                        border: '1.5px solid #000',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        boxShadow: '1px 1px 0 #000'
-                                    }}>
-                                        {tab.unread}
-                                    </span>
-                                )}
+                                <Menu size={20} />
+                                📚 Course Modules Menu 🍔
                             </button>
-                        ))}
-                    </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '3px solid #000', paddingBottom: '1rem' }} className="fta-subtabs">
+                            {[
+                                { id: 'curriculum', label: '📚 Curriculum', unread: 0 },
+                                { id: 'peers', label: '👥 Peer Hub', unread: unreadPeerCount },
+                                { id: 'notifications', label: '🔔 Notifications', unread: unreadCount }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => {
+                                        setAcademyTab(tab.id);
+                                        if (tab.id === 'notifications') {
+                                            const updated = notifications.map(n => ({ ...n, read: true }));
+                                            setNotifications(updated);
+                                            localStorage.setItem('fta-notifications', JSON.stringify(updated));
+                                            setUnreadCount(0);
+                                        }
+                                        if (tab.id === 'peers') {
+                                            const allIds = cohortFilteredPosts.map(p => p.id);
+                                            setReadPostIds(allIds);
+                                            localStorage.setItem('fta-read-posts', JSON.stringify(allIds));
+                                        }
+                                    }}
+                                    style={{
+                                        padding: '0.7rem 1.4rem', border: '3px solid #000', borderRadius: '0.8rem',
+                                        background: academyTab === tab.id ? '#000' : '#fff',
+                                        color: academyTab === tab.id ? '#fff' : '#000',
+                                        fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem',
+                                        cursor: 'pointer', textTransform: 'uppercase',
+                                        boxShadow: academyTab === tab.id ? 'none' : '4px 4px 0 #000',
+                                        display: 'flex', alignItems: 'center', gap: '0.4rem'
+                                    }}
+                                >
+                                    {tab.label}
+                                    {tab.unread > 0 && (
+                                        <span style={{
+                                            background: '#dc2626',
+                                            color: '#ffffff',
+                                            fontSize: '0.68rem',
+                                            fontWeight: 900,
+                                            padding: '0.15rem 0.55rem',
+                                            borderRadius: '1rem',
+                                            border: '1.5px solid #000',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: '1px 1px 0 #000'
+                                        }}>
+                                            {tab.unread}
+                                        </span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </>
                 );
             })()}
 
@@ -5209,7 +5242,7 @@ const AcademyDashboard = () => {
                 
                 {/* SIDEBAR: Curriculum Content */}
                 {academyTab === 'curriculum' && (
-                    <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000' }}>
+                    <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000' }} className="fta-desktop-curriculum-sidebar">
                     <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', textTransform: 'uppercase', margin: '0 0 1.2rem 0', paddingBottom: '0.8rem', borderBottom: '3px solid #000' }}>
                         Curriculum
                     </h3>
@@ -5986,6 +6019,233 @@ const AcademyDashboard = () => {
                 })()}
 
             </div>
+
+            {/* MOBILE MODULES MENU DRAWER MODAL */}
+            {showMobileModulesDrawer && (
+                <div className="fta-mobile-drawer-overlay" onClick={() => setShowMobileModulesDrawer(false)}>
+                    <div className="fta-mobile-drawer-content" onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #000', paddingBottom: '0.8rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <BookOpen size={20} color="var(--accent-r)" />
+                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase' }}>
+                                    Course Modules
+                                </h3>
+                            </div>
+                            <button onClick={() => setShowMobileModulesDrawer(false)} style={{ background: '#000', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '1rem', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                        </div>
+
+                        <p style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, margin: 0 }}>
+                            Select any module & lesson to switch lectures on mobile:
+                        </p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                            {course.modules.map((mod, modIdx) => {
+                                const isExpanded = !!expandedModules[modIdx];
+                                return (
+                                    <div key={modIdx} style={{ border: '2px solid #000', borderRadius: '0.5rem', overflow: 'hidden' }}>
+                                        <div
+                                            onClick={() => toggleModule(modIdx)}
+                                            style={{
+                                                background: isExpanded ? '#000000' : '#f8fafc',
+                                                color: isExpanded ? '#ffffff' : '#000000',
+                                                padding: '0.8rem 1rem',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                fontWeight: 900,
+                                                fontSize: '0.85rem'
+                                            }}
+                                        >
+                                            <span>{mod.title}</span>
+                                            {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                                        </div>
+
+                                        {isExpanded && (
+                                            <div style={{ background: '#fff', padding: '0.4rem' }}>
+                                                {mod.lessons.map((les, lesIdx) => {
+                                                    const isSelected = selectedLesson.id === les.id;
+                                                    const locked = isLessonLocked(les, modIdx, lesIdx);
+                                                    return (
+                                                        <button
+                                                            key={les.id}
+                                                            disabled={locked}
+                                                            onClick={() => {
+                                                                if (!locked) {
+                                                                    setSelectedModIdx(modIdx);
+                                                                    setSelectedLesIdx(lesIdx);
+                                                                    setSelectedLesson(les);
+                                                                    setShowMobileModulesDrawer(false);
+                                                                }
+                                                            }}
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '0.6rem',
+                                                                width: '100%',
+                                                                padding: '0.6rem 0.8rem',
+                                                                margin: '0.2rem 0',
+                                                                border: '2px solid',
+                                                                borderColor: isSelected ? 'var(--accent-r)' : 'transparent',
+                                                                background: isSelected ? '#fff0f3' : locked ? '#f1f5f9' : 'transparent',
+                                                                borderRadius: '0.4rem',
+                                                                cursor: locked ? 'not-allowed' : 'pointer',
+                                                                textAlign: 'left',
+                                                                fontWeight: isSelected ? 900 : 700,
+                                                                fontSize: '0.8rem',
+                                                                opacity: locked ? 0.7 : 1
+                                                            }}
+                                                        >
+                                                            {locked ? <Lock size={14} color="#94a3b8" /> : <Play size={14} color="var(--accent-r)" />}
+                                                            <span style={{ flex: 1 }}>{les.title}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* CANDIDATE PROFILE MODAL */}
+            {showProfileModal && (
+                <div className="fta-mobile-drawer-overlay" style={{ justifyContent: 'center', alignItems: 'center' }} onClick={() => setShowProfileModal(false)}>
+                    <div className="fta-modal-content" onClick={e => e.stopPropagation()} style={{ background: '#fff', border: '4px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000', maxWidth: '450px', width: '90%' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '3px solid #000', paddingBottom: '0.8rem' }}>
+                            <h3 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.2rem', margin: 0, textTransform: 'uppercase' }}>Candidate Profile</h3>
+                            <button onClick={() => setShowProfileModal(false)} style={{ background: '#000', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '1rem', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.2rem', marginBottom: '1.5rem' }}>
+                            <div style={{ position: 'relative' }}>
+                                {studentAvatar ? (
+                                    <img src={studentAvatar} alt={studentName} style={{ width: '90px', height: '90px', borderRadius: '50%', border: '4px solid #000', objectFit: 'cover' }} />
+                                ) : (
+                                    <div style={{ width: '90px', height: '90px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, border: '4px solid #000', fontSize: '2.5rem' }}>
+                                        {studentName.charAt(0)}
+                                    </div>
+                                )}
+                            </div>
+
+                            <label style={{ cursor: 'pointer', background: '#000', color: '#fff', padding: '0.5rem 1rem', border: '2px solid #000', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', borderRadius: '0.4rem', boxShadow: '3px 3px 0 var(--accent-r)' }}>
+                                📷 Upload Profile Picture
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    style={{ display: 'none' }}
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            if (file.size > 2 * 1024 * 1024) {
+                                                alert('Please choose an image under 2MB.');
+                                                return;
+                                            }
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                setStudentAvatar(reader.result);
+                                                localStorage.setItem('fta-student-avatar', reader.result);
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                />
+                            </label>
+                            {studentAvatar && (
+                                <button
+                                    onClick={() => {
+                                        setStudentAvatar('');
+                                        localStorage.removeItem('fta-student-avatar');
+                                    }}
+                                    style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', textDecoration: 'underline' }}
+                                >
+                                    Remove Picture
+                                </button>
+                            )}
+                        </div>
+
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', display: 'block', marginBottom: '0.4rem', fontFamily: 'Outfit' }}>Your Full Name / Peer Name:</label>
+                            <input
+                                type="text"
+                                value={editNameInput}
+                                onChange={(e) => setEditNameInput(e.target.value)}
+                                style={{ width: '100%', padding: '0.8rem', border: '2px solid #000', fontWeight: 700, fontFamily: 'Outfit', fontSize: '0.9rem' }}
+                            />
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                if (editNameInput.trim()) {
+                                    setStudentName(editNameInput.trim());
+                                    localStorage.setItem('fta-student-name', editNameInput.trim());
+                                    setShowProfileModal(false);
+                                }
+                            }}
+                            style={{ width: '100%', padding: '0.8rem', background: 'var(--accent-r)', color: '#fff', border: '3px solid #000', fontWeight: 950, fontSize: '0.9rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '4px 4px 0 #000' }}
+                        >
+                            Save Profile
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* STUCK IN TASK MODAL */}
+            {showStuckModal && stuckTaskData && (
+                <div className="fta-mobile-drawer-overlay" style={{ justifyContent: 'center', alignItems: 'center' }} onClick={() => setShowStuckModal(false)}>
+                    <div className="fta-modal-content" onClick={e => e.stopPropagation()} style={{ background: '#fff', border: '4px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000', maxWidth: '520px', width: '90%' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '3px solid #000', paddingBottom: '0.8rem' }}>
+                            <h3 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.2rem', margin: 0, textTransform: 'uppercase', color: '#dc2626' }}>
+                                🚨 Stuck in a Task?
+                            </h3>
+                            <button onClick={() => setShowStuckModal(false)} style={{ background: '#000', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '1rem', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                        </div>
+
+                        <p style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 650, lineHeight: '1.5', marginBottom: '1rem' }}>
+                            You scored <strong>{stuckTaskData.score}/100</strong> on <strong>{stuckTaskData.lessonTitle}</strong>. Would you like to drop this task on the Peer Hub so fellow candidates in <strong>{studentCohort}</strong> can review and assist you?
+                        </p>
+
+                        <div style={{ background: '#f8fafc', border: '2px solid #000', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1.5rem', maxHeight: '140px', overflowY: 'auto' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#dc2626', textTransform: 'uppercase', marginBottom: '0.4rem' }}>AI Grader Diagnostic:</div>
+                            <pre style={{ fontSize: '0.75rem', whiteSpace: 'pre-wrap', margin: 0, fontFamily: 'monospace' }}>{stuckTaskData.feedback}</pre>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                            <button
+                                onClick={() => setShowStuckModal(false)}
+                                style={{ padding: '0.7rem 1.2rem', background: '#fff', border: '2px solid #000', fontWeight: 900, cursor: 'pointer', fontSize: '0.8rem', textTransform: 'uppercase' }}
+                            >
+                                Dismiss
+                            </button>
+                            <button
+                                onClick={() => {
+                                    const newPost = {
+                                        id: Date.now(),
+                                        title: `Stuck on ${stuckTaskData.lessonTitle} (Score: ${stuckTaskData.score}/100)`,
+                                        body: `I need help with ${stuckTaskData.lessonTitle}.\n\nMy Submitted Code:\n\`\`\`\n${stuckTaskData.code || 'No code entered'}\n\`\`\`\n\nAI Diagnostic:\n${stuckTaskData.feedback}`,
+                                        tag: 'Bug 🐛',
+                                        author: studentName,
+                                        authorAvatar: studentAvatar,
+                                        date: new Date().toLocaleDateString(),
+                                        cohort: studentCohort,
+                                        replies: []
+                                    };
+                                    const updatedPosts = [newPost, ...peerPosts];
+                                    setPeerPosts(updatedPosts);
+                                    localStorage.setItem('fta-peer-posts', JSON.stringify(updatedPosts));
+                                    setShowStuckModal(false);
+                                    setAcademyTab('peers');
+                                }}
+                                style={{ padding: '0.7rem 1.4rem', background: 'var(--accent-r)', color: '#fff', border: '3px solid #000', fontWeight: 950, cursor: 'pointer', fontSize: '0.8rem', textTransform: 'uppercase', boxShadow: '3px 3px 0 #000' }}
+                            >
+                                🚀 Drop Task on Peer Hub
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

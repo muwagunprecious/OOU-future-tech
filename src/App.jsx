@@ -4352,12 +4352,36 @@ const AcademyDashboard = () => {
         }));
     };
     
-    // Cohort state and Assignment Submission state
-    const [studentCohort, setStudentCohort] = useState('Cohort 1');
+    // Cohort — assigned by admin, NOT student-selectable
+    const studentCohort = localStorage.getItem('fta-admin-assigned-cohort') || 'Cohort 1';
     const [assignmentText, setAssignmentText] = useState('');
     const [isGrading, setIsGrading] = useState(false);
     const [gradingResult, setGradingResult] = useState(null);
     const [recentSubmissionCount, setRecentSubmissionCount] = useState(0);
+
+    // Sub-tab switching
+    const [academyTab, setAcademyTab] = useState('curriculum'); // 'curriculum' | 'peers' | 'notifications'
+
+    // Peer posts states
+    const [peerPosts, setPeerPosts] = useState(() => JSON.parse(localStorage.getItem('fta-peer-posts') || '[]'));
+    const [peerTitle, setPeerTitle] = useState('');
+    const [peerBody, setPeerBody] = useState('');
+    const [peerTag, setPeerTag] = useState('Bug 🐛');
+    const [replyInputs, setReplyInputs] = useState({});
+
+    // Notifications states
+    const [notifications, setNotifications] = useState(() => JSON.parse(localStorage.getItem('fta-notifications') || '[]'));
+    const [unreadCount, setUnreadCount] = useState(() => {
+        const notes = JSON.parse(localStorage.getItem('fta-notifications') || '[]');
+        return notes.filter(n => !n.read).length;
+    });
+
+    // Compute live user assignment scores
+    const LESSON_IDS_ALL = ['fe-internet-https','fe-html-intro','fe-css-basics','fe-js-intro','fe-js-dom-api','fe-api-intro','fe-git-intro','fe-react-vite'];
+    const allScores = LESSON_IDS_ALL.map(id => localStorage.getItem(`fta-assignment-score-${id}`)).filter(Boolean).map(Number);
+    const completedCount = allScores.length;
+    const avgScore = completedCount > 0 ? Math.round(allScores.reduce((a,b)=>a+b,0)/completedCount) : 0;
+    const passedCount = allScores.filter(s => s >= 75).length;
 
     // Sync selected lesson when course changes
     useEffect(() => {
@@ -4458,9 +4482,23 @@ const AcademyDashboard = () => {
                     <div style={{ background: '#000', color: '#fff', padding: '0.8rem', border: '2px solid #000', borderRadius: '8px' }}>
                         <BookOpen size={28} />
                     </div>
-                    <div>
+                    <div style={{ flex: 1 }}>
                         <h1 style={{ fontSize: '1.8rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }}>Future Tech Academy (FTA)</h1>
                         <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px' }}>LEARNING PORTAL</span>
+                    </div>
+                    {/* Live Score Stats */}
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                        {[
+                            { label: 'Lessons Done', val: `${completedCount}/8`, color: '#000' },
+                            { label: 'Avg Score', val: avgScore > 0 ? `${avgScore}/100` : '—', color: avgScore >= 75 ? '#059669' : avgScore > 0 ? '#dc2626' : '#94a3b8' },
+                            { label: 'Passed', val: `${passedCount}/${completedCount || '—'}`, color: '#059669' },
+                            { label: 'Cohort', val: studentCohort, color: '#6d28d9' },
+                        ].map((stat, i) => (
+                            <div key={i} style={{ background: '#f8fafc', border: '2px solid #000', borderRadius: '0.8rem', padding: '0.6rem 1rem', textAlign: 'center', minWidth: '80px', boxShadow: '3px 3px 0 #000' }}>
+                                <div style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8', fontFamily: 'Outfit' }}>{stat.label}</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: stat.color, fontFamily: 'Outfit', marginTop: '0.2rem' }}>{stat.val}</div>
+                            </div>
+                        ))}
                     </div>
                 </div>
                 <p style={{ color: '#555', margin: 0, fontSize: '0.95rem', lineHeight: '1.5' }}>
@@ -4468,7 +4506,7 @@ const AcademyDashboard = () => {
                 </p>
             </div>
 
-            {/* Course & Cohort Selector Row */}
+            {/* Course Selector + Cohort (read-only, admin-assigned) */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     {Object.keys(ACADEMY_COURSES).map(cKey => (
@@ -4492,37 +4530,47 @@ const AcademyDashboard = () => {
                         </button>
                     ))}
                 </div>
-
-                {/* Cohort Selector */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: '#fff', border: '3px solid #000', padding: '0.5rem 1rem', borderRadius: '1rem', boxShadow: '4px 4px 0 #000' }}>
-                    <Users size={18} />
-                    <span style={{ fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', fontFamily: 'Outfit' }}>Active Cohort:</span>
-                    <select
-                        value={studentCohort}
-                        onChange={(e) => setStudentCohort(e.target.value)}
-                        style={{
-                            border: '2px solid #000',
-                            borderRadius: '0.5rem',
-                            padding: '0.3rem 0.6rem',
-                            fontWeight: 900,
-                            fontFamily: 'Outfit',
-                            fontSize: '0.75rem',
-                            background: '#fff',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        <option value="Cohort 1">Cohort 1</option>
-                        <option value="Cohort 2">Cohort 2</option>
-                        <option value="Cohort 3">Cohort 3</option>
-                    </select>
+                {/* Cohort badge — admin assigned, read-only */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: '#f3e8ff', border: '3px solid #7c3aed', padding: '0.6rem 1.2rem', borderRadius: '1rem', boxShadow: '4px 4px 0 #000' }}>
+                    <Users size={16} color="#7c3aed" />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', fontFamily: 'Outfit', color: '#6d28d9' }}>Your Cohort:</span>
+                    <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', color: '#4c1d95' }}>{studentCohort}</span>
+                    <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#7c3aed', background: '#ede9fe', padding: '0.2rem 0.5rem', borderRadius: '0.4rem', border: '1px solid #7c3aed' }}>ADMIN ASSIGNED</span>
                 </div>
             </div>
 
+            {/* Academy Sub-tabs */}
+            <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '3px solid #000', paddingBottom: '1rem' }}>
+                {[{id:'curriculum',label:'📚 Curriculum'},{id:'peers',label:`👥 Peer Hub`},{id:'notifications',label:`🔔 Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`}].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => {
+                            setAcademyTab(tab.id);
+                            if (tab.id === 'notifications') {
+                                const updated = notifications.map(n => ({ ...n, read: true }));
+                                setNotifications(updated);
+                                localStorage.setItem('fta-notifications', JSON.stringify(updated));
+                                setUnreadCount(0);
+                            }
+                        }}
+                        style={{
+                            padding: '0.7rem 1.4rem', border: '3px solid #000', borderRadius: '0.8rem',
+                            background: academyTab === tab.id ? '#000' : '#fff',
+                            color: academyTab === tab.id ? '#fff' : '#000',
+                            fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem',
+                            cursor: 'pointer', textTransform: 'uppercase',
+                            boxShadow: academyTab === tab.id ? 'none' : '4px 4px 0 #000'
+                        }}
+                    >{tab.label}</button>
+                ))}
+            </div>
+
             {/* Main Dashboard Layout */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 320px) 1fr', gap: '2rem', alignItems: 'start' }} className="academy-grid">
+            <div style={{ display: 'grid', gridTemplateColumns: academyTab === 'curriculum' ? 'minmax(0, 320px) 1fr' : '1fr', gap: '2rem', alignItems: 'start' }} className="academy-grid">
                 
                 {/* SIDEBAR: Curriculum Content */}
-                <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000' }}>
+                {academyTab === 'curriculum' && (
+                    <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '6px 6px 0 #000000' }}>
                     <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', textTransform: 'uppercase', margin: '0 0 1.2rem 0', paddingBottom: '0.8rem', borderBottom: '3px solid #000' }}>
                         Curriculum
                     </h3>
@@ -4604,9 +4652,11 @@ const AcademyDashboard = () => {
                         );
                     })}
                 </div>
+                )}
 
                 {/* MAIN CONTENT AREA */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                {academyTab === 'curriculum' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     {(() => {
                         let selectedModIdx = 0;
                         let selectedLesIdx = 0;
@@ -4927,6 +4977,246 @@ const AcademyDashboard = () => {
                         );
                     })()}
                 </div>
+                )}
+
+                {/* 👥 PEER TO PEER HUB VIEW */}
+                {academyTab === 'peers' && (() => {
+                    const handleCreatePost = (e) => {
+                        e.preventDefault();
+                        if (!peerTitle.trim() || !peerBody.trim()) {
+                            alert('Please write a title and content for your peer post!');
+                            return;
+                        }
+                        const newPost = {
+                            id: Date.now(),
+                            title: peerTitle,
+                            body: peerBody,
+                            tag: peerTag,
+                            author: 'You (Active Student)',
+                            date: new Date().toLocaleDateString(),
+                            cohort: studentCohort,
+                            replies: []
+                        };
+                        const updated = [newPost, ...peerPosts];
+                        setPeerPosts(updated);
+                        localStorage.setItem('fta-peer-posts', JSON.stringify(updated));
+                        setPeerTitle('');
+                        setPeerBody('');
+                        alert('✅ Challenge ticket posted successfully in your Cohort hub!');
+                    };
+
+                    const handleAddReply = (postId) => {
+                        const replyText = replyInputs[postId] || '';
+                        if (!replyText.trim()) {
+                            alert('Please write a comment first!');
+                            return;
+                        }
+                        const updated = peerPosts.map(p => {
+                            if (p.id === postId) {
+                                return {
+                                    ...p,
+                                    replies: [...(p.replies || []), {
+                                        author: 'You (Active Student)',
+                                        body: replyText,
+                                        date: new Date().toLocaleDateString()
+                                    }]
+                                };
+                            }
+                            return p;
+                        });
+                        setPeerPosts(updated);
+                        localStorage.setItem('fta-peer-posts', JSON.stringify(updated));
+                        setReplyInputs(prev => ({ ...prev, [postId]: '' }));
+                    };
+
+                    // Seed active posts if storage is empty
+                    const activePosts = peerPosts.length > 0 ? peerPosts : [
+                        {
+                            id: 1,
+                            title: 'Getting TypeError: Illegal constructor in React',
+                            body: 'I noticed this error occurs when referencing Lock without importing it from lucide-react. Make sure you check your imports at the top of main or App!',
+                            tag: 'Bug 🐛',
+                            author: 'Ogunkoya Samuel Opemipo',
+                            date: '7/19/2026',
+                            cohort: studentCohort,
+                            replies: [
+                                { author: 'Ademuwagun Precious', body: 'Thanks Samuel! This saved me hours of debugging.', date: '7/19/2026' }
+                            ]
+                        },
+                        {
+                            id: 2,
+                            title: 'HTML Intro grading fails - help!',
+                            body: 'I keep getting 55/100 and Failed on the HTML introduction assignment. I included h1, p, and a tags. What else is needed?',
+                            tag: 'Question ❓',
+                            author: 'Chioma Okafor',
+                            date: '7/19/2026',
+                            cohort: studentCohort,
+                            replies: [
+                                { author: 'Omotoyosi Agboola', body: 'Make sure you add the exact DOCTYPE declaration: <!doctype html> at the very top. The strict AI grader validates the entire skeleton!', date: '7/19/2026' }
+                            ]
+                        }
+                    ];
+
+                    const cohortFilteredPosts = activePosts.filter(p => p.cohort === studentCohort);
+
+                    return (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 420px) 1fr', gap: '2rem', alignItems: 'start', width: '100%' }} className="peer-hub-grid">
+                            
+                            {/* POST CREATOR PANEL */}
+                            <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '2rem', boxShadow: '8px 8px 0 #000000', display: 'flex', flexDirection: 'column', gap: '1.2rem', height: 'fit-content' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}>
+                                    <Cpu size={20} style={{ color: 'var(--accent-r)' }} />
+                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', margin: 0, textTransform: 'uppercase' }}>
+                                        🚀 Post Challenge
+                                    </h3>
+                                </div>
+                                <p style={{ fontSize: '0.75rem', color: '#666', lineHeight: '1.4', margin: 0 }}>
+                                    Ask for bug fixes, share structural design issues, or request coding assistance from peers in **{studentCohort}**.
+                                </p>
+                                
+                                <form onSubmit={handleCreatePost} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Title / Bug Area</label>
+                                        <input
+                                            type="text"
+                                            value={peerTitle}
+                                            onChange={e => setPeerTitle(e.target.value)}
+                                            placeholder="e.g. CSS Grid alignment issue"
+                                            style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.6rem', fontFamily: 'Outfit', fontWeight: 700 }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Tag</label>
+                                        <select
+                                            value={peerTag}
+                                            onChange={e => setPeerTag(e.target.value)}
+                                            style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.6rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer' }}
+                                        >
+                                            <option value="Bug 🐛">Bug 🐛</option>
+                                            <option value="Question ❓">Question ❓</option>
+                                            <option value="Challenge 🎯">Challenge 🎯</option>
+                                            <option value="Idea 💡">Idea 💡</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Detailed Explanation</label>
+                                        <textarea
+                                            value={peerBody}
+                                            onChange={e => setPeerBody(e.target.value)}
+                                            placeholder="Paste error logs, explain what you've tried, or describe code syntax issues..."
+                                            style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', minHeight: '120px', borderRadius: '0.6rem', fontFamily: 'Outfit', fontWeight: 650, resize: 'vertical' }}
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        style={{ width: '100%', padding: '0.8rem', background: '#000', color: '#fff', border: '3px solid #000', fontWeight: 950, textTransform: 'uppercase', cursor: 'pointer', boxShadow: '4px 4px 0 var(--accent-r)' }}
+                                    >
+                                        Submit Ticket 🚀
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* STREAM OF TICKETS */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div style={{ borderBottom: '3px solid #000', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0, textTransform: 'uppercase' }}>
+                                        💬 Active Bug Board ({cohortFilteredPosts.length})
+                                    </h3>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#71717a' }}>Viewing only challenges for {studentCohort}</span>
+                                </div>
+
+                                {cohortFilteredPosts.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '4rem', color: '#71717a', border: '3px dashed #ccc', background: '#fff', borderRadius: '1rem' }}>
+                                        <Users size={32} style={{ marginBottom: '1rem', opacity: 0.3, display: 'inline-block' }} />
+                                        <p style={{ fontWeight: 800 }}>Clean Board! No active bugs posted in your cohort yet.</p>
+                                    </div>
+                                ) : (
+                                    cohortFilteredPosts.map((post) => (
+                                        <div key={post.id} style={{ background: '#fff', border: '3px solid #000', padding: '1.5rem', boxShadow: '6px 6px 0 #000', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                <div>
+                                                    <span style={{ background: '#000', color: '#fff', padding: '0.2rem 0.6rem', border: '1px solid #000', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', marginRight: '0.5rem' }}>{post.tag}</span>
+                                                    <span style={{ fontSize: '0.7rem', color: '#71717a', fontWeight: 700 }}>Posted by {post.author} on {post.date}</span>
+                                                </div>
+                                            </div>
+                                            <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0 }}>{post.title}</h4>
+                                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#334155', fontWeight: 650, lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{post.body}</p>
+
+                                            {/* REPLIES BOX */}
+                                            <div style={{ background: '#f8fafc', borderTop: '2px solid #000', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '0.5rem' }}>
+                                                <div style={{ fontSize: '0.7rem', fontWeight: 955, textTransform: 'uppercase', color: '#71717a' }}>Replies ({post.replies?.length || 0})</div>
+                                                
+                                                {(post.replies || []).map((rep, idx) => (
+                                                    <div key={idx} style={{ paddingBottom: '0.5rem', borderBottom: idx < post.replies.length - 1 ? '1px dashed #cbd5e1' : 'none' }}>
+                                                        <div style={{ fontSize: '0.65rem', fontWeight: 900, color: rep.author === 'You (Active Student)' ? 'var(--accent-r)' : '#000' }}>
+                                                            {rep.author} <span style={{ fontWeight: 400, color: '#94a3b8' }}>• {rep.date}</span>
+                                                        </div>
+                                                        <div style={{ fontSize: '0.8rem', color: '#334155', fontWeight: 650, marginTop: '0.2rem' }}>{rep.body}</div>
+                                                    </div>
+                                                ))}
+
+                                                {/* ADD COMMENT FORM */}
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                    <input
+                                                        type="text"
+                                                        value={replyInputs[post.id] || ''}
+                                                        onChange={e => setReplyInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                                                        placeholder="Write a reply or suggest a fix..."
+                                                        style={{ flex: 1, border: '2px solid #000', padding: '0.5rem', fontSize: '0.75rem', borderRadius: '4px', fontFamily: 'Outfit', fontWeight: 700 }}
+                                                    />
+                                                    <button
+                                                        onClick={() => handleAddReply(post.id)}
+                                                        style={{ padding: '0.5rem 1rem', background: '#000', color: '#fff', border: '2px solid #000', fontWeight: 900, fontSize: '0.75rem', cursor: 'pointer' }}
+                                                    >Reply</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    );
+                })()}
+
+                {/* 🔔 NOTIFICATIONS VIEW */}
+                {academyTab === 'notifications' && (() => {
+                    const activeNotes = notifications.length > 0 ? notifications : [
+                        {
+                            id: 1,
+                            title: 'Welcome to the Future Tech Academy (FTA)!',
+                            body: 'Welcome to the learning space! Please complete coding assignments sequentially to advance. Remember, AI grading requires at least a 75/100 score to unlock next lessons.',
+                            date: new Date().toLocaleDateString()
+                        }
+                    ];
+
+                    return (
+                        <div style={{ maxWidth: '800px', margin: '0 auto', animation: 'fadeIn 0.3s ease-out', width: '100%' }}>
+                            <div style={{ borderBottom: '3px solid #000', paddingBottom: '0.5rem', marginBottom: '2rem' }}>
+                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0, textTransform: 'uppercase' }}>
+                                    🔔 Cohort Notifications & Broadcasts
+                                </h3>
+                                <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#71717a', margin: '0.2rem 0 0 0' }}>Alerts and meetings posted by curriculum curators</p>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {activeNotes.map((note) => (
+                                    <div key={note.id} style={{ background: '#fff', border: '3px solid #000', padding: '1.5rem', boxShadow: '6px 6px 0 #000', display: 'flex', gap: '1rem', alignItems: 'start' }}>
+                                        <div style={{ background: 'var(--accent-r)', color: '#fff', padding: '0.5rem', border: '2px solid #000', borderRadius: '6px', flexShrink: 0 }}>
+                                            <Mail size={20} />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                <h4 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1rem', margin: 0 }}>{note.title}</h4>
+                                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700 }}>{note.date}</span>
+                                            </div>
+                                            <p style={{ margin: '0.6rem 0 0 0', fontSize: '0.85rem', color: '#334155', fontWeight: 650, lineHeight: '1.5' }}>{note.body}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })()}
 
             </div>
         </div>

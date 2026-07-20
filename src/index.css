@@ -461,3 +461,129 @@ button {
 .bg-blue-500\/20 {
   background-color: rgba(59, 130, 246, 0.2);
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS RULES — FUTURE TECH ACADEMY (FTA)
+   ========================================================================== */
+
+/* Layout Grids Stacking */
+@media (max-width: 992px) {
+  .academy-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+  .peer-hub-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+  .notes-scratchpad-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.2rem !important;
+  }
+  .admin-dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+}
+
+/* Screen Widths <= 768px */
+@media (max-width: 768px) {
+  .fta-container {
+    padding: 0 0.8rem !important;
+    margin-top: 1rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .fta-header-branding {
+    padding: 1.2rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .fta-header-title {
+    font-size: 1.3rem !important;
+  }
+
+  .fta-header-stats {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+
+  .fta-course-selector {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.6rem !important;
+  }
+
+  .fta-course-selector button {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 0.8rem 1rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  .fta-cohort-badge {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .fta-subtabs {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.5rem !important;
+  }
+
+  .fta-subtabs button {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.8rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .peer-hub-post-form {
+    padding: 1.2rem !important;
+  }
+
+  .ide-submit-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.8rem !important;
+  }
+
+  .ide-submit-bar button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .fta-modal-content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    padding: 1.2rem !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Small Mobile Screens <= 480px */
+@media (max-width: 480px) {
+  .fta-header-stats {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .fta-header-title {
+    font-size: 1.1rem !important;
+  }
+
+  h1, h2, h3, h4 {
+    word-break: break-word !important;
+  }
+
+  textarea, input, select {
+    font-size: 0.85rem !important;
+  }
+
+  pre {
+    font-size: 0.72rem !important;
+  }
+}

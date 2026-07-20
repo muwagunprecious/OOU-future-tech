@@ -4931,9 +4931,9 @@ const AcademyDashboard = () => {
     // Sync assignment text and grading status when lesson changes or on submission
     useEffect(() => {
         setAssignmentText('');
-        const savedScore = localStorage.getItem(`fta-assignment-score-${selectedLesson.id}`);
-        const savedFeedback = localStorage.getItem(`fta-assignment-feedback-${selectedLesson.id}`);
-        const savedCode = localStorage.getItem(`fta-assignment-code-${selectedLesson.id}`);
+        const savedScore = localStorage.getItem(`fta-exercise-score-mod-${selectedModIdx}`);
+        const savedFeedback = localStorage.getItem(`fta-exercise-feedback-mod-${selectedModIdx}`);
+        const savedCode = localStorage.getItem(`fta-exercise-code-mod-${selectedModIdx}`);
         
         if (savedScore) {
             setGradingResult({
@@ -4944,7 +4944,7 @@ const AcademyDashboard = () => {
         } else {
             setGradingResult(null);
         }
-    }, [selectedLesson, recentSubmissionCount]);
+    }, [selectedModIdx, recentSubmissionCount]);
 
     // Check if a lesson is locked
     const isLessonLocked = (les, modIdx, lesIdx) => {
@@ -4956,7 +4956,6 @@ const AcademyDashboard = () => {
         }
 
         // 2. Sequential assignment submission lock check
-        // If it's the very first lesson, it's always unlocked
         if (modIdx === 0 && lesIdx === 0) return false;
 
         // Find the previous lesson in the course
@@ -4969,13 +4968,13 @@ const AcademyDashboard = () => {
         }
 
         if (prevLesson) {
-            const scoreStr = localStorage.getItem(`fta-assignment-score-${prevLesson.id}`);
+            const scoreStr = localStorage.getItem(`fta-exercise-score-mod-${modIdx === 0 ? 0 : modIdx - 1}`);
             if (!scoreStr) {
-                return true; // Previous lesson assignment is not submitted yet!
+                return true;
             }
             const scoreVal = parseInt(scoreStr);
             if (isNaN(scoreVal) || scoreVal < 75) {
-                return true; // Failed! Keeps this lesson locked!
+                return true;
             }
         }
 
@@ -5013,19 +5012,19 @@ const AcademyDashboard = () => {
     };
 
     return (
-        <div style={{ maxWidth: '1200px', margin: '2rem auto 5rem auto', padding: '0 1.5rem' }}>
+        <div style={{ maxWidth: '1200px', margin: '2rem auto 5rem auto', padding: '0 1.5rem' }} className="fta-container">
             {/* Header branding */}
-            <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '2rem', boxShadow: '8px 8px 0 #000000', marginBottom: '2.5rem' }}>
+            <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '2rem', boxShadow: '8px 8px 0 #000000', marginBottom: '2.5rem' }} className="fta-header-branding">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
                     <div style={{ background: '#000', color: '#fff', padding: '0.8rem', border: '2px solid #000', borderRadius: '8px' }}>
                         <BookOpen size={28} />
                     </div>
                     <div style={{ flex: 1 }}>
-                        <h1 style={{ fontSize: '1.8rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }}>Future Tech Academy (FTA)</h1>
+                        <h1 style={{ fontSize: '1.8rem', margin: 0, textTransform: 'uppercase', fontFamily: 'Outfit, sans-serif', fontWeight: 900 }} className="fta-header-title">Future Tech Academy (FTA)</h1>
                         <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.9rem', letterSpacing: '1px' }}>LEARNING PORTAL</span>
                     </div>
                     {/* Live Score Stats & Candidate Profile */}
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }} className="fta-header-stats">
                         {/* Candidate Profile Avatar Button */}
                         <div 
                             onClick={() => {
@@ -5079,7 +5078,7 @@ const AcademyDashboard = () => {
 
             {/* Course Selector + Cohort (read-only, admin-assigned) */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }} className="fta-course-selector">
                     {Object.keys(ACADEMY_COURSES).map(cKey => (
                         <button
                             key={cKey}
@@ -5102,7 +5101,7 @@ const AcademyDashboard = () => {
                     ))}
                 </div>
                 {/* Cohort badge — admin assigned, read-only */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: '#f3e8ff', border: '3px solid #7c3aed', padding: '0.6rem 1.2rem', borderRadius: '1rem', boxShadow: '4px 4px 0 #000' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: '#f3e8ff', border: '3px solid #7c3aed', padding: '0.6rem 1.2rem', borderRadius: '1rem', boxShadow: '4px 4px 0 #000' }} className="fta-cohort-badge">
                     <Users size={16} color="#7c3aed" />
                     <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', fontFamily: 'Outfit', color: '#6d28d9' }}>Your Cohort:</span>
                     <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', color: '#4c1d95' }}>{studentCohort}</span>
@@ -5145,7 +5144,7 @@ const AcademyDashboard = () => {
                 const unreadPeerCount = cohortFilteredPosts.filter(p => !readPostIds.includes(p.id)).length;
 
                 return (
-                    <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '3px solid #000', paddingBottom: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '3px solid #000', paddingBottom: '1rem' }} className="fta-subtabs">
                         {[
                             { id: 'curriculum', label: '📚 Curriculum', unread: 0 },
                             { id: 'peers', label: '👥 Peer Hub', unread: unreadPeerCount },

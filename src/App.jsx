@@ -3579,7 +3579,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                     }).sort((a,b) => b.passed - a.passed || b.avg - a.avg);
 
                     const ftaTabs = [
-                        { id: 'cohort', label: '👥 Cohort Control' },
+                        { id: 'cohort', label: '👥 Student Assignment' },
                         { id: 'curriculum', label: '🔒 Curriculum Locks' },
                         { id: 'notify', label: '📣 Send Notification' },
                         { id: 'leaderboard', label: '🏆 Leaderboard' },
@@ -3607,27 +3607,62 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                 ))}
                             </div>
 
-                            {/* ── COHORT CONTROL ── */}
+                            {/* ── COHORT & COURSE CONTROL ── */}
                             {ftaTab === 'cohort' && (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
-                                    {COHORTS.map(cohort => {
-                                        const isCurrent = localStorage.getItem('fta-admin-assigned-cohort') === cohort || (!localStorage.getItem('fta-admin-assigned-cohort') && cohort === 'Cohort 1');
-                                        return (
-                                            <div key={cohort} style={{ background: '#fff', border: `3px solid ${isCurrent ? 'var(--accent-r)' : '#000'}`, padding: '1.5rem', boxShadow: isCurrent ? '6px 6px 0 var(--accent-r)' : '6px 6px 0 #000', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <div>
-                                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0 }}>{cohort}</h3>
-                                                        {isCurrent && <span style={{ fontSize: '0.65rem', fontWeight: 900, background: 'var(--accent-r)', color: '#fff', padding: '0.2rem 0.5rem', borderRadius: '0.3rem' }}>CURRENTLY ACTIVE</span>}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                    {/* Cohort Section */}
+                                    <div>
+                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', marginBottom: '1rem', textTransform: 'uppercase', color: '#000', borderBottom: '2px solid #000', paddingBottom: '0.3rem' }}>1. Assign Student Cohort</h4>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.2rem' }}>
+                                            {COHORTS.map(cohort => {
+                                                const isCurrent = localStorage.getItem('fta-admin-assigned-cohort') === cohort || (!localStorage.getItem('fta-admin-assigned-cohort') && cohort === 'Cohort 1');
+                                                return (
+                                                    <div key={cohort} style={{ background: '#fff', border: `3px solid ${isCurrent ? 'var(--accent-r)' : '#000'}`, padding: '1.2rem', boxShadow: isCurrent ? '4px 4px 0 var(--accent-r)' : '4px 4px 0 #000', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                             <div>
+                                                                 <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', margin: 0 }}>{cohort}</h3>
+                                                                 {isCurrent && <span style={{ fontSize: '0.65rem', fontWeight: 900, background: 'var(--accent-r)', color: '#fff', padding: '0.2rem 0.5rem', borderRadius: '0.3rem' }}>CURRENTLY ACTIVE</span>}
+                                                             </div>
+                                                             <Users size={20} color={isCurrent ? 'var(--accent-r)' : '#000'} />
+                                                         </div>
+                                                         <button
+                                                             onClick={() => assignCohort(cohort)}
+                                                             style={{ padding: '0.6rem', background: isCurrent ? 'var(--accent-r)' : '#000', color: '#fff', border: '2px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', fontSize: '0.8rem' }}
+                                                         >{isCurrent ? '✅ Active Cohort' : `Set Active`}</button>
                                                     </div>
-                                                    <Users size={24} color={isCurrent ? 'var(--accent-r)' : '#000'} />
-                                                </div>
-                                                <button
-                                                    onClick={() => assignCohort(cohort)}
-                                                    style={{ padding: '0.8rem', background: isCurrent ? 'var(--accent-r)' : '#000', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', boxShadow: '3px 3px 0 rgba(0,0,0,0.3)' }}
-                                                >{isCurrent ? '✅ Active Cohort' : `Set as Active Cohort`}</button>
-                                            </div>
-                                        );
-                                    })}
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Course Track Section */}
+                                    <div>
+                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', marginBottom: '1rem', textTransform: 'uppercase', color: '#000', borderBottom: '2px solid #000', paddingBottom: '0.3rem' }}>2. Assign Student Course Track</h4>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.2rem' }}>
+                                            {['Frontend Engineering', 'Backend Engineering', 'Product Design (UI/UX)'].map(track => {
+                                                const isCurrent = localStorage.getItem('fta-admin-assigned-course') === track || (!localStorage.getItem('fta-admin-assigned-course') && track === 'Frontend Engineering');
+                                                return (
+                                                    <div key={track} style={{ background: '#fff', border: `3px solid ${isCurrent ? 'var(--accent-b, #3b82f6)' : '#000'}`, padding: '1.2rem', boxShadow: isCurrent ? '4px 4px 0 var(--accent-b, #3b82f6)' : '4px 4px 0 #000', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                             <div>
+                                                                 <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0 }}>{track}</h3>
+                                                                 {isCurrent && <span style={{ fontSize: '0.65rem', fontWeight: 900, background: '#3b82f6', color: '#fff', padding: '0.2rem 0.5rem', borderRadius: '0.3rem' }}>CURRENTLY ASSIGNED</span>}
+                                                             </div>
+                                                             <BookOpen size={20} color={isCurrent ? '#3b82f6' : '#000'} />
+                                                         </div>
+                                                         <button
+                                                             onClick={() => {
+                                                                 localStorage.setItem('fta-admin-assigned-course', track);
+                                                                 alert(`✅ Active track set to "${track}". Students will now only access this track on their portal.`);
+                                                                 window.location.reload();
+                                                             }}
+                                                             style={{ padding: '0.6rem', background: isCurrent ? '#3b82f6' : '#000', color: '#fff', border: '2px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', fontSize: '0.8rem' }}
+                                                         >{isCurrent ? '✅ Assigned Track' : `Assign Track`}</button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -4875,8 +4910,10 @@ const runAIGrader = (modIdx, code, courseKey) => {
 };
 
 const AcademyDashboard = () => {
-    const [selectedCourse, setSelectedCourse] = useState('Frontend Engineering');
-    const course = ACADEMY_COURSES[selectedCourse];
+    const [selectedCourse, setSelectedCourse] = useState(() => {
+        return localStorage.getItem('fta-admin-assigned-course') || 'Frontend Engineering';
+    });
+    const course = ACADEMY_COURSES[selectedCourse] || ACADEMY_COURSES['Frontend Engineering'];
     const firstLesson = course.modules[0].lessons[0];
     const [selectedLesson, setSelectedLesson] = useState(firstLesson);
     const [selectedModIdx, setSelectedModIdx] = useState(0);
@@ -5470,27 +5507,11 @@ const AcademyDashboard = () => {
 
             {/* Course Selector + Cohort (read-only, admin-assigned) */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }} className="fta-course-selector">
-                    {Object.keys(ACADEMY_COURSES).map(cKey => (
-                        <button
-                            key={cKey}
-                            onClick={() => setSelectedCourse(cKey)}
-                            style={{
-                                background: selectedCourse === cKey ? 'var(--accent-r)' : '#ffffff',
-                                color: selectedCourse === cKey ? '#ffffff' : '#000000',
-                                border: '3px solid #000000',
-                                boxShadow: selectedCourse === cKey ? '2px 2px 0 #000000' : '4px 4px 0 #000000',
-                                padding: '0.8rem 1.6rem',
-                                fontWeight: 900,
-                                textTransform: 'uppercase',
-                                fontSize: '0.9rem',
-                                cursor: 'pointer',
-                                transition: 'all 0.1s ease'
-                            }}
-                        >
-                            {cKey}
-                        </button>
-                    ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: '#eff6ff', border: '3px solid #3b82f6', padding: '0.6rem 1.2rem', borderRadius: '1rem', boxShadow: '4px 4px 0 #000' }} className="fta-assigned-course-badge">
+                    <BookOpen size={16} color="#3b82f6" />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', fontFamily: 'Outfit', color: '#1d4ed8' }}>Assigned Track:</span>
+                    <span style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.9rem', color: '#1e3a8a', textTransform: 'uppercase' }}>{selectedCourse}</span>
+                    <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#3b82f6', background: '#dbeafe', padding: '0.2rem 0.5rem', borderRadius: '0.4rem', border: '1px solid #3b82f6' }}>ADMIN ASSIGNED</span>
                 </div>
                 {/* Cohort badge — admin assigned, read-only */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: '#f3e8ff', border: '3px solid #7c3aed', padding: '0.6rem 1.2rem', borderRadius: '1rem', boxShadow: '4px 4px 0 #000' }} className="fta-cohort-badge">

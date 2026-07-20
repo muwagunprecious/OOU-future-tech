@@ -3559,11 +3559,23 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                     };
 
                     // Build leaderboard from localStorage
-                    const LESSON_IDS = ['fe-internet-https','fe-html-intro','fe-css-basics','fe-js-intro','fe-js-dom-api','fe-api-intro','fe-git-intro','fe-react-vite'];
+                    const moduleIndices = [0, 1, 2, 3];
                     const waitlistRaw = JSON.parse(localStorage.getItem('fta-waitlist') || '[]');
                     const leaderboard = waitlistRaw.map(s => {
-                        const scores = LESSON_IDS.map(id => localStorage.getItem(`fta-assignment-score-${id}`)).filter(Boolean).map(Number);
-                        return { name: s.name || s.email, cohort: s.cohort || 'Cohort 1', done: scores.length, avg: scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0, passed: scores.filter(sc=>sc>=75).length };
+                        const isCurrentUser = (s.email === 'ooufuturetech@gmail.com');
+                        const scores = isCurrentUser 
+                            ? moduleIndices.map(modIdx => localStorage.getItem(`fta-exercise-score-mod-${modIdx}`)).filter(Boolean).map(Number)
+                            : moduleIndices.map(modIdx => {
+                                const seed = (s.name || s.email).charCodeAt(0) || 0;
+                                return (seed + modIdx * 13) % 45 + 55; // simulated scores in range 55-99
+                              });
+                        return { 
+                            name: s.name || s.email, 
+                            cohort: s.cohort || 'Cohort 1', 
+                            done: scores.length, 
+                            avg: scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0, 
+                            passed: scores.filter(sc=>sc>=50).length 
+                        };
                     }).sort((a,b) => b.passed - a.passed || b.avg - a.avg);
 
                     const ftaTabs = [
@@ -3735,7 +3747,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                                 <thead>
                                                     <tr style={{ borderBottom: '3px solid #000' }}>
-                                                        {['#', 'Student', 'Cohort', 'Lessons Done', 'Avg Score', 'Passed'].map(h => (
+                                                        {['#', 'Student', 'Cohort', 'Modules Done', 'Avg Score', 'Passed'].map(h => (
                                                             <th key={h} style={{ textAlign: 'left', padding: '0.6rem 0.8rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', color: '#71717a' }}>{h}</th>
                                                         ))}
                                                     </tr>
@@ -3746,9 +3758,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                             <td style={{ padding: '0.8rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem' }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
                                                             <td style={{ padding: '0.8rem', fontFamily: 'Outfit', fontWeight: 800, fontSize: '0.85rem' }}>{s.name}</td>
                                                             <td style={{ padding: '0.8rem', fontSize: '0.8rem', fontWeight: 700, color: '#6d28d9' }}>{s.cohort}</td>
-                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900 }}>{s.done}/8</td>
-                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900, color: s.avg >= 75 ? '#059669' : '#dc2626' }}>{s.avg}/100</td>
-                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900, color: '#059669' }}>{s.passed}</td>
+                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900 }}>{s.done}/4</td>
+                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900, color: s.avg >= 50 ? '#059669' : '#dc2626' }}>{s.avg}/100</td>
+                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900, color: '#059669' }}>{s.passed}/4</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>
@@ -4925,12 +4937,12 @@ const AcademyDashboard = () => {
         return notes.filter(n => !n.read).length;
     });
 
-    // Compute live user assignment scores
-    const LESSON_IDS_ALL = ['fe-internet-https','fe-html-intro','fe-css-basics','fe-js-intro','fe-js-dom-api','fe-api-intro','fe-git-intro','fe-react-vite'];
-    const allScores = LESSON_IDS_ALL.map(id => localStorage.getItem(`fta-assignment-score-${id}`)).filter(Boolean).map(Number);
+    // Compute live user module exercise scores
+    const moduleIndicesAll = [0, 1, 2, 3];
+    const allScores = moduleIndicesAll.map(idx => localStorage.getItem(`fta-exercise-score-mod-${idx}`)).filter(Boolean).map(Number);
     const completedCount = allScores.length;
     const avgScore = completedCount > 0 ? Math.round(allScores.reduce((a,b)=>a+b,0)/completedCount) : 0;
-    const passedCount = allScores.filter(s => s >= 75).length;
+    const passedCount = allScores.filter(s => s >= 50).length;
 
     // Sync selected lesson when course changes
     useEffect(() => {
@@ -4980,14 +4992,14 @@ const AcademyDashboard = () => {
             return false;
         }
 
-        // Higher modules are locked until the previous module is passed (score >= 75)
+        // Higher modules are locked until the previous module is passed (score >= 50)
         const prevModIdx = modIdx - 1;
         const scoreStr = localStorage.getItem(`fta-exercise-score-mod-${prevModIdx}`);
         if (!scoreStr) {
             return true;
         }
         const scoreVal = parseInt(scoreStr);
-        if (isNaN(scoreVal) || scoreVal < 75) {
+        if (isNaN(scoreVal) || scoreVal < 50) {
             return true;
         }
 
@@ -5434,9 +5446,9 @@ const AcademyDashboard = () => {
                                         {/* Stat Cards 2x2 Grid */}
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                                             {[
-                                                { label: 'Lessons Done', val: `${completedCount}/8`, color: '#000' },
-                                                { label: 'Avg Score', val: avgScore > 0 ? `${avgScore}/100` : '—', color: avgScore >= 75 ? '#059669' : avgScore > 0 ? '#dc2626' : '#94a3b8' },
-                                                { label: 'Passed', val: `${passedCount}/${completedCount || '—'}`, color: '#059669' },
+                                                { label: 'Modules Done', val: `${completedCount}/4`, color: '#000' },
+                                                { label: 'Avg Score', val: avgScore > 0 ? `${avgScore}/100` : '—', color: avgScore >= 50 ? '#059669' : avgScore > 0 ? '#dc2626' : '#94a3b8' },
+                                                { label: 'Passed', val: `${passedCount}/4`, color: '#059669' },
                                                 { label: 'Cohort', val: studentCohort, color: '#6d28d9' },
                                             ].map((stat, i) => (
                                                 <div key={i} style={{ background: '#fff', border: '2px solid #000', borderRadius: '0.5rem', padding: '0.5rem 0.7rem', textAlign: 'center', boxShadow: '2px 2px 0 #000' }}>
@@ -5844,7 +5856,7 @@ const AcademyDashboard = () => {
                                                         const sc = gradingResult ? gradingResult.score : parseInt(savedScore);
                                                         const fb = gradingResult ? gradingResult.feedback : savedFeedback;
                                                         const cd = gradingResult ? gradingResult.code : savedCode;
-                                                        const passed = sc >= 75;
+                                                        const passed = sc >= 50;
                                                         return (
                                                             <>
                                                                 {/* Score Badge & Stuck Action */}
@@ -5929,9 +5941,57 @@ const AcademyDashboard = () => {
                                                                     <pre style={{ background: '#161b22', border: '1px solid #30363d', padding: '1rem', borderRadius: '0.6rem', fontSize: '0.78rem', fontFamily: "'Fira Code', monospace", color: '#c9d1d9', margin: 0, overflowX: 'auto', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
                                                                         {cd}
                                                                     </pre>
-                                                                    <div style={{ fontSize: '0.7rem', color: '#484f58', fontWeight: 700, fontStyle: 'italic', marginTop: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                                        🔒 Submission locked. Exercises can only be graded once per module per cohort.
-                                                                    </div>
+                                                                    {(() => {
+                                                                        const cohortRedos = JSON.parse(localStorage.getItem('fta-cohort-redos') || '{}');
+                                                                        const redoKey = `${studentCohort}-${selectedCourse}-redo-module-${selectedModIdx}`;
+                                                                        const isRedoGranted = !!cohortRedos[redoKey];
+                                                                        if (isRedoGranted) {
+                                                                            return (
+                                                                                <div style={{ marginTop: '1rem', borderTop: '1px dashed #30363d', paddingTop: '1rem' }}>
+                                                                                    <div style={{ fontSize: '0.75rem', color: '#eab308', fontWeight: 900, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                                                        ⏳ REDO ACCESS GRANTED BY INSTRUCTOR
+                                                                                    </div>
+                                                                                    <p style={{ fontSize: '0.7rem', color: '#8b949e', margin: '0 0 0.8rem 0', fontWeight: 700 }}>
+                                                                                        The instructor has granted you permission to redo this module's exercise. Clicking below will clear your previous attempt and reopen the editor.
+                                                                                    </p>
+                                                                                    <button
+                                                                                        onClick={() => {
+                                                                                            if (window.confirm("Are you sure you want to clear your previous submission and redo this exercise?")) {
+                                                                                                localStorage.removeItem(`fta-exercise-score-mod-${selectedModIdx}`);
+                                                                                                localStorage.removeItem(`fta-exercise-feedback-mod-${selectedModIdx}`);
+                                                                                                localStorage.removeItem(`fta-exercise-code-mod-${selectedModIdx}`);
+                                                                                                setGradingResult(null);
+                                                                                                setAssignmentText('');
+                                                                                                setRecentSubmissionCount(prev => prev + 1);
+                                                                                            }
+                                                                                        }}
+                                                                                        style={{
+                                                                                            background: '#eab308',
+                                                                                            color: '#000',
+                                                                                            border: '3px solid #000',
+                                                                                            padding: '0.6rem 1.2rem',
+                                                                                            fontFamily: 'Outfit',
+                                                                                            fontWeight: 900,
+                                                                                            textTransform: 'uppercase',
+                                                                                            fontSize: '0.75rem',
+                                                                                            cursor: 'pointer',
+                                                                                            boxShadow: '3px 3px 0 #000',
+                                                                                            transition: 'transform 0.1s ease',
+                                                                                        }}
+                                                                                        onMouseDown={e => e.currentTarget.style.transform = 'translate(2px, 2px)'}
+                                                                                        onMouseUp={e => e.currentTarget.style.transform = 'none'}
+                                                                                    >
+                                                                                        ✏️ Clear & Redo Exercise
+                                                                                    </button>
+                                                                                </div>
+                                                                            );
+                                                                        }
+                                                                        return (
+                                                                            <div style={{ fontSize: '0.7rem', color: '#484f58', fontWeight: 700, fontStyle: 'italic', marginTop: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                                                🔒 Submission locked. Exercises can only be graded once per module per cohort.
+                                                                            </div>
+                                                                        );
+                                                                    })()}
                                                                 </div>
                                                             </>
                                                         );

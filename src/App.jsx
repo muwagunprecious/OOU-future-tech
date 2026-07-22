@@ -7985,6 +7985,7 @@ const VerificationPortal = ({ onBack }) => {
    ─────────────────────────────────────────── */
 export default function App() {
     const [view, setView] = useState('site'); // 'site', 'admin-login', 'admin', 'founders'
+    const [showOnboardingPopup, setShowOnboardingPopup] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isRegModalOpen, setIsRegModalOpen] = useState(false);
     const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
@@ -8003,10 +8004,16 @@ export default function App() {
 
     useEffect(() => {
         fetchCMSData();
-        if (window.location.pathname === '/techwaitlist' || window.location.pathname === '/techwaitlist/') {
+        const path = window.location.pathname;
+        if (path === '/techwaitlist' || path === '/techwaitlist/' || path === '/waitlist' || path === '/waitlist/') {
             setView('techwaitlist');
-        } else if (window.location.pathname === '/academy' || window.location.pathname === '/academy/') {
+            setShowOnboardingPopup(false);
+        } else if (path === '/academy' || path === '/academy/') {
             setView('academy');
+            setShowOnboardingPopup(false);
+        } else {
+            setView('site');
+            setShowOnboardingPopup(true);
         }
     }, []);
 
@@ -8269,6 +8276,106 @@ export default function App() {
                     setIsRegModalOpen(true);
                 }}
             />
-        </>
+
+
+            {showOnboardingPopup && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0, 0, 0, 0.85)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 10000,
+                    padding: '1.5rem',
+                    boxSizing: 'border-box'
+                }}>
+                    <div style={{
+                        background: '#161b22',
+                        border: '4px solid #000000',
+                        boxShadow: '10px 10px 0 var(--accent-r)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        width: '100%',
+                        maxWidth: '500px',
+                        borderRadius: '0.8rem',
+                        padding: '2.5rem',
+                        boxSizing: 'border-box',
+                        textAlign: 'center',
+                        fontFamily: "'Outfit', sans-serif"
+                    }}>
+                        <div style={{ fontSize: '3.3rem', marginBottom: '1rem' }}>🚀</div>
+                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.8rem', color: '#ffffff', margin: '0 0 0.5rem 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Welcome to OOU Future Tech
+                        </h2>
+                        <p style={{ color: '#8b949e', fontSize: '0.9rem', fontWeight: 700, margin: '0 0 2rem 0', lineHeight: '1.5' }}>
+                            Please choose how you would like to proceed:
+                        </p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                            <button
+                                onClick={() => {
+                                    setShowOnboardingPopup(false);
+                                    window.history.pushState({}, '', '/waitlist');
+                                    setView('techwaitlist');
+                                }}
+                                style={{
+                                    background: 'var(--accent-r)',
+                                    color: '#ffffff',
+                                    border: '3px solid #000000',
+                                    padding: '1.1rem 1.5rem',
+                                    borderRadius: '0.6rem',
+                                    fontFamily: 'Outfit',
+                                    fontWeight: 900,
+                                    fontSize: '0.98rem',
+                                    textTransform: 'uppercase',
+                                    cursor: 'pointer',
+                                    boxShadow: '4px 4px 0 #000000',
+                                    transition: 'all 0.1s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem'
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-1px,-1px)'; e.currentTarget.style.boxShadow = '5px 5px 0 #000000'; }}
+                                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '4px 4px 0 #000000'; }}
+                            >
+                                🎓 Enter Academy Waitlist
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    setShowOnboardingPopup(false);
+                                }}
+                                style={{
+                                    background: '#ffffff',
+                                    color: '#000000',
+                                    border: '3px solid #000000',
+                                    padding: '1.1rem 1.5rem',
+                                    borderRadius: '0.6rem',
+                                    fontFamily: 'Outfit',
+                                    fontWeight: 900,
+                                    fontSize: '0.98rem',
+                                    textTransform: 'uppercase',
+                                    cursor: 'pointer',
+                                    boxShadow: '4px 4px 0 #000000',
+                                    transition: 'all 0.1s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem'
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-1px,-1px)'; e.currentTarget.style.boxShadow = '5px 5px 0 #000000'; }}
+                                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '4px 4px 0 #000000'; }}
+                            >
+                                🌐 Enter Conference Website
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}        </>
     );
 }

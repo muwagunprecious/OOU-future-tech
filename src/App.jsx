@@ -3146,6 +3146,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                     onClick={async () => {
                                                                         if (confirm(`Give Cohort One admission to ${w.name} (${w.email})?`)) {
                                                                             try {
+                                                                                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
                                                                                 const apiBase = isLocal ? 'http://localhost:3001' : '';
                                                                                 const response = await fetch(`${apiBase}/api/send-admission`, {
                                                                                     method: 'POST',

@@ -4973,6 +4973,7 @@ const AcademyDashboard = () => {
     const [activeChannel, setActiveChannel] = useState('general-questions');
     const [discordInput, setDiscordInput] = useState('');
     const [replyTargetPost, setReplyTargetPost] = useState(null);
+    const [mobileShowSidebar, setMobileShowSidebar] = useState(true);
 
     // Challenge visibility state
     const [showModuleChallenge, setShowModuleChallenge] = useState(false);
@@ -5237,9 +5238,45 @@ const AcademyDashboard = () => {
                         fontFamily: "'Outfit', system-ui, sans-serif",
                         animation: 'fadeIn 0.2s ease-out'
                     }} className="discord-community-container">
+                        <style>{`
+                            @media (max-width: 768px) {
+                                .discord-community-container {
+                                    grid-template-columns: 1fr !important;
+                                    height: 80vh !important;
+                                }
+                                .discord-sidebar {
+                                    display: ${mobileShowSidebar ? 'flex' : 'none'} !important;
+                                    width: 100% !important;
+                                    border-right: none !important;
+                                }
+                                .discord-chat-column {
+                                    display: ${!mobileShowSidebar ? 'flex' : 'none'} !important;
+                                    width: 100% !important;
+                                }
+                                .discord-mobile-menu-btn {
+                                    display: flex !important;
+                                }
+                            }
+                            @media (max-width: 600px) {
+                                .discord-topic-desc, .discord-header-actions {
+                                    display: none !important;
+                                }
+                            }
+                            @media (min-width: 769px) {
+                                .discord-sidebar {
+                                    display: flex !important;
+                                }
+                                .discord-chat-column {
+                                    display: flex !important;
+                                }
+                                .discord-mobile-menu-btn {
+                                    display: none !important;
+                                }
+                            }
+                        `}</style>
 
                         {/* LEFT SIDEBAR (#22213d) */}
-                        <div style={{ background: '#22213d', borderRight: '3px solid #000000', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+                        <div className="discord-sidebar" style={{ background: '#22213d', borderRight: '3px solid #000000', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
                             {/* Community Server Header */}
                             <div style={{ padding: '1.2rem 1rem', borderBottom: '3px solid #000000', background: '#22213d', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -5289,7 +5326,7 @@ const AcademyDashboard = () => {
                                     return (
                                         <button
                                             key={ch.id}
-                                            onClick={() => { setActiveChannel(ch.id); setReplyTargetPost(null); }}
+                                            onClick={() => { setActiveChannel(ch.id); setReplyTargetPost(null); setMobileShowSidebar(false); }}
                                             style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -5338,21 +5375,46 @@ const AcademyDashboard = () => {
                         </div>
 
                         {/* MAIN CHAT COLUMN (#2b2a4a) */}
-                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#2b2a4a', overflow: 'hidden' }}>
+                        <div className="discord-chat-column" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#2b2a4a', overflow: 'hidden' }}>
                             
                             {/* Header Bar */}
                             <div style={{ padding: '0.9rem 1.5rem', background: '#2b2a4a', borderBottom: '3px solid #000000', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                    
+                                    {/* Mobile Hamburger toggle */}
+                                    <button
+                                        onClick={() => setMobileShowSidebar(true)}
+                                        className="discord-mobile-menu-btn"
+                                        style={{
+                                            display: 'none',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            background: 'var(--accent-r)',
+                                            color: '#ffffff',
+                                            border: '2px solid #000000',
+                                            borderRadius: '0.4rem',
+                                            padding: '0.35rem 0.6rem',
+                                            fontFamily: 'Outfit',
+                                            fontWeight: 900,
+                                            fontSize: '0.72rem',
+                                            cursor: 'pointer',
+                                            marginRight: '0.4rem',
+                                            boxShadow: '2px 2px 0 #000000'
+                                        }}
+                                    >
+                                        ☰ Channels
+                                    </button>
+
                                     <span style={{ fontSize: '1.4rem', color: '#fff', fontWeight: 900 }}>#</span>
                                     <h2 style={{ fontFamily: 'Outfit', fontWeight: 955, fontSize: '1.1rem', margin: 0, color: '#ffffff' }}>
                                         {currChannelObj.name}
                                     </h2>
-                                    <span style={{ color: '#000000', margin: '0 0.4rem', fontWeight: 900 }}>|</span>
-                                    <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>{currChannelObj.desc}</span>
+                                    <span className="discord-topic-desc" style={{ color: '#000000', margin: '0 0.4rem', fontWeight: 900 }}>|</span>
+                                    <span className="discord-topic-desc" style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>{currChannelObj.desc}</span>
                                 </div>
 
                                 {/* Action Icons Panel matching Discord header */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <div className="discord-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                     <span style={{ cursor: 'pointer', fontSize: '1.2rem' }} title="Members">👥</span>
                                     <span style={{ cursor: 'pointer', fontSize: '1.2rem' }} title="Pinned Messages">📌</span>
                                     <span style={{ cursor: 'pointer', fontSize: '1.2rem' }} title="Mute Notifications">🔔</span>
@@ -5379,7 +5441,7 @@ const AcademyDashboard = () => {
                                             Ask everything that is or sounds weird.
                                         </p>
                                     </div>
-                                    <span style={{ color: '#4ade80', fontSize: '0.8rem', fontWeight: 900, cursor: 'pointer', textDecoration: 'underline' }}>Edit channel</span>
+                                    <span className="discord-topic-desc" style={{ color: '#4ade80', fontSize: '0.8rem', fontWeight: 900, cursor: 'pointer', textDecoration: 'underline' }}>Edit channel</span>
                                 </div>
 
                                 {/* Messages list */}
@@ -5567,8 +5629,7 @@ const AcademyDashboard = () => {
                                 </form>
                             </div>
                         </div>
-                    </div>
-                );
+                    </div>                );
             })()}
 {/* ── ALL OTHER VIEWS (curriculum / notifications) ── */}
             {academyTab !== 'peers' && (<>

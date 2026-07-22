@@ -6,6 +6,10 @@
       "destination": "/api/founders.js"
     },
     {
+      "source": "/api/send-admission",
+      "destination": "/api/send-admission.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
@@ -14,6 +18,10 @@
     "api/founders.js": {
       "memory": 1024,
       "maxDuration": 60
+    },
+    "api/send-admission.js": {
+      "memory": 512,
+      "maxDuration": 30
     }
   }
 }

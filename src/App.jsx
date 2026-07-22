@@ -3110,13 +3110,106 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                     {w.created_at ? new Date(w.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                                                 </td>
                                                 <td style={{ padding: '0.9rem 1.2rem' }}>
-                                                    <button
-                                                        onClick={() => handleDeleteWaitlistEntry(w.id)}
-                                                        style={{ padding: '0.4rem', background: '#fee2e2', color: '#dc2626', border: '2px solid #000', cursor: 'pointer' }}
-                                                        title="Remove from waitlist"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                                        {(() => {
+                                                            let isAdmitted = false;
+                                                            let trackLevel = w.products || 'Beginner';
+                                                            try {
+                                                                const parsed = JSON.parse(w.products);
+                                                                if (parsed && typeof parsed === 'object') {
+                                                                    isAdmitted = !!parsed.admitted;
+                                                                    trackLevel = parsed.level || 'Beginner';
+                                                                }
+                                                            } catch (e) {}
+
+                                                            if (isAdmitted) {
+                                                                return (
+                                                                    <span style={{
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '0.2rem',
+                                                                        background: '#dcfce7',
+                                                                        color: '#15803d',
+                                                                        border: '2px solid #000000',
+                                                                        padding: '0.25rem 0.6rem',
+                                                                        borderRadius: '0.4rem',
+                                                                        fontSize: '0.7rem',
+                                                                        fontWeight: 900
+                                                                    }}>
+                                                                        ✅ Admitted
+                                                                    </span>
+                                                                );
+                                                            }
+
+                                                            return (
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        if (confirm(`Give Cohort One admission to ${w.name} (${w.email})?`)) {
+                                                                            try {
+                                                                                const apiBase = isLocal ? 'http://localhost:3001' : '';
+                                                                                const response = await fetch(`${apiBase}/api/send-admission`, {
+                                                                                    method: 'POST',
+                                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                                    body: JSON.stringify({
+                                                                                        email: w.email,
+                                                                                        name: w.name,
+                                                                                        course: w.company_name || 'Frontend Engineering'
+                                                                                    })
+                                                                                });
+
+                                                                                if (!response.ok) {
+                                                                                    const errData = await response.json();
+                                                                                    throw new Error(errData.error || 'Failed to send email');
+                                                                                }
+
+                                                                                const { error: updateError } = await supabase
+                                                                                    .from('registrations')
+                                                                                    .update({
+                                                                                        products: JSON.stringify({
+                                                                                            level: trackLevel,
+                                                                                            admitted: true,
+                                                                                            password: '',
+                                                                                            avatar_url: ''
+                                                                                        })
+                                                                                    })
+                                                                                    .eq('id', w.id);
+
+                                                                                if (updateError) throw updateError;
+
+                                                                                alert(`Admission granted successfully to ${w.name}!`);
+                                                                                fetchWaitlist();
+                                                                            } catch (err) {
+                                                                                console.error('Error giving admission:', err);
+                                                                                alert(`Error: ${err.message}`);
+                                                                            }
+                                                                        }
+                                                                    }}
+                                                                    style={{
+                                                                        background: 'var(--accent-r)',
+                                                                        color: '#ffffff',
+                                                                        border: '2px solid #000000',
+                                                                        padding: '0.35rem 0.7rem',
+                                                                        borderRadius: '0.4rem',
+                                                                        fontSize: '0.7rem',
+                                                                        fontWeight: 900,
+                                                                        cursor: 'pointer',
+                                                                        boxShadow: '2px 2px 0 #000000',
+                                                                        textTransform: 'uppercase'
+                                                                    }}
+                                                                >
+                                                                    🎓 Admit
+                                                                </button>
+                                                            );
+                                                        })()}
+
+                                                        <button
+                                                            onClick={() => handleDeleteWaitlistEntry(w.id)}
+                                                            style={{ padding: '0.4rem', background: '#fee2e2', color: '#dc2626', border: '2px solid #000', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                                                            title="Remove from waitlist"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -4929,10 +5022,216 @@ const AcademyDashboard = () => {
         }));
     };
     // Candidate Profile State
-    const [studentName, setStudentName] = useState(() => localStorage.getItem('fta-student-name') || 'You (Active Student)');
-    const [studentAvatar, setStudentAvatar] = useState(() => localStorage.getItem('fta-student-avatar') || '');
+    const [studentName, setStudentName] = useState(() => {
+        const saved = localStorage.getItem('fta-student-session');
+        return saved ? JSON.parse(saved).name : 'You (Active Student)';
+    });
+    const [studentAvatar, setStudentAvatar] = useState(() => {
+        const saved = localStorage.getItem('fta-student-session');
+        return saved ? JSON.parse(saved).avatar_url : '';
+    });
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [editNameInput, setEditNameInput] = useState(studentName);
+
+    // LMS Login System States
+    const [studentSession, setStudentSession] = useState(() => {
+        const saved = localStorage.getItem('fta-student-session');
+        return saved ? JSON.parse(saved) : null;
+    });
+    const [loginEmail, setLoginEmail] = useState('');
+    const [loginPassword, setLoginPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [setupAvatar, setSetupAvatar] = useState('');
+    const [loginStep, setLoginStep] = useState('email'); // 'email' | 'setup' | 'password'
+    const [admittedRecord, setAdmittedRecord] = useState(null);
+    const [loginError, setLoginError] = useState(null);
+    const [loginLoading, setLoginLoading] = useState(false);
+
+    // Sync selected course track with admitted course when logging in
+    useEffect(() => {
+        if (studentSession && studentSession.course) {
+            setSelectedCourse(studentSession.course);
+        }
+    }, [studentSession]);
+
+    const handleCheckEmail = async (e) => {
+        e.preventDefault();
+        setLoginError(null);
+        setLoginLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('registrations')
+                .select('*')
+                .eq('email', loginEmail.trim())
+                .like('ticket_type', 'tech_waitlist_%')
+                .maybeSingle();
+
+            if (error) throw error;
+
+            if (!data) {
+                setLoginError('not yet admitted');
+                setLoginLoading(false);
+                return;
+            }
+
+            let admitted = false;
+            let password = '';
+            let avatarUrl = '';
+            try {
+                const parsed = JSON.parse(data.products);
+                if (parsed && typeof parsed === 'object') {
+                    admitted = !!parsed.admitted;
+                    password = parsed.password || '';
+                    avatarUrl = parsed.avatar_url || '';
+                }
+            } catch (e) {}
+
+            if (!admitted) {
+                setLoginError('not yet admitted');
+                setLoginLoading(false);
+                return;
+            }
+
+            setAdmittedRecord(data);
+            if (!password) {
+                setLoginStep('setup');
+            } else {
+                setLoginStep('password');
+            }
+        } catch (err) {
+            console.error('Email check error:', err);
+            setLoginError('Verification failed. Try again.');
+        }
+        setLoginLoading(false);
+    };
+
+    const handleCompleteSetup = async (e) => {
+        e.preventDefault();
+        setLoginError(null);
+        if (loginPassword.length < 6) {
+            setLoginError('Password must be at least 6 characters.');
+            return;
+        }
+        if (loginPassword !== confirmPassword) {
+            setLoginError('Passwords do not match.');
+            return;
+        }
+
+        setLoginLoading(true);
+        try {
+            let avatarUrl = setupAvatar;
+            const avatarFile = document.getElementById('avatar-file-input')?.files[0];
+            if (avatarFile) {
+                const fileName = `student_avatars/${Date.now()}_${avatarFile.name}`;
+                let { error: uploadError } = await supabase.storage
+                    .from('partners')
+                    .upload(fileName, avatarFile);
+                if (uploadError) throw uploadError;
+
+                const { data: publicUrlData } = supabase.storage
+                    .from('partners')
+                    .getPublicUrl(fileName);
+                avatarUrl = publicUrlData.publicUrl;
+            }
+
+            let level = 'Beginner';
+            try {
+                const parsed = JSON.parse(admittedRecord.products);
+                if (parsed && typeof parsed === 'object') {
+                    level = parsed.level || 'Beginner';
+                }
+            } catch (e) {
+                level = admittedRecord.products || 'Beginner';
+            }
+
+            const productsValue = JSON.stringify({
+                level: level,
+                admitted: true,
+                password: loginPassword,
+                avatar_url: avatarUrl
+            });
+
+            const { error: updateError } = await supabase
+                .from('registrations')
+                .update({ products: productsValue })
+                .eq('id', admittedRecord.id);
+
+            if (updateError) throw updateError;
+
+            const sessionData = {
+                id: admittedRecord.id,
+                name: admittedRecord.name,
+                email: admittedRecord.email,
+                course: admittedRecord.company_name || 'Frontend Engineering',
+                avatar_url: avatarUrl
+            };
+
+            localStorage.setItem('fta-student-session', JSON.stringify(sessionData));
+            setStudentName(admittedRecord.name);
+            setStudentAvatar(avatarUrl);
+            localStorage.setItem('fta-student-name', admittedRecord.name);
+            localStorage.setItem('fta-student-avatar', avatarUrl);
+            setStudentSession(sessionData);
+        } catch (err) {
+            console.error('Setup error:', err);
+            setLoginError('Failed to complete onboarding. Try again.');
+        }
+        setLoginLoading(false);
+    };
+
+    const handleSignIn = async (e) => {
+        e.preventDefault();
+        setLoginError(null);
+        setLoginLoading(true);
+        try {
+            let storedPassword = '';
+            let avatarUrl = '';
+            try {
+                const parsed = JSON.parse(admittedRecord.products);
+                if (parsed && typeof parsed === 'object') {
+                    storedPassword = parsed.password || '';
+                    avatarUrl = parsed.avatar_url || '';
+                }
+            } catch (e) {}
+
+            if (loginPassword !== storedPassword) {
+                setLoginError('Incorrect password. Please try again.');
+                setLoginLoading(false);
+                return;
+            }
+
+            const sessionData = {
+                id: admittedRecord.id,
+                name: admittedRecord.name,
+                email: admittedRecord.email,
+                course: admittedRecord.company_name || 'Frontend Engineering',
+                avatar_url: avatarUrl
+            };
+
+            localStorage.setItem('fta-student-session', JSON.stringify(sessionData));
+            setStudentName(admittedRecord.name);
+            setStudentAvatar(avatarUrl);
+            localStorage.setItem('fta-student-name', admittedRecord.name);
+            localStorage.setItem('fta-student-avatar', avatarUrl);
+            setStudentSession(sessionData);
+        } catch (err) {
+            console.error('Login error:', err);
+            setLoginError('Failed to sign in. Try again.');
+        }
+        setLoginLoading(false);
+    };
+
+    const handleLogOut = () => {
+        localStorage.removeItem('fta-student-session');
+        localStorage.removeItem('fta-student-name');
+        localStorage.removeItem('fta-student-avatar');
+        setStudentSession(null);
+        setLoginEmail('');
+        setLoginPassword('');
+        setConfirmPassword('');
+        setLoginStep('email');
+        setAdmittedRecord(null);
+    };
 
     // Read Peer Posts State (for unread counter icon)
     const [readPostIds, setReadPostIds] = useState(() => JSON.parse(localStorage.getItem('fta-read-posts') || '[]'));
@@ -5088,6 +5387,262 @@ const AcademyDashboard = () => {
             localStorage.removeItem(`fta-notes-${selectedLesson.id}`);
         }
     };
+
+    if (!studentSession) {
+        return (
+            <div style={{
+                minHeight: '70vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem 1rem',
+                fontFamily: "'Outfit', sans-serif"
+            }}>
+                <div style={{
+                    width: '100%',
+                    maxWidth: '450px',
+                    background: '#ffffff',
+                    border: '4px solid #000000',
+                    boxShadow: '8px 8px 0 #000000',
+                    padding: '2.5rem',
+                    boxSizing: 'border-box',
+                    animation: 'fadeIn 0.3s ease-out'
+                }}>
+                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                        <span style={{ fontSize: '3rem' }}>🎓</span>
+                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.6rem', color: '#000000', margin: '0.8rem 0 0.4rem 0', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Academy LMS Login
+                        </h2>
+                        <p style={{ color: '#52525b', fontSize: '0.85rem', fontWeight: 700, margin: 0 }}>
+                            Future Tech Academy Portal • Cohort One
+                        </p>
+                    </div>
+
+                    {loginError && (
+                        <div style={{
+                            background: '#fef2f2',
+                            color: '#b91c1c',
+                            border: '2px solid #000000',
+                            padding: '0.8rem 1rem',
+                            borderRadius: '0.4rem',
+                            marginBottom: '1.5rem',
+                            fontSize: '0.82rem',
+                            fontWeight: 900,
+                            textAlign: 'center',
+                            textTransform: 'uppercase'
+                        }}>
+                            ⚠️ {loginError}
+                        </div>
+                    )}
+
+                    {loginStep === 'email' && (
+                        <form onSubmit={handleCheckEmail} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', color: '#000' }}>Enter Student Email</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={loginEmail}
+                                    onChange={e => setLoginEmail(e.target.value)}
+                                    placeholder="your.email@example.com"
+                                    style={{
+                                        padding: '0.9rem 1.2rem',
+                                        border: '3px solid #000000',
+                                        fontSize: '0.95rem',
+                                        fontFamily: 'Inter, sans-serif',
+                                        outline: 'none',
+                                        background: '#ffffff',
+                                        width: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loginLoading}
+                                style={{
+                                    background: 'var(--accent-r)',
+                                    color: '#ffffff',
+                                    border: '3px solid #000000',
+                                    padding: '1rem',
+                                    fontFamily: 'Outfit',
+                                    fontWeight: 900,
+                                    fontSize: '0.95rem',
+                                    textTransform: 'uppercase',
+                                    cursor: 'pointer',
+                                    boxShadow: '4px 4px 0 #000000',
+                                    transition: 'all 0.1s ease',
+                                    width: '100%'
+                                }}
+                            >
+                                {loginLoading ? 'Checking Admission...' : 'Continue →'}
+                            </button>
+                        </form>
+                    )}
+
+                    {loginStep === 'setup' && (
+                        <form onSubmit={handleCompleteSetup} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                            <div style={{ background: '#dcfce7', color: '#15803d', border: '2px solid #000', padding: '0.6rem 0.8rem', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', borderRadius: '0.4rem', textAlign: 'center' }}>
+                                🔓 Admission Confirmed! Let's set up your account.
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', color: '#000' }}>Choose Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    minLength={6}
+                                    value={loginPassword}
+                                    onChange={e => setLoginPassword(e.target.value)}
+                                    placeholder="Minimum 6 characters"
+                                    style={{
+                                        padding: '0.9rem 1.2rem',
+                                        border: '3px solid #000000',
+                                        fontSize: '0.95rem',
+                                        outline: 'none',
+                                        width: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', color: '#000' }}>Confirm Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={confirmPassword}
+                                    onChange={e => setConfirmPassword(e.target.value)}
+                                    placeholder="Repeat chosen password"
+                                    style={{
+                                        padding: '0.9rem 1.2rem',
+                                        border: '3px solid #000000',
+                                        fontSize: '0.95rem',
+                                        outline: 'none',
+                                        width: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', color: '#000' }}>Upload Profile Picture</label>
+                                <input
+                                    type="file"
+                                    id="avatar-file-input"
+                                    accept="image/*"
+                                    style={{
+                                        padding: '0.6rem 0.8rem',
+                                        border: '3px solid #000000',
+                                        fontSize: '0.85rem',
+                                        width: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loginLoading}
+                                style={{
+                                    background: 'var(--accent-r)',
+                                    color: '#ffffff',
+                                    border: '3px solid #000000',
+                                    padding: '1rem',
+                                    fontFamily: 'Outfit',
+                                    fontWeight: 900,
+                                    fontSize: '0.95rem',
+                                    textTransform: 'uppercase',
+                                    cursor: 'pointer',
+                                    boxShadow: '4px 4px 0 #000000',
+                                    transition: 'all 0.1s ease',
+                                    width: '100%'
+                                }}
+                            >
+                                {loginLoading ? 'Setting up Account...' : 'Complete Setup & Enter LMS 🚀'}
+                            </button>
+                        </form>
+                    )}
+
+                    {loginStep === 'password' && (
+                        <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+                                <div style={{ background: 'var(--accent-r)', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, border: '1.5px solid #000' }}>
+                                    {admittedRecord.name.charAt(0)}
+                                </div>
+                                <div style={{ textAlign: 'left' }}>
+                                    <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#000' }}>{admittedRecord.name}</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#71717a' }}>{admittedRecord.email}</div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', color: '#000' }}>Enter Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={loginPassword}
+                                    onChange={e => setLoginPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    style={{
+                                        padding: '0.9rem 1.2rem',
+                                        border: '3px solid #000000',
+                                        fontSize: '0.95rem',
+                                        outline: 'none',
+                                        width: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loginLoading}
+                                style={{
+                                    background: 'var(--accent-r)',
+                                    color: '#ffffff',
+                                    border: '3px solid #000000',
+                                    padding: '1rem',
+                                    fontFamily: 'Outfit',
+                                    fontWeight: 900,
+                                    fontSize: '0.95rem',
+                                    textTransform: 'uppercase',
+                                    cursor: 'pointer',
+                                    boxShadow: '4px 4px 0 #000000',
+                                    transition: 'all 0.1s ease',
+                                    width: '100%'
+                                }}
+                            >
+                                {loginLoading ? 'Signing In...' : 'Log In →'}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setLoginStep('email');
+                                    setLoginPassword('');
+                                    setAdmittedRecord(null);
+                                }}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: '#71717a',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 900,
+                                    textTransform: 'uppercase',
+                                    cursor: 'pointer',
+                                    textDecoration: 'underline'
+                                }}
+                            >
+                                Switch Account
+                            </button>
+                        </form>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div style={{ maxWidth: '1200px', margin: '2rem auto 5rem auto', padding: '0 1.5rem' }} className="fta-container">
@@ -5756,6 +6311,26 @@ const AcademyDashboard = () => {
                                                     </div>
                                                 ))}
                                             </div>
+                                            <button
+                                                 onClick={handleLogOut}
+                                                 style={{
+                                                     width: '100%',
+                                                     marginTop: '0.8rem',
+                                                     background: '#fee2e2',
+                                                     color: '#dc2626',
+                                                     border: '2px solid #000000',
+                                                     borderRadius: '0.4rem',
+                                                     padding: '0.5rem',
+                                                     fontFamily: 'Outfit',
+                                                     fontWeight: 900,
+                                                     fontSize: '0.8rem',
+                                                     textTransform: 'uppercase',
+                                                     cursor: 'pointer',
+                                                     boxShadow: '2px 2px 0 #000000'
+                                                 }}
+                                             >
+                                                 🚪 Log Out
+                                             </button>
                                         </div>
                                     </div>
                                 </>
@@ -5876,6 +6451,26 @@ const AcademyDashboard = () => {
                                                     </div>
                                                 ))}
                                             </div>
+                                             <button
+                                                 onClick={handleLogOut}
+                                                 style={{
+                                                     width: '100%',
+                                                     marginTop: '0.8rem',
+                                                     background: '#fee2e2',
+                                                     color: '#dc2626',
+                                                     border: '2px solid #000000',
+                                                     borderRadius: '0.4rem',
+                                                     padding: '0.4rem',
+                                                     fontFamily: 'Outfit',
+                                                     fontWeight: 900,
+                                                     fontSize: '0.75rem',
+                                                     textTransform: 'uppercase',
+                                                     cursor: 'pointer',
+                                                     boxShadow: '2px 2px 0 #000000'
+                                                 }}
+                                             >
+                                                 🚪 Log Out
+                                             </button>
                                         </div>
                                     </>
                                 )}

@@ -12554,8 +12554,8 @@
   {
     "email": "brghteric200@gmail.com",
     "name": "Bright Eric",
-    "status": "failed",
-    "error": "Unexpected socket close"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:35:41.670Z"
   },
   {
     "email": "adedamolaosunkoya@gmail.com",
@@ -14030,631 +14030,631 @@
   {
     "email": "adekunleprecious16@gmail.com",
     "name": "adekunle precious",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4955dfa4a97sm112690465e9.4 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:35:59.716Z"
   },
   {
     "email": "ebonywunder@gmail.com",
     "name": "Olunowo motunrayo",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-495499a5847sm202213145e9.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:36:19.822Z"
   },
   {
     "email": "adenugaelizabeth510@gmail.com",
     "name": "Adenuga Oreoluwa",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2f210csm306892745e9.15 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:36:25.599Z"
   },
   {
     "email": "ddamilola205@gmail.com",
     "name": "Ajijedidun Damilola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e496ffsm29373757f8f.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:36:32.414Z"
   },
   {
     "email": "adebisioluwayanfe02@gmail.com",
     "name": "Adebisi Oluwayanfe",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49563969482sm38400685e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:36:38.209Z"
   },
   {
     "email": "chidiogbeh16@gmail.com",
     "name": "OGBEH CHIDI",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2a2504sm308903095e9.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:36:44.475Z"
   },
   {
     "email": "sulaimonadedoyin5@gmail.com",
     "name": "Sulaimon Adedoyin",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49561a30c56sm57972215e9.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:36:52.183Z"
   },
   {
     "email": "ajibonafaith@gmail.com",
     "name": "Ajibona faith Aduragbemi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4955dfa81b2sm54706995e9.4 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:37:01.595Z"
   },
   {
     "email": "olayemiadesemowo@gmail.com",
     "name": "Olayemi Adesemowo",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63edd7d3sm28945814f8f.25 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:37:08.804Z"
   },
   {
     "email": "rolandoseni02@gmail.com",
     "name": "oseni Ibukunoluwa",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e49acesm28779903f8f.6 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:37:16.131Z"
   },
   {
     "email": "hikmaholabanjo@gmail.com",
     "name": "Adenekan Aishat Mojisola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e49ab8sm31530051f8f.5 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:37:23.818Z"
   },
   {
     "email": "joshua2024utme@gmail.com",
     "name": "Ikpa joshua",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 4fb4d7f45d1cf-69e6fee3304sm4941996a12.5 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:37:31.851Z"
   },
   {
     "email": "saheedsalmaayool@gmail.com",
     "name": "Saheed Salma Ayoola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 a640c23a62f3a-c1712a63ae0sm464453166b.33 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:37:38.067Z"
   },
   {
     "email": "bhadmuslatyphat@gmail.com",
     "name": "bhadmus latyphat",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4955dfa4a97sm112806675e9.4 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:37:46.093Z"
   },
   {
     "email": "olusegunabigeal2023@gmail.com",
     "name": "Olusegun Abigeal",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e496afsm30939815f8f.1 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:37:53.077Z"
   },
   {
     "email": "abdulsalamhanif2008@gmail.com",
     "name": "Abdulsalam Hanif",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2e850dsm310445275e9.9 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:37:59.919Z"
   },
   {
     "email": "piusfavour1111@gmail.com",
     "name": "Eseburukumo Favour",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63edda29sm30367840f8f.32 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:38:09.159Z"
   },
   {
     "email": "idrisib3599@gmail.com",
     "name": "Idris Ibrahim",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954995b78dsm183172835e9.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:38:22.903Z"
   },
   {
     "email": "oladeleisrael05@gmail.com",
     "name": "Oladele Israel",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49563969482sm38507705e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:38:30.551Z"
   },
   {
     "email": "ayomikunomolayo2@gmail.com",
     "name": "0molayo pelumi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49549a47de7sm286141985e9.7 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:38:37.784Z"
   },
   {
     "email": "ayodelebenoi@gmail.com",
     "name": "Ayodele Benoit",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49549a36312sm302675595e9.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:38:54.975Z"
   },
   {
     "email": "abigailmbah358@gmail.com",
     "name": "Mbah Ugochi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2b074csm301717825e9.6 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:39:02.225Z"
   },
   {
     "email": "ayodelebenoit@gmail.com",
     "name": "Ayodele Benoit",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e49ce4sm30642968f8f.8 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:39:09.423Z"
   },
   {
     "email": "ogbumogodspower4@gmail.com",
     "name": "Ogbumo Godspower",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63edcd13sm29354213f8f.26 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:39:17.460Z"
   },
   {
     "email": "olatonakehinde696@gmail.com",
     "name": "olatona kehinde",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f67466e09sm31443284f8f.21 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:39:26.049Z"
   },
   {
     "email": "abiodunoziohu123@gmail.com",
     "name": "Abiodun Bernice",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49563969482sm38561025e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:39:33.549Z"
   },
   {
     "email": "oyekoyakamal15@gmail.com",
     "name": "Oyekoya Kamal",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e496ffsm29385651f8f.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:39:41.007Z"
   },
   {
     "email": "ibukunifeoluwa58@gmail.com",
     "name": "Odubanjo Ifeoluwa",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2a24b6sm290467345e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:39:47.705Z"
   },
   {
     "email": "oluwunmibenjamin2@gmail.com",
     "name": "Oluwunmi Benjamin",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e496afsm30947872f8f.1 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:39:56.300Z"
   },
   {
     "email": "igwereginaconfidence@gmail.com",
     "name": "regina igwe",
     "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f6fa848fcsm19969796f8f.0 - gsmtp"
+    "error": "read ECONNRESET"
   },
   {
     "email": "adesanyaismail11@gmail.com",
     "name": "Adesanya haliyah omotomiwa",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2b87c6sm508220045e9.7 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:40:11.159Z"
   },
   {
     "email": "aligalimusa@gmail.com",
     "name": "Musa Aligali Adedamola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63edda9bsm30746098f8f.31 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:40:22.332Z"
   },
   {
     "email": "adekoeniola25@gmail.com",
     "name": "adeko eniola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e51986sm34034968f8f.11 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:40:34.497Z"
   },
   {
     "email": "adediranaliyat92@gmail.com",
     "name": "Adediran Aliyat",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63ed2313sm29489517f8f.23 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:40:47.813Z"
   },
   {
     "email": "aishaoluyemi@gmail.com",
     "name": "Oluyemi Aisha",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4955a9e5f26sm90979835e9.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:41:15.041Z"
   },
   {
     "email": "mmisturah50@gmail.com",
     "name": "muhammed misturah",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e519f4sm28728925f8f.14 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:41:23.496Z"
   },
   {
     "email": "oluwanifemiabass7@gmail.com",
     "name": "Abass Oluwanifemi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63eeece9sm28541170f8f.37 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:41:44.211Z"
   },
   {
     "email": "abdulraheemabdulbaqee444@gmail.com",
     "name": "raheem abdulbaqi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63edd7d3sm28960360f8f.25 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:41:54.741Z"
   },
   {
     "email": "kadirimacaulay1@gmail.com",
     "name": "Macaulay",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 4fb4d7f45d1cf-69e6fef2640sm4690075a12.8 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:42:23.221Z"
   },
   {
     "email": "blessingawe899@gmail.com",
     "name": "blessing toluwani awe",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 a640c23a62f3a-c17009ae102sm467081066b.13 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:42:36.516Z"
   },
   {
     "email": "afolabioyegunle07@gmail.com",
     "name": "Oyegunle Afolabi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49564011868sm11596525e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:42:50.516Z"
   },
   {
     "email": "ayannugatunmise5@gmail.com",
     "name": "Ayannuga Beatrice",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 4fb4d7f45d1cf-69e6fef2477sm4845773a12.7 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:43:00.311Z"
   },
   {
     "email": "abigeal599@gmail.com",
     "name": "owolola abigeal",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 a640c23a62f3a-c1705a08476sm470062166b.17 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:43:08.732Z"
   },
   {
     "email": "we202317@gmail.com",
     "name": "Ugbebor Wealth",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2b87c6sm508309575e9.7 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:43:17.351Z"
   },
   {
     "email": "motunrayooredola224@gmail.com",
     "name": "success oredola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4955dfa4a97sm113049905e9.4 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:43:56.827Z"
   },
   {
     "email": "taiwoakawanwa@gmail.com",
     "name": "AKAWANWA DANIEL MOYOSORE",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2b87c6sm508329225e9.7 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:44:11.042Z"
   },
   {
     "email": "oladeleoluwapelumi3@gmail.com",
     "name": "Oladele oluwapelumi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63eeece9sm28545045f8f.37 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:44:30.028Z"
   },
   {
     "email": "adebanjoadesewa13@gmail.com",
     "name": "Adebanjo Ifeoluwa",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 a640c23a62f3a-c1712a63d99sm461093666b.41 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:44:46.084Z"
   },
   {
     "email": "aurabygail07@gmail.com",
     "name": "abigail akporubare",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49562709500sm48884025e9.14 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:45:00.288Z"
   },
   {
     "email": "yekeenamidat2007@gmail.com",
     "name": "Yekeen Amidat",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49549a47e64sm295389355e9.8 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:45:07.753Z"
   },
   {
     "email": "esiomahd@gmail.com",
     "name": "Blessing Esiomah",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4955fee64dasm63725965e9.10 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:45:20.191Z"
   },
   {
     "email": "taiwoberry12@gmail.com",
     "name": "Babatunde Taiwo",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63ed244asm28674480f8f.20 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:45:30.127Z"
   },
   {
     "email": "abdulrofiutoyyibat@gmail.com",
     "name": "Abdulrofiu Toyyibat",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e49ce4sm30656500f8f.8 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:45:40.966Z"
   },
   {
     "email": "moseskorede09@gmail.com",
     "name": "Abolarin Moses",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2b87c6sm508403675e9.7 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:45:47.913Z"
   },
   {
     "email": "abdussamiimaryam2007@gmail.com",
     "name": "Abdussamii Maryam Ayoola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49562709500sm48915725e9.14 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:45:57.282Z"
   },
   {
     "email": "lawalmubarak2006@gmail.com",
     "name": "Lawal Mubarak",
-    "status": "failed",
-    "error": "read ECONNRESET"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:46:07.145Z"
   },
   {
     "email": "prudysketch@gmail.com",
     "name": "Prudent Igenuma",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49549a36312sm302939295e9.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:46:20.764Z"
   },
   {
     "email": "farotimisharon@gmail.com",
     "name": "Farotimi Sharon",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f6fa848fcsm19988163f8f.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:46:27.378Z"
   },
   {
     "email": "adeleyesanyaolu1@gmail.com",
     "name": "Adeleye Charles akinola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 4fb4d7f45d1cf-69e6fee2347sm4574633a12.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:46:37.598Z"
   },
   {
     "email": "fhaderinsola09@gmail.com",
     "name": "faith taiwo",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 a640c23a62f3a-c1724f50ab7sm461646766b.50 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:46:45.632Z"
   },
   {
     "email": "kehindeadelakun809@gmail.com",
     "name": "Adelakun Kehinde",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f6fa848fcsm19989446f8f.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:47:03.379Z"
   },
   {
     "email": "shofolahanomotoyosi306@gmail.com",
     "name": "Shofolahan Omotoyosi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f6fa848fcsm19989849f8f.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:47:13.823Z"
   },
   {
     "email": "funmilolashobowals04@gmail.com",
     "name": "Shobowale funmilola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2a2504sm309240335e9.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:47:24.101Z"
   },
   {
     "email": "iyanugbadewole20@gmail.com",
     "name": "Gbadewole iyanu Sunday",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2edbe4sm303960785e9.12 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:47:34.614Z"
   },
   {
     "email": "danielchukwuebuka172@gmail.com",
     "name": "daniel chukwuebuka",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 4fb4d7f45d1cf-69e6fff537csm4560348a12.25 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:47:41.389Z"
   },
   {
     "email": "obabalola035@gmail.com",
     "name": "Babalola Florence oluwajuwonlo",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63ed244asm28689729f8f.20 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:47:47.731Z"
   },
   {
     "email": "abdulsalamfathia2022@gmail.com",
     "name": "Abdulsalam Fathia Bisola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63ed244asm28690357f8f.20 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:47:57.098Z"
   },
   {
     "email": "peterodugbemi19@gmail.com",
     "name": "Peter Odugbemi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49549c96fecsm329049195e9.11 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:48:04.688Z"
   },
   {
     "email": "ogunsegunolamide8@gmail.com",
     "name": "Ogunsegun olamide Samuel",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49563969482sm38985105e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:48:12.022Z"
   },
   {
     "email": "abiolaliyah015@gmail.com",
     "name": "Abiola Aaliyah",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63eea8afsm31320954f8f.33 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:48:20.658Z"
   },
   {
     "email": "okeridwan806@gmail.com",
     "name": "Oke Ridwan",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f6fa848fcsm19993393f8f.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:48:26.670Z"
   },
   {
     "email": "wunmienilolobo2006@gmail.com",
     "name": "enilolobo adewunmi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63ed244asm28693038f8f.20 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:48:32.575Z"
   },
   {
     "email": "olamidemonijesu04@gmail.com",
     "name": "Ogunyemi Olamide",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e49500sm31654923f8f.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:48:38.718Z"
   },
   {
     "email": "iretomiwaidowu895@gmail.com",
     "name": "Idowu Iretomiwa Shakirat",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63edd7d3sm28984226f8f.25 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:48:45.953Z"
   },
   {
     "email": "thefavourolayanju@gmail.com",
     "name": "Favour Olayanju",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2b074csm302038235e9.6 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:48:53.189Z"
   },
   {
     "email": "adebayovictor6822@gmail.com",
     "name": "Adebayo Victor",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2692a3sm245289985e9.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:49:00.459Z"
   },
   {
     "email": "oluwatofunmisolomon23@gmail.com",
     "name": "adebowale solomon",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2e8529sm272904575e9.11 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:49:07.181Z"
   },
   {
     "email": "haleemahabolaji198@gmail.com",
     "name": "Adams Haleemah",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63ed2313sm29519653f8f.23 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:49:13.429Z"
   },
   {
     "email": "victoriashoyombo1@gmail.com",
     "name": "Victoria",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49549a36312sm303081825e9.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:49:20.558Z"
   },
   {
     "email": "oshinayaoluwaseyi6@gmail.com",
     "name": "Oshinaya oluwaseyi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63eea8afsm31325883f8f.33 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:49:26.518Z"
   },
   {
     "email": "fathiaoke799@gmail.com",
     "name": "Oke Fathia",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63edda9bsm30779236f8f.31 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:49:33.396Z"
   },
   {
     "email": "amosgbolahan6621@gmail.com",
     "name": "Amos Gbolahan",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f6fa848fcsm19998104f8f.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:49:40.109Z"
   },
   {
     "email": "ejidekristin@gmail.com",
     "name": "Ejide Kristin Oluwatomisin",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63ed2313sm29522686f8f.23 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:49:47.708Z"
   },
   {
     "email": "ajetunmobiprecious501@gmail.com",
     "name": "Ajetunmobi Olatoye Temidayo",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e65644sm28483639f8f.16 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:49:53.864Z"
   },
   {
     "email": "kristinolamide@gmail.com",
     "name": "Ejide Kristin Oluwatomisin",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e499c2sm28081785f8f.4 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:50:00.142Z"
   },
   {
     "email": "ajayiganiu15@gmail.com",
     "name": "Ajayi Ganiu Ayomide",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49563969482sm39113575e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:50:08.229Z"
   },
   {
     "email": "odunayokelvin@gmail.com",
     "name": "ARIYO ODUNAYO",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63edda29sm30405106f8f.32 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:50:14.972Z"
   },
   {
     "email": "deborahade84@gmail.com",
     "name": "Deborah Adebayo",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4955de8895dsm77137905e9.4 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:50:20.744Z"
   },
   {
     "email": "tayoadeosun817@gmail.com",
     "name": "Adeosun Adedayo",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49548e0fcdbsm239213435e9.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:50:28.219Z"
   },
   {
     "email": "oluwasegun2009.seun@gmail.com",
     "name": "Johnson Lawrence oluwasegun",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4955fee64dasm63961965e9.10 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:50:46.145Z"
   },
   {
     "email": "benardboniface1@gmail.com",
     "name": "Boniface Benard Baba",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49563971572sm14567865e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:51:01.660Z"
   },
   {
     "email": "osibogunadesanya96@gmail.com",
     "name": "Osibogun Abdulwahab",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49563969482sm39151745e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:51:13.223Z"
   },
   {
     "email": "opemipoyusuffabdullahi@gmail.com",
     "name": "Yusuff Abdullahi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2a24b6sm290810055e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:51:21.156Z"
   },
   {
     "email": "kehindeibiyemi26@gmail.com",
     "name": "Ibiyemi kehinde",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49548e0fcdbsm239229635e9.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:51:29.267Z"
   },
   {
     "email": "lordk.m.ythe1@gmail.com",
     "name": "Yusuf Michael",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49563969482sm39172365e9.3 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:51:36.946Z"
   },
   {
     "email": "adekoyasherifdeenadetunji@gmail.com",
     "name": "Sherifdeen Adekoya",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f6fa848fcsm20004756f8f.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:51:44.176Z"
   },
   {
     "email": "hassanahbaruwa@gmail.com",
     "name": "Baruwa Hassanah Iyiola",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f6fa848fcsm20005279f8f.0 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:52:03.271Z"
   },
   {
     "email": "dadebimpe46@gmail.com",
     "name": "Adebimpe David Owolabi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49549a3f07esm271126425e9.6 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:52:10.390Z"
   },
   {
     "email": "mustaphasuliatayobami@gmail.com",
     "name": "Mustapha Suliat Ayobami",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63eeb360sm31319214f8f.34 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:52:19.124Z"
   },
   {
     "email": "emmazzye@gmail.com",
     "name": "Ujereh Emmanuel",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954c841a0dsm238675745e9.5 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:52:26.253Z"
   },
   {
     "email": "omoilekewuagbayeadedejiadedeji@gmail.com",
     "name": "ADEDEJI MALIK OLUWADAMILARE",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63ee0086sm32349636f8f.30 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:52:33.650Z"
   },
   {
     "email": "lawalfatimoh29@gmail.com",
     "name": "Fatimoh Lawal",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-49549a47e64sm295683215e9.8 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:52:41.265Z"
   },
   {
     "email": "adeotunadekunle6@gmail.com",
     "name": "Adekunle Oluwadarasimi",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 5b1f17b1804b1-4954a2a2504sm309456265e9.2 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:52:49.241Z"
   },
   {
     "email": "agboladeoluwaseun443@gmail.com",
     "name": "AGBOLADE JAMIU AYOMIDE",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e49ab8sm31585850f8f.5 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:52:56.230Z"
   },
   {
     "email": "adekanbiibrahim5@gmail.com",
     "name": "adekanbi Ibrahim",
-    "status": "failed",
-    "error": "Data command failed: 550-5.4.5 Daily user sending limit exceeded. For more information on Gmail\n550-5.4.5 sending limits go to\n550 5.4.5  https://support.google.com/a/answer/166852 ffacd0b85a97d-47f63e49acesm28828475f8f.6 - gsmtp"
+    "status": "sent",
+    "sent_at": "2026-07-21T11:53:11.741Z"
   }
 ]

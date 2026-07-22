@@ -4969,6 +4969,14 @@ const AcademyDashboard = () => {
     const [peerTag, setPeerTag] = useState('Bug 🐛');
     const [replyInputs, setReplyInputs] = useState({});
 
+    // Discord Peer Hub states
+    const [activeChannel, setActiveChannel] = useState('general-questions');
+    const [discordInput, setDiscordInput] = useState('');
+    const [replyTargetPost, setReplyTargetPost] = useState(null);
+
+    // Challenge visibility state
+    const [showModuleChallenge, setShowModuleChallenge] = useState(false);
+
     // Notifications states
     const [notifications, setNotifications] = useState(() => JSON.parse(localStorage.getItem('fta-notifications') || '[]'));
     const [unreadCount, setUnreadCount] = useState(() => {
@@ -4982,6 +4990,11 @@ const AcademyDashboard = () => {
     const completedCount = allScores.length;
     const avgScore = completedCount > 0 ? Math.round(allScores.reduce((a,b)=>a+b,0)/completedCount) : 0;
     const passedCount = allScores.filter(s => s >= 50).length;
+
+    // Reset showModuleChallenge when lesson or module changes
+    useEffect(() => {
+        setShowModuleChallenge(false);
+    }, [selectedModIdx, selectedLesIdx]);
 
     // Sync selected lesson when course changes
     useEffect(() => {
@@ -5080,345 +5093,484 @@ const AcademyDashboard = () => {
 
             {/* ── PEER HUB FULL-SCREEN VIEW ── */}
             {academyTab === 'peers' && (() => {
-                const handleCreatePost = (e) => {
-                    e.preventDefault();
-                    if (!peerTitle.trim() || !peerBody.trim()) {
-                        alert('Please write a title and content for your peer post!');
-                        return;
-                    }
-                    const newPost = {
-                        id: Date.now(),
-                        title: peerTitle,
-                        body: peerBody,
-                        tag: peerTag,
-                        author: studentName,
-                        authorAvatar: studentAvatar,
-                        date: new Date().toLocaleDateString(),
+                const discordChannels = [
+                    { id: 'general-questions', name: 'weird-questions', desc: 'Ask everything that is or sounds weird.', icon: '#' },
+                    { id: 'help-and-bugs', name: 'help-and-bugs', desc: 'Post code syntax bugs & technical questions.', icon: '#' },
+                    { id: 'project-showcase', name: 'project-showcase', desc: 'Show off your designs and completed tasks.', icon: '#' },
+                    { id: 'announcements', name: 'announcements', desc: 'Official updates and curator notes.', icon: '📢' },
+                ];
+
+                const currChannelObj = discordChannels.find(c => c.id === activeChannel) || discordChannels[0];
+
+                const seedMessages = [
+                    {
+                        id: 101,
+                        channel: 'general-questions',
+                        author: 'Master Clyde',
+                        authorAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Clyde',
+                        date: 'Today at 9:15 AM',
+                        body: 'Anything that you would like to say?',
                         cohort: studentCohort,
                         replies: []
-                    };
-                    const updated = [newPost, ...peerPosts];
-                    setPeerPosts(updated);
-                    localStorage.setItem('fta-peer-posts', JSON.stringify(updated));
-                    setPeerTitle('');
-                    setPeerBody('');
-                    alert('✅ Challenge ticket posted successfully in your Cohort hub!');
-                };
-
-                const handleAddReply = (postId) => {
-                    const replyText = replyInputs[postId] || '';
-                    if (!replyText.trim()) { alert('Please write a comment first!'); return; }
-                    const updated = peerPosts.map(p => {
-                        if (p.id === postId) {
-                            return { ...p, replies: [...(p.replies || []), { author: studentName, authorAvatar: studentAvatar, body: replyText, date: new Date().toLocaleDateString() }] };
-                        }
-                        return p;
-                    });
-                    setPeerPosts(updated);
-                    localStorage.setItem('fta-peer-posts', JSON.stringify(updated));
-                    setReplyInputs(prev => ({ ...prev, [postId]: '' }));
-                };
-
-                const activePosts = peerPosts.length > 0 ? peerPosts : [
-                    { id: 1, title: 'Getting TypeError: Illegal constructor in React', body: 'I noticed this error occurs when referencing Lock without importing it from lucide-react. Make sure you check your imports at the top of main or App!', tag: 'Bug 🐛', author: 'Ogunkoya Samuel Opemipo', authorAvatar: '', date: '7/19/2026', cohort: studentCohort, replies: [{ author: 'Ademuwagun Precious', authorAvatar: '', body: 'Thanks Samuel! This saved me hours of debugging.', date: '7/19/2026' }] },
-                    { id: 2, title: 'HTML Intro grading fails - help!', body: 'I keep getting 55/100 and Failed on the HTML introduction assignment. I included h1, p, and a tags. What else is needed?', tag: 'Question ❓', author: 'Chioma Okafor', authorAvatar: '', date: '7/19/2026', cohort: studentCohort, replies: [{ author: 'Omotoyosi Agboola', authorAvatar: '', body: 'Make sure you add the exact DOCTYPE declaration: <!doctype html> at the very top. The strict AI grader validates the entire skeleton!', date: '7/19/2026' }] }
+                    },
+                    {
+                        id: 102,
+                        channel: 'general-questions',
+                        author: 'Master Clyde',
+                        authorAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Clyde',
+                        date: 'Today at 10:23 AM',
+                        body: "Please tell me, I've been waiting for one hour.",
+                        cohort: studentCohort,
+                        replies: []
+                    },
+                    {
+                        id: 103,
+                        channel: 'general-questions',
+                        author: 'Wumpus',
+                        authorAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Wumpus',
+                        date: 'Today at 10:27 AM',
+                        body: '*tremble fearfully*',
+                        cohort: studentCohort,
+                        replies: []
+                    },
+                    {
+                        id: 104,
+                        channel: 'general-questions',
+                        author: 'Master Clyde',
+                        authorAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Clyde',
+                        date: 'Today at 10:27 AM',
+                        body: 'Do you have something to say Wumpus?\nor maybe anyone else?\npls I want to hear you guys',
+                        cohort: studentCohort,
+                        replies: []
+                    },
+                    {
+                        id: 105,
+                        channel: 'general-questions',
+                        author: 'Wumpus cousin',
+                        authorAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Cousin',
+                        date: 'Today at 10:29 AM',
+                        body: '*smells the sandwich that Wumpus just left*',
+                        cohort: studentCohort,
+                        replies: []
+                    },
+                    {
+                        id: 106,
+                        channel: 'general-questions',
+                        author: 'Master Clyde',
+                        authorAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Clyde',
+                        date: 'Today at 10:29 AM',
+                        body: "come on\nSo as nobody is asking, I'll ask first\nDoes anybody feels like something is different?",
+                        cohort: studentCohort,
+                        replies: []
+                    },
+                    {
+                        id: 107,
+                        channel: 'help-and-bugs',
+                        author: 'Ogunkoya Samuel Opemipo',
+                        authorAvatar: '',
+                        date: 'Today at 10:35 AM',
+                        body: 'Getting TypeError: Illegal constructor in React — Make sure you import components properly from lucide-react!',
+                        cohort: studentCohort,
+                        replies: [
+                            { author: 'Ademuwagun Precious', authorAvatar: '', body: 'Thanks Samuel! This saved me hours of debugging.', date: 'Today at 10:40 AM' }
+                        ]
+                    }
                 ];
-                const cohortFilteredPosts = activePosts.filter(p => p.cohort === studentCohort);
+
+                const activeList = peerPosts.length > 0 ? peerPosts : seedMessages;
+                const channelMessages = activeList.filter(m => (m.channel === activeChannel || (!m.channel && activeChannel === 'general-questions')) && (m.cohort === studentCohort || !m.cohort));
+
+                const handleSendDiscordMessage = (e) => {
+                    if (e) e.preventDefault();
+                    if (!discordInput.trim()) return;
+
+                    if (replyTargetPost) {
+                        const updated = activeList.map(p => {
+                            if (p.id === replyTargetPost.id) {
+                                return {
+                                    ...p,
+                                    replies: [...(p.replies || []), {
+                                        author: studentName,
+                                        authorAvatar: studentAvatar,
+                                        body: discordInput,
+                                        date: `Today at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                                    }]
+                                };
+                            }
+                            return p;
+                        });
+                        setPeerPosts(updated);
+                        localStorage.setItem('fta-peer-posts', JSON.stringify(updated));
+                        setDiscordInput('');
+                        setReplyTargetPost(null);
+                    } else {
+                        const newMsg = {
+                            id: Date.now(),
+                            channel: activeChannel,
+                            title: discordInput.slice(0, 50),
+                            body: discordInput,
+                            tag: 'Chat',
+                            author: studentName,
+                            authorAvatar: studentAvatar,
+                            date: `Today at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                            cohort: studentCohort,
+                            replies: []
+                        };
+                        const updated = [...activeList, newMsg];
+                        setPeerPosts(updated);
+                        localStorage.setItem('fta-peer-posts', JSON.stringify(updated));
+                        setDiscordInput('');
+                    }
+                };
 
                 return (
-                    <div style={{ animation: 'fadeIn 0.25s ease-out' }}>
-                        {/* PEER HUB TOP BAR: Back + Title + Notifications */}
-                        <div style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap',
-                            background: '#fff', border: '3px solid #000', padding: '1rem 1.5rem',
-                            boxShadow: '6px 6px 0 #000', borderRadius: '0.5rem'
-                        }}>
-                            {/* Back Button */}
-                            <button
-                                onClick={() => setAcademyTab('curriculum')}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    background: '#000', color: '#fff', border: '2px solid #000',
-                                    padding: '0.6rem 1.2rem', fontFamily: 'Outfit', fontWeight: 900,
-                                    fontSize: '0.85rem', textTransform: 'uppercase', cursor: 'pointer',
-                                    borderRadius: '0.5rem', boxShadow: '3px 3px 0 var(--accent-r)'
-                                }}
-                            >
-                                <ArrowLeft size={18} />
-                                Back to Learning
-                            </button>
+                    <div style={{
+                        background: '#2b2a4a',
+                        color: '#ffffff',
+                        borderRadius: '1rem',
+                        border: '3px solid #000000',
+                        boxShadow: '8px 8px 0 #000000',
+                        display: 'grid',
+                        gridTemplateColumns: '260px 1fr',
+                        height: 'min(760px, 82vh)',
+                        overflow: 'hidden',
+                        fontFamily: "'Outfit', system-ui, sans-serif",
+                        animation: 'fadeIn 0.2s ease-out'
+                    }} className="discord-community-container">
 
-                            {/* Title */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, justifyContent: 'center' }}>
-                                <Users size={22} color="var(--accent-r)" />
-                                <h2 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.2rem', margin: 0, textTransform: 'uppercase' }}>
-                                    Peer Hub — {studentCohort}
-                                </h2>
-                            </div>
+                        {/* LEFT SIDEBAR (#22213d) */}
+                        <div style={{ background: '#22213d', borderRight: '3px solid #000000', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+                            {/* Community Server Header */}
+                            <div style={{ padding: '1.2rem 1rem', borderBottom: '3px solid #000000', background: '#22213d', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 955, fontSize: '0.95rem', margin: 0, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.04em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        💬 ${studentCohort} Hub
+                                    </h3>
+                                    <span style={{ fontSize: '0.65rem', background: 'var(--accent-r)', color: '#fff', padding: '0.15rem 0.5rem', borderRadius: '1rem', fontWeight: 900, border: '1.5px solid #000' }}>PRO</span>
+                                </div>
 
-                            {/* Notifications Bell with Badge */}
-                            <button
-                                onClick={() => {
-                                    const updated = notifications.map(n => ({ ...n, read: true }));
-                                    setNotifications(updated);
-                                    localStorage.setItem('fta-notifications', JSON.stringify(updated));
-                                    setUnreadCount(0);
-                                    setAcademyTab('notifications');
-                                }}
-                                style={{
-                                    position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    background: unreadCount > 0 ? '#fef9c3' : '#f8fafc',
-                                    border: `2px solid ${unreadCount > 0 ? '#ca8a04' : '#000'}`,
-                                    width: '44px', height: '44px', borderRadius: '50%',
-                                    cursor: 'pointer', boxShadow: '3px 3px 0 #000',
-                                    transition: 'all 0.15s ease'
-                                }}
-                                title="View Notifications"
-                            >
-                                <span style={{ fontSize: '1.3rem' }}>🔔</span>
-                                {unreadCount > 0 && (
-                                    <span style={{
-                                        position: 'absolute', top: '-6px', right: '-6px',
-                                        background: '#dc2626', color: '#fff',
-                                        fontSize: '0.6rem', fontWeight: 900,
-                                        padding: '0.1rem 0.4rem', borderRadius: '1rem',
-                                        border: '1.5px solid #000', minWidth: '18px',
-                                        textAlign: 'center', lineHeight: '1.4'
-                                    }}>
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </button>
-                        </div>
-
-                        {/* PEER HUB CONTENT GRID — full-width feed + floating modal */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-
-                            {/* Bug Board header + Post Challenge button */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #000', paddingBottom: '0.8rem', flexWrap: 'wrap', gap: '0.8rem' }}>
-                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0, textTransform: 'uppercase' }}>
-                                    🐛 Bug Board ({cohortFilteredPosts.length})
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#71717a', marginLeft: '0.8rem', textTransform: 'none' }}>— {studentCohort}</span>
-                                </h3>
+                                {/* BACK BUTTON TO LEARNING DASHBOARD */}
                                 <button
-                                    onClick={() => setShowPostForm(true)}
+                                    onClick={() => setAcademyTab('curriculum')}
                                     style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                        background: 'var(--accent-r)', color: '#fff',
-                                        border: '3px solid #000', padding: '0.65rem 1.4rem',
-                                        fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.9rem',
-                                        textTransform: 'uppercase', cursor: 'pointer',
-                                        boxShadow: '4px 4px 0 #000', borderRadius: '0.4rem',
-                                        transition: 'transform 0.1s ease, box-shadow 0.1s ease'
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.5rem',
+                                        width: '100%',
+                                        padding: '0.65rem 0.8rem',
+                                        background: 'var(--accent-r)',
+                                        color: '#ffffff',
+                                        border: '2px solid #000000',
+                                        borderRadius: '0.5rem',
+                                        fontFamily: 'Outfit',
+                                        fontWeight: 900,
+                                        fontSize: '0.78rem',
+                                        cursor: 'pointer',
+                                        boxShadow: '3px 3px 0 #000000',
+                                        textTransform: 'uppercase',
+                                        transition: 'all 0.12s ease'
                                     }}
-                                    onMouseOver={e => { e.currentTarget.style.transform = 'translate(-2px,-2px)'; e.currentTarget.style.boxShadow = '6px 6px 0 #000'; }}
-                                    onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '4px 4px 0 #000'; }}
+                                    onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-1px,-1px)'; e.currentTarget.style.boxShadow = '4px 4px 0 #000000'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '3px 3px 0 #000000'; }}
                                 >
-                                    <Cpu size={16} /> Post Challenge
+                                    <span>←</span> Learning Dashboard
                                 </button>
                             </div>
 
-                            {/* Posts Feed */}
-                            {cohortFilteredPosts.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '5rem 2rem', color: '#71717a', border: '3px dashed #ccc', background: '#fff', borderRadius: '1rem' }}>
-                                    <Users size={36} style={{ marginBottom: '1rem', opacity: 0.25, display: 'inline-block' }} />
-                                    <p style={{ fontWeight: 800, fontSize: '1rem', margin: '0 0 0.5rem' }}>Clean Board!</p>
-                                    <p style={{ fontSize: '0.8rem', margin: 0 }}>No active bugs posted in your cohort yet. Be the first to drop a challenge.</p>
+                            {/* Channels List */}
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 0.6rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                <div style={{ fontSize: '0.68rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8', padding: '0 0.5rem 0.4rem 0.5rem', letterSpacing: '0.05em' }}>
+                                    TEXT CHANNELS
                                 </div>
-                            ) : (
-                                cohortFilteredPosts.map((post) => (
-                                    <div key={post.id} style={{ background: '#fff', border: '3px solid #000', padding: '1.5rem', boxShadow: '6px 6px 0 #000', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                {post.authorAvatar ? (
-                                                    <img src={post.authorAvatar} alt={post.author} style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #000', objectFit: 'cover' }} />
-                                                ) : (
-                                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem', border: '2px solid #000' }}>
-                                                        {post.author.charAt(0)}
-                                                    </div>
-                                                )}
-                                                <div>
-                                                    <div style={{ fontSize: '0.9rem', fontWeight: 950, color: '#000', fontFamily: 'Outfit' }}>{post.author}</div>
-                                                    <div style={{ fontSize: '0.65rem', color: '#71717a', fontWeight: 700 }}>Posted on {post.date} • {post.cohort}</div>
-                                                </div>
-                                            </div>
-                                            <span style={{ background: '#000', color: '#fff', padding: '0.2rem 0.7rem', border: '1px solid #000', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', borderRadius: '0.3rem' }}>{post.tag}</span>
-                                        </div>
-                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0 }}>{post.title}</h4>
-                                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#334155', fontWeight: 650, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{post.body}</p>
-                                        <div style={{ background: '#f8fafc', borderTop: '2px solid #000', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '0.5rem' }}>
-                                            <div style={{ fontSize: '0.7rem', fontWeight: 955, textTransform: 'uppercase', color: '#71717a' }}>Replies ({post.replies?.length || 0})</div>
-                                            {(post.replies || []).map((rep, idx) => (
-                                                <div key={idx} style={{ paddingBottom: '0.5rem', borderBottom: idx < post.replies.length - 1 ? '1px dashed #cbd5e1' : 'none' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
-                                                        {rep.authorAvatar ? (
-                                                            <img src={rep.authorAvatar} alt={rep.author} style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1px solid #000', objectFit: 'cover' }} />
-                                                        ) : (
-                                                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.65rem', border: '1px solid #000' }}>{rep.author.charAt(0)}</div>
-                                                        )}
-                                                        <div style={{ fontSize: '0.7rem', fontWeight: 900, color: rep.author === studentName ? 'var(--accent-r)' : '#000' }}>
-                                                            {rep.author} <span style={{ fontWeight: 400, color: '#94a3b8' }}>• {rep.date}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div style={{ fontSize: '0.8rem', color: '#334155', fontWeight: 650, marginLeft: '1.8rem' }}>{rep.body}</div>
-                                                </div>
-                                            ))}
-                                            {!openReplyBoxes[post.id] ? (
-                                                <button
-                                                    onClick={() => setOpenReplyBoxes(prev => ({ ...prev, [post.id]: true }))}
-                                                    style={{
-                                                        marginTop: '0.8rem',
-                                                        background: 'transparent',
-                                                        border: '2px solid #000',
-                                                        padding: '0.4rem 0.9rem',
-                                                        borderRadius: '0.4rem',
-                                                        fontFamily: 'Outfit',
-                                                        fontWeight: 900,
-                                                        fontSize: '0.75rem',
-                                                        cursor: 'pointer',
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        gap: '0.3rem',
-                                                        boxShadow: '2px 2px 0 #000',
-                                                        transition: 'all 0.1s ease'
-                                                    }}
-                                                    onMouseOver={e => e.currentTarget.style.background = '#f1f5f9'}
-                                                    onMouseOut={e => e.currentTarget.style.background = 'transparent'}
-                                                >
-                                                    💬 Reply
-                                                </button>
-                                            ) : (
-                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.8rem', background: '#f8fafc', padding: '0.8rem', borderRadius: '0.6rem', border: '2px dashed #cbd5e1' }}>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Add a reply..."
-                                                        value={replyInputs[post.id] || ''}
-                                                        onChange={e => setReplyInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
-                                                        style={{ flex: 1, border: '2px solid #000', padding: '0.5rem 0.8rem', fontFamily: 'Outfit', fontSize: '0.8rem', borderRadius: '0.4rem' }}
-                                                        onKeyDown={e => {
-                                                            if (e.key === 'Enter') {
-                                                                handleAddReply(post.id);
-                                                                setOpenReplyBoxes(prev => ({ ...prev, [post.id]: false }));
-                                                            }
-                                                        }}
-                                                        autoFocus
-                                                    />
-                                                    <button 
-                                                        onClick={() => {
-                                                            handleAddReply(post.id);
-                                                            setOpenReplyBoxes(prev => ({ ...prev, [post.id]: false }));
-                                                        }} 
-                                                        style={{ background: 'var(--accent-r)', color: '#fff', border: '2px solid #000', padding: '0.5rem 1rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem', boxShadow: '2px 2px 0 #000' }}
-                                                    >
-                                                        <Send size={14} />
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => setOpenReplyBoxes(prev => ({ ...prev, [post.id]: false }))} 
-                                                        style={{ background: '#fff', color: '#000', border: '2px solid #000', padding: '0.5rem 1rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem' }}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
 
-                        {/* POST CHALLENGE MODAL POPUP */}
-                        {showPostForm && (
-                            <div
-                                onClick={() => setShowPostForm(false)}
-                                style={{
-                                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
-                                    backdropFilter: 'blur(4px)', zIndex: 9000,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    padding: '1rem', animation: 'fadeIn 0.2s ease-out'
-                                }}
-                            >
-                                <div
-                                    onClick={e => e.stopPropagation()}
-                                    style={{
-                                        background: '#fff', border: '3px solid #000',
-                                        boxShadow: '10px 10px 0 #000', padding: '2rem',
-                                        width: '100%', maxWidth: '520px', borderRadius: '0.5rem',
-                                        display: 'flex', flexDirection: 'column', gap: '1.2rem',
-                                        animation: 'slideUp 0.25s ease-out', maxHeight: '90vh', overflowY: 'auto'
-                                    }}
-                                >
-                                    {/* Modal Header */}
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000', paddingBottom: '0.8rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                                            <Cpu size={20} color="var(--accent-r)" />
-                                            <h3 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.2rem', margin: 0, textTransform: 'uppercase' }}>🚀 Post a Challenge</h3>
-                                        </div>
+                                {discordChannels.map(ch => {
+                                    const isSelected = activeChannel === ch.id;
+                                    return (
                                         <button
-                                            onClick={() => setShowPostForm(false)}
-                                            style={{ background: 'none', border: '2px solid #000', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1rem', color: '#000' }}
-                                        >✕</button>
-                                    </div>
+                                            key={ch.id}
+                                            onClick={() => { setActiveChannel(ch.id); setReplyTargetPost(null); }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.6rem',
+                                                width: '100%',
+                                                padding: '0.55rem 0.7rem',
+                                                borderRadius: '0.4rem',
+                                                background: isSelected ? 'var(--accent-r)' : 'transparent',
+                                                color: '#ffffff',
+                                                border: isSelected ? '2px solid #000000' : 'none',
+                                                cursor: 'pointer',
+                                                fontFamily: 'Outfit',
+                                                fontWeight: isSelected ? 900 : 700,
+                                                fontSize: '0.85rem',
+                                                textAlign: 'left',
+                                                transition: 'all 0.1s ease',
+                                                boxShadow: isSelected ? '2px 2px 0 #000000' : 'none'
+                                            }}
+                                            onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.background = '#2b2a4a'; } }}
+                                            onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.background = 'transparent'; } }}
+                                        >
+                                            <span style={{ fontSize: '1rem', color: isSelected ? '#fff' : '#94a3b8' }}>{ch.icon}</span>
+                                            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.name}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
 
-                                    <p style={{ fontSize: '0.8rem', color: '#555', lineHeight: '1.5', margin: 0 }}>
-                                        Ask peers in <strong>{studentCohort}</strong> for help on bugs, design questions, or coding challenges.
-                                    </p>
-
-                                    <form onSubmit={(e) => { handleCreatePost(e); setShowPostForm(false); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Title / Bug Area *</label>
-                                            <input
-                                                type="text"
-                                                value={peerTitle}
-                                                onChange={e => setPeerTitle(e.target.value)}
-                                                placeholder="e.g. CSS Grid alignment issue"
-                                                autoFocus
-                                                style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.9rem', boxSizing: 'border-box' }}
-                                            />
+                            {/* User Info Bar at bottom of sidebar */}
+                            <div style={{ background: '#1c1b33', padding: '0.8rem 1rem', borderTop: '3px solid #000000', display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                                <div style={{ position: 'relative' }}>
+                                    {studentAvatar ? (
+                                        <img src={studentAvatar} alt={studentName} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #000000' }} />
+                                    ) : (
+                                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem', border: '1.5px solid #000000' }}>
+                                            {studentName.charAt(0)}
                                         </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Tag</label>
-                                            <select value={peerTag} onChange={e => setPeerTag(e.target.value)} style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.5rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', boxSizing: 'border-box' }}>
-                                                <option value="Bug 🐛">Bug 🐛</option>
-                                                <option value="Question ❓">Question ❓</option>
-                                                <option value="Challenge 🎯">Challenge 🎯</option>
-                                                <option value="Idea 💡">Idea 💡</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem', color: '#71717a' }}>Describe the Problem *</label>
-                                            <textarea
-                                                value={peerBody}
-                                                onChange={e => setPeerBody(e.target.value)}
-                                                rows={5}
-                                                placeholder="Paste your code or describe the problem clearly..."
-                                                style={{ border: '2px solid #000', padding: '0.8rem', width: '100%', borderRadius: '0.5rem', fontFamily: 'monospace', fontSize: '0.85rem', resize: 'vertical', boxSizing: 'border-box' }}
-                                            />
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '0.8rem', justifyContent: 'flex-end', borderTop: '2px solid #eee', paddingTop: '1rem' }}>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowPostForm(false)}
-                                                style={{ background: '#fff', color: '#000', border: '2px solid #000', padding: '0.7rem 1.2rem', fontFamily: 'Outfit', fontWeight: 900, cursor: 'pointer', borderRadius: '0.4rem' }}
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                style={{ background: 'var(--accent-r)', color: '#fff', border: '3px solid #000', padding: '0.7rem 1.6rem', fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.9rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '4px 4px 0 #000', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '0.4rem' }}
-                                            >
-                                                <Send size={16} /> Post to Hub
-                                            </button>
-                                        </div>
-                                    </form>
+                                    )}
+                                    <span style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', background: '#22c55e', borderRadius: '50%', border: '2px solid #1c1b33' }} />
+                                </div>
+                                <div style={{ overflow: 'hidden' }}>
+                                    <div style={{ fontSize: '0.82rem', fontWeight: 900, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{studentName}</div>
+                                    <div style={{ fontSize: '0.65rem', color: '#22c55e', fontWeight: 800 }}>Online • ${studentCohort}</div>
                                 </div>
                             </div>
-                        )}
+                        </div>
+
+                        {/* MAIN CHAT COLUMN (#2b2a4a) */}
+                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#2b2a4a', overflow: 'hidden' }}>
+                            
+                            {/* Header Bar */}
+                            <div style={{ padding: '0.9rem 1.5rem', background: '#2b2a4a', borderBottom: '3px solid #000000', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                    <span style={{ fontSize: '1.4rem', color: '#fff', fontWeight: 900 }}>#</span>
+                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: 955, fontSize: '1.1rem', margin: 0, color: '#ffffff' }}>
+                                        {currChannelObj.name}
+                                    </h2>
+                                    <span style={{ color: '#000000', margin: '0 0.4rem', fontWeight: 900 }}>|</span>
+                                    <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>{currChannelObj.desc}</span>
+                                </div>
+
+                                {/* Action Icons Panel matching Discord header */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <span style={{ cursor: 'pointer', fontSize: '1.2rem' }} title="Members">👥</span>
+                                    <span style={{ cursor: 'pointer', fontSize: '1.2rem' }} title="Pinned Messages">📌</span>
+                                    <span style={{ cursor: 'pointer', fontSize: '1.2rem' }} title="Mute Notifications">🔔</span>
+                                    <div style={{ background: '#22213d', border: '1.5px solid #000000', borderRadius: '0.4rem', padding: '0.2rem 0.5rem', display: 'flex', alignItems: 'center', width: '130px' }}>
+                                        <input type="text" placeholder="Search" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#fff', fontSize: '0.7rem', width: '100%' }} />
+                                        <span>🔍</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Message Stream */}
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                
+                                {/* Welcome Giant Title Banner */}
+                                <div style={{ marginBottom: '1.5rem', borderBottom: '2px solid #000000', paddingBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                    <div>
+                                        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#22213d', border: '3px solid #000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', color: '#fff', marginBottom: '0.8rem', boxShadow: '3px 3px 0 #000000' }}>
+                                            #
+                                        </div>
+                                        <h1 style={{ fontFamily: 'Outfit', fontWeight: 955, fontSize: '2.2rem', color: '#fff', margin: '0 0 0.4rem 0' }}>
+                                            Welcome to #${currChannelObj.name}!
+                                        </h1>
+                                        <p style={{ color: '#cbd5e1', fontSize: '0.9rem', margin: 0, fontWeight: 700 }}>
+                                            Ask everything that is or sounds weird.
+                                        </p>
+                                    </div>
+                                    <span style={{ color: '#4ade80', fontSize: '0.8rem', fontWeight: 900, cursor: 'pointer', textDecoration: 'underline' }}>Edit channel</span>
+                                </div>
+
+                                {/* Messages list */}
+                                {channelMessages.map((msg) => {
+                                    const isSelf = msg.author === studentName;
+                                    return (
+                                        <div
+                                            key={msg.id}
+                                            style={{
+                                                display: 'flex',
+                                                gap: '1rem',
+                                                padding: '0.6rem 0.8rem',
+                                                borderRadius: '0.5rem',
+                                                transition: 'background 0.1s ease',
+                                                position: 'relative'
+                                            }}
+                                            className="discord-message-row"
+                                            onMouseEnter={e => {
+                                                e.currentTarget.style.background = '#22213d';
+                                                const actionBtn = e.currentTarget.querySelector('.msg-action-bar');
+                                                if (actionBtn) actionBtn.style.opacity = '1';
+                                            }}
+                                            onMouseLeave={e => {
+                                                e.currentTarget.style.background = 'transparent';
+                                                const actionBtn = e.currentTarget.querySelector('.msg-action-bar');
+                                                if (actionBtn) actionBtn.style.opacity = '0';
+                                            }}
+                                        >
+                                            {/* Author Avatar with color fallback */}
+                                            {msg.authorAvatar ? (
+                                                <img src={msg.authorAvatar} alt={msg.author} style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2.5px solid #000000' }} />
+                                            ) : (
+                                                <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: isSelf ? 'var(--accent-r)' : '#eb459e', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.15rem', flexShrink: 0, border: '2.5px solid #000000' }}>
+                                                    {msg.author.charAt(0)}
+                                                </div>
+                                            )}
+
+                                            {/* Message Header & Body */}
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.15rem' }}>
+                                                    <span style={{ fontWeight: 900, fontSize: '0.95rem', color: '#ffffff', fontFamily: 'Outfit' }}>
+                                                        {msg.author}
+                                                    </span>
+                                                    <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700 }}>
+                                                        {msg.date}
+                                                    </span>
+                                                </div>
+
+                                                <div style={{ color: '#f1f5f9', fontSize: '0.9rem', lineHeight: '1.5', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontWeight: 600 }}>
+                                                    {msg.body}
+                                                </div>
+
+                                                {/* Nested Replies Stream - Smaller in Width */}
+                                                {msg.replies && msg.replies.length > 0 && (
+                                                    <div style={{
+                                                        marginTop: '0.6rem',
+                                                        padding: '0.6rem 0.8rem',
+                                                        background: '#22213d',
+                                                        border: '2px solid #000000',
+                                                        borderRadius: '0.6rem',
+                                                        boxShadow: '3px 3px 0 #000000',
+                                                        maxWidth: '420px',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        gap: '0.4rem'
+                                                    }}>
+                                                        {msg.replies.map((rep, rIdx) => (
+                                                            <div key={rIdx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+                                                                {rep.authorAvatar ? (
+                                                                    <img src={rep.authorAvatar} alt={rep.author} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                                ) : (
+                                                                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--accent-r)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.65rem' }}>
+                                                                        {rep.author.charAt(0)}
+                                                                    </div>
+                                                                )}
+                                                                <span style={{ fontWeight: 900, color: rep.author === studentName ? 'var(--accent-r)' : '#ffffff' }}>
+                                                                    {rep.author}:
+                                                                </span>
+                                                                <span style={{ color: '#f1f5f9', fontWeight: 600 }}>
+                                                                    {rep.body}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Hover Reply Icon */}
+                                            <div
+                                                className="msg-action-bar"
+                                                style={{
+                                                    position: 'absolute',
+                                                    right: '1rem',
+                                                    top: '-0.5rem',
+                                                    background: '#22213d',
+                                                    border: '2px solid #000000',
+                                                    borderRadius: '0.4rem',
+                                                    padding: '0.2rem 0.5rem',
+                                                    opacity: 0,
+                                                    transition: 'opacity 0.15s ease',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    boxShadow: '3px 3px 0 #000000'
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={() => setReplyTargetPost({ id: msg.id, author: msg.author, title: msg.title || msg.body.slice(0, 30) })}
+                                                    title="Reply to message"
+                                                    style={{
+                                                        background: 'transparent',
+                                                        border: 'none',
+                                                        color: '#ffffff',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.3rem',
+                                                        fontFamily: 'Outfit',
+                                                        fontWeight: 900,
+                                                        fontSize: '0.72rem'
+                                                    }}
+                                                >
+                                                    <span>💬</span> Reply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Discord Bottom Input Bar */}
+                            <div style={{ padding: '1rem 1.5rem', background: '#2b2a4a', borderTop: '3px solid #000000' }}>
+                                {/* Reply Banner if active */}
+                                {replyTargetPost && (
+                                    <div style={{ background: '#22213d', border: '2px solid #000000', borderBottom: 'none', borderRadius: '0.5rem 0.5rem 0 0', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: '#ffffff', marginBottom: '-2px', maxWidth: '420px' }}>
+                                        <div>
+                                            Replying to <strong style={{ color: 'var(--accent-r)' }}>@${replyTargetPost.author}</strong>
+                                        </div>
+                                        <button onClick={() => setReplyTargetPost(null)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 900 }}>✕</button>
+                                    </div>
+                                )}
+
+                                <form onSubmit={handleSendDiscordMessage} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: '#22213d', borderRadius: '2rem', padding: '0.4rem 1rem', border: '2px solid #000000', boxShadow: '3px 3px 0 #000000' }}>
+                                    {/* Discord plus symbol on left */}
+                                    <div style={{ background: '#4e5058', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: '0.9rem', cursor: 'pointer' }}>+</div>
+
+                                    <input
+                                        type="text"
+                                        value={discordInput}
+                                        onChange={e => setDiscordInput(e.target.value)}
+                                        placeholder={`Message #${currChannelObj.name}`}
+                                        style={{
+                                            flex: 1,
+                                            background: 'transparent',
+                                            border: 'none',
+                                            outline: 'none',
+                                            color: '#ffffff',
+                                            fontFamily: 'Outfit',
+                                            fontSize: '0.9rem',
+                                            padding: '0.5rem 0'
+                                        }}
+                                    />
+
+                                    {/* Emoji Face and Gift/Send Button */}
+                                    <span style={{ fontSize: '1.2rem', cursor: 'pointer' }}>😃</span>
+                                    <button
+                                        type="submit"
+                                        style={{
+                                            background: 'var(--accent-r)',
+                                            color: '#fff',
+                                            border: '2px solid #000000',
+                                            padding: '0.4rem 1rem',
+                                            borderRadius: '1.5rem',
+                                            fontFamily: 'Outfit',
+                                            fontWeight: 900,
+                                            fontSize: '0.78rem',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.3rem',
+                                            boxShadow: '2px 2px 0 #000000'
+                                        }}
+                                    >
+                                        🚀
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 );
             })()}
-
-            {/* ── ALL OTHER VIEWS (curriculum / notifications) ── */}
+{/* ── ALL OTHER VIEWS (curriculum / notifications) ── */}
             {academyTab !== 'peers' && (<>
             <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '2rem', boxShadow: '8px 8px 0 #000000', marginBottom: '2.5rem' }} className="fta-header-branding">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -6016,275 +6168,325 @@ const AcademyDashboard = () => {
                                     const lineCount = Math.max(codeLines.length, 15);
 
                                     return (
-                                        <div style={{ background: '#0d1117', border: '3px solid #000000', boxShadow: '8px 8px 0 var(--accent-r)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                            {/* Exercise Header */}
-                                            <div style={{ background: '#161b22', padding: '1.2rem 1.5rem', borderBottom: '2px solid #30363d', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                <div style={{ background: 'var(--accent-r)', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem', border: '2px solid #000', flexShrink: 0 }}>
-                                                    <Cpu size={16} />
-                                                </div>
-                                                <div>
-                                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase', color: '#e6edf3' }}>
-                                                        💻 {exercise.title}
-                                                    </h3>
-                                                    <div style={{ fontSize: '0.7rem', color: '#8b949e', fontWeight: 700, marginTop: '0.2rem' }}>
-                                                        Language: {exercise.langHint.toUpperCase()} &nbsp;•&nbsp; Passing Score: 75/100 &nbsp;•&nbsp; AI Strict Mode: ON
-                                                    </div>
-                                                </div>
+                                        <>
+                                            {/* Inline button to open challenge */}
+                                            <div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+                                                <button
+                                                    onClick={() => setShowModuleChallenge(true)}
+                                                    style={{
+                                                        background: 'var(--accent-r)',
+                                                        color: '#ffffff',
+                                                        border: '3px solid #000000',
+                                                        padding: '1.1rem 2.5rem',
+                                                        borderRadius: '0.8rem',
+                                                        fontFamily: 'Outfit',
+                                                        fontWeight: 955,
+                                                        fontSize: '1.05rem',
+                                                        textTransform: 'uppercase',
+                                                        cursor: 'pointer',
+                                                        boxShadow: '6px 6px 0 #000000',
+                                                        transition: 'all 0.12s ease'
+                                                    }}
+                                                    onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-2px,-2px)'; e.currentTarget.style.boxShadow = '8px 8px 0 #000000'; }}
+                                                    onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '6px 6px 0 #000000'; }}
+                                                >
+                                                    🚀 Enter Task/Challenge for this Module
+                                                </button>
                                             </div>
 
-                                            {/* Instructions Panel */}
-                                            <div style={{ background: '#161b22', padding: '1.2rem 1.5rem', borderBottom: '2px solid #30363d' }}>
-                                                <div style={{ fontWeight: 950, fontSize: '0.65rem', textTransform: 'uppercase', color: '#f0883e', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>📋 Exercise Instructions</div>
-                                                <pre style={{ background: '#0d1117', border: '1px solid #30363d', padding: '1rem', borderRadius: '0.6rem', fontSize: '0.8rem', fontFamily: "'Fira Code', 'Cascadia Code', 'SF Mono', monospace", color: '#c9d1d9', margin: 0, whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
-                                                    {exercise.instruction}
-                                                </pre>
-                                            </div>
-
-                                            {/* Display previous submission OR new editor */}
-                                            {(gradingResult || hasPreviousSubmission) ? (
-                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    {/* Score Header & Stuck Action */}
-                                                    {(() => {
-                                                        const sc = gradingResult ? gradingResult.score : parseInt(savedScore);
-                                                        const fb = gradingResult ? gradingResult.feedback : savedFeedback;
-                                                        const cd = gradingResult ? gradingResult.code : savedCode;
-                                                        const passed = sc >= 50;
-                                                        return (
-                                                            <>
-                                                                {/* Score Badge & Stuck Action */}
-                                                                <div style={{ padding: '1.2rem 1.5rem', background: passed ? '#0d2818' : '#2d1117', borderBottom: '2px solid #30363d', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                                        <div style={{
-                                                                            background: passed ? '#238636' : '#da3633',
-                                                                            color: '#fff',
-                                                                            width: '56px',
-                                                                            height: '56px',
-                                                                            borderRadius: '50%',
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            fontWeight: 900,
-                                                                            fontSize: '1.3rem',
-                                                                            border: '3px solid #000',
-                                                                            flexShrink: 0
-                                                                        }}>
-                                                                            {sc}
-                                                                        </div>
-                                                                        <div>
-                                                                            <div style={{ fontWeight: 950, textTransform: 'uppercase', fontSize: '0.85rem', color: passed ? '#3fb950' : '#f85149' }}>
-                                                                                {passed ? '✅ GRADE: PASSED' : '❌ GRADE: FAILED — REVIEW REQUIRED'}
-                                                                            </div>
-                                                                            <div style={{ fontSize: '0.7rem', color: '#8b949e', fontWeight: 700, marginTop: '0.2rem' }}>
-                                                                                Score: {sc}/100 &nbsp;•&nbsp; Threshold: 75/100 &nbsp;•&nbsp; Base Score: 5/100
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {!passed && (
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                setStuckTaskData({
-                                                                                    title: exercise.title,
-                                                                                    code: cd,
-                                                                                    feedback: fb,
-                                                                                    score: sc
-                                                                                });
-                                                                                setShowStuckModal(true);
-                                                                            }}
-                                                                            style={{ background: 'var(--accent-r)', color: '#fff', border: '2px solid #000', padding: '0.6rem 1.2rem', borderRadius: '0.5rem', fontFamily: 'Outfit', fontWeight: 950, textTransform: 'uppercase', fontSize: '0.78rem', cursor: 'pointer', boxShadow: '2px 2px 0 #000' }}
-                                                                        >
-                                                                            🚨 Stuck? Drop Task on Peer Hub
-                                                                        </button>
-                                                                    )}
+                                            {/* CHALLENGE MODAL POPUP */}
+                                            {showModuleChallenge && (
+                                                <div style={{
+                                                    position: 'fixed',
+                                                    top: 0,
+                                                    left: 0,
+                                                    width: '100vw',
+                                                    height: '100vh',
+                                                    background: 'rgba(0, 0, 0, 0.75)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    zIndex: 9999,
+                                                    padding: '1.5rem',
+                                                    boxSizing: 'border-box'
+                                                }}>
+                                                    <div style={{
+                                                        background: '#0d1117',
+                                                        border: '3px solid #000000',
+                                                        boxShadow: '10px 10px 0 var(--accent-r)',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        width: '100%',
+                                                        maxWidth: '900px',
+                                                        maxHeight: '90vh',
+                                                        overflow: 'hidden',
+                                                        borderRadius: '0.8rem',
+                                                        position: 'relative',
+                                                        animation: 'zoomIn 0.2s ease-out'
+                                                    }}>
+                                                        {/* Modal Header */}
+                                                        <div style={{ background: '#161b22', padding: '1.2rem 1.5rem', borderBottom: '2px solid #30363d', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.8rem' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                                <div style={{ background: 'var(--accent-r)', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem', border: '2px solid #000', flexShrink: 0 }}>
+                                                                    <Cpu size={16} />
                                                                 </div>
-
-                                                                {/* Step-by-Step Feedback */}
-                                                                <div style={{ padding: '1.2rem 1.5rem', background: '#0d1117', borderBottom: '2px solid #30363d' }}>
-                                                                    <div style={{ fontWeight: 950, fontSize: '0.65rem', textTransform: 'uppercase', color: '#f0883e', marginBottom: '0.8rem', letterSpacing: '0.05em' }}>🔍 AI Step-by-Step Analysis</div>
-                                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                                                                        {fb.split('\n').map((line, i) => {
-                                                                            if (!line.trim()) return null;
-                                                                            const isPass = line.startsWith('✅');
-                                                                            const isFail = line.startsWith('❌');
-                                                                            const isPartial = line.startsWith('⚠️');
-                                                                            const isFinal = line.startsWith('🏁');
-                                                                            return (
-                                                                                <div key={i} style={{
-                                                                                    padding: '0.4rem 0.6rem',
-                                                                                    background: isFinal ? '#161b22' : isPass ? '#0d2818' : isFail ? '#2d1117' : isPartial ? '#2d2305' : 'transparent',
-                                                                                    border: isFinal ? '1px solid #30363d' : 'none',
-                                                                                    borderRadius: '0.4rem',
-                                                                                    fontSize: '0.78rem',
-                                                                                    fontFamily: "'Fira Code', monospace",
-                                                                                    color: isFinal ? '#e6edf3' : isPass ? '#3fb950' : isFail ? '#f85149' : isPartial ? '#d29922' : '#8b949e',
-                                                                                    fontWeight: isFinal ? 900 : 600,
-                                                                                    lineHeight: '1.4'
-                                                                                }}>
-                                                                                    {line}
-                                                                                </div>
-                                                                            );
-                                                                        })}
+                                                                <div>
+                                                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: 0, textTransform: 'uppercase', color: '#e6edf3' }}>
+                                                                        💻 {exercise.title}
+                                                                    </h3>
+                                                                    <div style={{ fontSize: '0.7rem', color: '#8b949e', fontWeight: 700, marginTop: '0.2rem' }}>
+                                                                        Language: {exercise.langHint.toUpperCase()} &nbsp;•&nbsp; Passing Score: 75/100 &nbsp;•&nbsp; AI Strict Mode: ON
                                                                     </div>
                                                                 </div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => setShowModuleChallenge(false)}
+                                                                style={{
+                                                                    background: '#f43f5e',
+                                                                    color: '#fff',
+                                                                    border: '2px solid #000000',
+                                                                    borderRadius: '0.4rem',
+                                                                    width: '32px',
+                                                                    height: '32px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    fontWeight: 955,
+                                                                    fontSize: '1rem',
+                                                                    cursor: 'pointer',
+                                                                    boxShadow: '2px 2px 0 #000000'
+                                                                }}
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
 
-                                                                {/* Submitted Code */}
-                                                                <div style={{ padding: '1.2rem 1.5rem', background: '#0d1117' }}>
-                                                                    <div style={{ fontWeight: 950, fontSize: '0.65rem', textTransform: 'uppercase', color: '#8b949e', marginBottom: '0.5rem' }}>📄 Your Submitted Code</div>
-                                                                    <pre style={{ background: '#161b22', border: '1px solid #30363d', padding: '1rem', borderRadius: '0.6rem', fontSize: '0.78rem', fontFamily: "'Fira Code', monospace", color: '#c9d1d9', margin: 0, overflowX: 'auto', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
-                                                                        {cd}
-                                                                    </pre>
+                                                        {/* Modal Scrollable Content Container */}
+                                                        <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                                            {/* Instructions Panel */}
+                                                            <div style={{ background: '#161b22', padding: '1.2rem 1.5rem', borderBottom: '2px solid #30363d' }}>
+                                                                <div style={{ fontWeight: 955, fontSize: '0.65rem', textTransform: 'uppercase', color: '#f0883e', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>📋 Exercise Instructions</div>
+                                                                <pre style={{ background: '#0d1117', border: '1px solid #30363d', padding: '1rem', borderRadius: '0.6rem', fontSize: '0.8rem', fontFamily: "'Fira Code', 'Cascadia Code', 'SF Mono', monospace", color: '#c9d1d9', margin: 0, whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                                                                    {exercise.instruction}
+                                                                </pre>
+                                                            </div>
+
+                                                            {/* Display previous submission OR new editor */}
+                                                            {(gradingResult || hasPreviousSubmission) ? (
+                                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                                    {/* Score Header & Stuck Action */}
                                                                     {(() => {
-                                                                        const cohortRedos = JSON.parse(localStorage.getItem('fta-cohort-redos') || '{}');
-                                                                        const redoKey = `${studentCohort}-${selectedCourse}-redo-module-${selectedModIdx}`;
-                                                                        const isRedoGranted = !!cohortRedos[redoKey];
-                                                                        if (isRedoGranted) {
-                                                                            return (
-                                                                                <div style={{ marginTop: '1rem', borderTop: '1px dashed #30363d', paddingTop: '1rem' }}>
-                                                                                    <div style={{ fontSize: '0.75rem', color: '#eab308', fontWeight: 900, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                                                        ⏳ REDO ACCESS GRANTED BY INSTRUCTOR
-                                                                                    </div>
-                                                                                    <p style={{ fontSize: '0.7rem', color: '#8b949e', margin: '0 0 0.8rem 0', fontWeight: 700 }}>
-                                                                                        The instructor has granted you permission to redo this module's exercise. Clicking below will clear your previous attempt and reopen the editor.
-                                                                                    </p>
-                                                                                    <button
-                                                                                        onClick={() => {
-                                                                                            if (window.confirm("Are you sure you want to clear your previous submission and redo this exercise?")) {
-                                                                                                localStorage.removeItem(`fta-exercise-score-mod-${selectedModIdx}`);
-                                                                                                localStorage.removeItem(`fta-exercise-feedback-mod-${selectedModIdx}`);
-                                                                                                localStorage.removeItem(`fta-exercise-code-mod-${selectedModIdx}`);
-                                                                                                setGradingResult(null);
-                                                                                                setAssignmentText('');
-                                                                                                setRecentSubmissionCount(prev => prev + 1);
-                                                                                            }
-                                                                                        }}
-                                                                                        style={{
-                                                                                            background: '#eab308',
-                                                                                            color: '#000',
-                                                                                            border: '3px solid #000',
-                                                                                            padding: '0.6rem 1.2rem',
-                                                                                            fontFamily: 'Outfit',
-                                                                                            fontWeight: 900,
-                                                                                            textTransform: 'uppercase',
-                                                                                            fontSize: '0.75rem',
-                                                                                            cursor: 'pointer',
-                                                                                            boxShadow: '3px 3px 0 #000',
-                                                                                            transition: 'transform 0.1s ease',
-                                                                                        }}
-                                                                                        onMouseDown={e => e.currentTarget.style.transform = 'translate(2px, 2px)'}
-                                                                                        onMouseUp={e => e.currentTarget.style.transform = 'none'}
-                                                                                    >
-                                                                                        ✏️ Clear & Redo Exercise
-                                                                                    </button>
-                                                                                </div>
-                                                                            );
-                                                                        }
+                                                                        const sc = gradingResult ? gradingResult.score : parseInt(savedScore);
+                                                                        const fb = gradingResult ? gradingResult.feedback : savedFeedback;
+                                                                        const cd = gradingResult ? gradingResult.code : savedCode;
+                                                                        const passed = sc >= 50;
                                                                         return (
-                                                                            <div style={{ fontSize: '0.7rem', color: '#484f58', fontWeight: 700, fontStyle: 'italic', marginTop: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                                                🔒 Submission locked. Exercises can only be graded once per module per cohort.
-                                                                            </div>
+                                                                            <>
+                                                                                {/* Score Badge & Stuck Action */}
+                                                                                <div style={{ padding: '1.2rem 1.5rem', background: passed ? '#0d2818' : '#2d1117', borderBottom: '2px solid #30363d', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                                                        <div style={{ background: passed ? '#2e7d32' : '#d32f2f', color: '#fff', padding: '0.4rem 1rem', borderRadius: '0.4rem', fontWeight: 950, fontSize: '0.9rem', border: '2px solid #000', boxShadow: '2px 2px 0 #000' }}>
+                                                                                            SCORE: {sc}/100
+                                                                                        </div>
+                                                                                        <span style={{ color: passed ? '#4ade80' : '#f87171', fontWeight: 800, fontSize: '0.85rem' }}>
+                                                                                            {passed ? '🎉 PASSED!' : '❌ FAILED (Requires 75+ to pass)'}
+                                                                                        </span>
+                                                                                    </div>
+
+                                                                                    {/* Request stuck guidance */}
+                                                                                    {!passed && (
+                                                                                        <button
+                                                                                            onClick={() => {
+                                                                                                setStuckTaskData({
+                                                                                                    lessonTitle: exercise.title,
+                                                                                                    code: cd,
+                                                                                                    feedback: fb,
+                                                                                                    score: sc
+                                                                                                });
+                                                                                                setShowStuckModal(true);
+                                                                                            }}
+                                                                                            style={{
+                                                                                                background: '#ca8a04',
+                                                                                                color: '#000',
+                                                                                                border: '2px solid #000',
+                                                                                                padding: '0.5rem 1rem',
+                                                                                                borderRadius: '0.4rem',
+                                                                                                fontFamily: 'Outfit',
+                                                                                                fontWeight: 900,
+                                                                                                fontSize: '0.75rem',
+                                                                                                cursor: 'pointer',
+                                                                                                boxShadow: '2px 2px 0 #000',
+                                                                                                textTransform: 'uppercase'
+                                                                                            }}
+                                                                                        >
+                                                                                            💡 Ask AI Mentor for Help
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+
+                                                                                {/* Feedback Panel */}
+                                                                                <div style={{ padding: '1.2rem 1.5rem', borderBottom: '2px solid #30363d', background: '#0d1117' }}>
+                                                                                    <div style={{ fontWeight: 955, fontSize: '0.65rem', textTransform: 'uppercase', color: '#8b949e', marginBottom: '0.5rem' }}>🤖 AI Assistant Feedback</div>
+                                                                                    <pre style={{ background: '#161b22', border: '1px solid #30363d', padding: '1rem', borderRadius: '0.6rem', fontSize: '0.8rem', fontFamily: "'Fira Code', monospace", color: '#e6edf3', margin: 0, whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                                                                                        {fb}
+                                                                                    </pre>
+                                                                                </div>
+
+                                                                                {/* Saved Code Display */}
+                                                                                <div style={{ padding: '1.2rem 1.5rem', background: '#0d1117' }}>
+                                                                                    <div style={{ fontWeight: 955, fontSize: '0.65rem', textTransform: 'uppercase', color: '#8b949e', marginBottom: '0.5rem' }}>📂 Submitted Code</div>
+                                                                                    <pre style={{ background: '#161b22', border: '1px solid #30363d', padding: '1rem', borderRadius: '0.6rem', fontSize: '0.8rem', fontFamily: "'Fira Code', monospace", color: '#8892b0', margin: 0, overflowX: 'auto', lineHeight: '1.5' }}>
+                                                                                        {cd}
+                                                                                    </pre>
+
+                                                                                    {/* Redo Button logic based on score status */}
+                                                                                    {(() => {
+                                                                                        const isRedoAllowed = sc < 50;
+                                                                                        if (isRedoAllowed) {
+                                                                                            return (
+                                                                                                <div style={{ marginTop: '1.2rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                                                                                    <button
+                                                                                                        onClick={() => {
+                                                                                                            if (confirm('Are you sure you want to clear your previous submission and try again?')) {
+                                                                                                                localStorage.removeItem(`fta-exercise-score-mod-${selectedModIdx}`);
+                                                                                                                localStorage.removeItem(`fta-exercise-feedback-mod-${selectedModIdx}`);
+                                                                                                                localStorage.removeItem(`fta-exercise-code-mod-${selectedModIdx}`);
+                                                                                                                setGradingResult(null);
+                                                                                                                setAssignmentText('');
+                                                                                                                setRecentSubmissionCount(prev => prev + 1);
+                                                                                                            }
+                                                                                                        }}
+                                                                                                        style={{
+                                                                                                            background: '#eab308',
+                                                                                                            color: '#000',
+                                                                                                            border: '3px solid #000',
+                                                                                                            padding: '0.6rem 1.2rem',
+                                                                                                            fontFamily: 'Outfit',
+                                                                                                            fontWeight: 900,
+                                                                                                            textTransform: 'uppercase',
+                                                                                                            fontSize: '0.75rem',
+                                                                                                            cursor: 'pointer',
+                                                                                                            boxShadow: '3px 3px 0 #000',
+                                                                                                            transition: 'transform 0.1s ease',
+                                                                                                        }}
+                                                                                                        onMouseDown={e => e.currentTarget.style.transform = 'translate(2px, 2px)'}
+                                                                                                        onMouseUp={e => e.currentTarget.style.transform = 'none'}
+                                                                                                    >
+                                                                                                        ✏️ Clear & Redo Exercise
+                                                                                                    </button>
+                                                                                                </div>
+                                                                                            );
+                                                                                        }
+                                                                                        return (
+                                                                                            <div style={{ fontSize: '0.7rem', color: '#484f58', fontWeight: 700, fontStyle: 'italic', marginTop: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                                                                🔒 Submission locked. Exercises can only be graded once per module per cohort.
+                                                                                            </div>
+                                                                                        );
+                                                                                    })()}
+                                                                                </div>
+                                                                            </>
                                                                         );
                                                                     })()}
                                                                 </div>
-                                                            </>
-                                                        );
-                                                    })()}
-                                                </div>
-                                            ) : (
-                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    {/* IDE-like Code Editor */}
-                                                    <div style={{ display: 'flex', background: '#0d1117' }}>
-                                                        {/* Line Numbers */}
-                                                        <div style={{
-                                                            padding: '1rem 0.6rem 1rem 0.8rem',
-                                                            background: '#161b22',
-                                                            borderRight: '1px solid #30363d',
-                                                            textAlign: 'right',
-                                                            userSelect: 'none',
-                                                            minWidth: '40px'
-                                                        }}>
-                                                            {Array.from({ length: lineCount }, (_, i) => (
-                                                                <div key={i} style={{ fontSize: '0.78rem', fontFamily: "'Fira Code', monospace", color: '#484f58', lineHeight: '1.5', height: '1.17rem' }}>
-                                                                    {i + 1}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                        {/* Code Input Area */}
-                                                        <textarea
-                                                            value={assignmentText}
-                                                            onChange={(e) => setAssignmentText(e.target.value)}
-                                                            placeholder={`// Write your ${exercise.langHint.toUpperCase()} code here...\n// The AI grader starts you at 5/100.\n// You must EARN every point.\n// Be thorough. Include comments.\n`}
-                                                            disabled={isGrading}
-                                                            spellCheck={false}
-                                                            style={{
-                                                                flex: 1,
-                                                                padding: '1rem',
-                                                                background: '#0d1117',
-                                                                color: '#c9d1d9',
-                                                                border: 'none',
-                                                                outline: 'none',
-                                                                fontSize: '0.85rem',
-                                                                fontFamily: "'Fira Code', 'Cascadia Code', 'SF Mono', 'Consolas', monospace",
-                                                                lineHeight: '1.5',
-                                                                resize: 'vertical',
-                                                                minHeight: '280px',
-                                                                boxSizing: 'border-box',
-                                                                caretColor: '#58a6ff',
-                                                                tabSize: 2
-                                                            }}
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === 'Tab') {
-                                                                    e.preventDefault();
-                                                                    const start = e.target.selectionStart;
-                                                                    const end = e.target.selectionEnd;
-                                                                    const newVal = assignmentText.substring(0, start) + '  ' + assignmentText.substring(end);
-                                                                    setAssignmentText(newVal);
-                                                                    setTimeout(() => { e.target.selectionStart = e.target.selectionEnd = start + 2; }, 0);
-                                                                }
-                                                            }}
-                                                        />
-                                                    </div>
-
-                                                    {/* Submit Bar */}
-                                                    <div style={{ padding: '1rem 1.5rem', background: '#161b22', borderTop: '2px solid #30363d', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-                                                        <div style={{ fontSize: '0.7rem', color: '#8b949e', fontWeight: 700 }}>
-                                                            {assignmentText.trim().length} characters &nbsp;•&nbsp; {assignmentText.split('\n').length} lines &nbsp;•&nbsp; {exercise.langHint.toUpperCase()}
-                                                        </div>
-                                                        <button
-                                                            onClick={handleGradeAssignment}
-                                                            disabled={isGrading || !assignmentText.trim()}
-                                                            style={{
-                                                                background: isGrading ? '#21262d' : '#238636',
-                                                                color: isGrading ? '#484f58' : '#ffffff',
-                                                                border: '2px solid #000',
-                                                                padding: '0.8rem 2rem',
-                                                                borderRadius: '0.6rem',
-                                                                fontFamily: 'Outfit',
-                                                                fontWeight: 950,
-                                                                textTransform: 'uppercase',
-                                                                fontSize: '0.85rem',
-                                                                cursor: (isGrading || !assignmentText.trim()) ? 'not-allowed' : 'pointer',
-                                                                boxShadow: (isGrading || !assignmentText.trim()) ? 'none' : '3px 3px 0 #000000',
-                                                                transition: 'all 0.15s ease',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: '0.5rem'
-                                                            }}
-                                                        >
-                                                            {isGrading ? (
-                                                                <>🧠 AI Analyzing Code Step-by-Step...</>
                                                             ) : (
-                                                                <>
-                                                                    <Cpu size={16} /> Submit & Grade Code
-                                                                </>
+                                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                                    {/* IDE-like Code Editor */}
+                                                                    <div style={{ display: 'flex', background: '#0d1117' }}>
+                                                                        {/* Line Numbers */}
+                                                                        <div style={{
+                                                                            padding: '1rem 0.6rem 1rem 0.8rem',
+                                                                            background: '#161b22',
+                                                                            borderRight: '1px solid #30363d',
+                                                                            textAlign: 'right',
+                                                                            userSelect: 'none',
+                                                                            minWidth: '40px'
+                                                                        }}>
+                                                                            {Array.from({ length: lineCount }, (_, i) => (
+                                                                                <div key={i} style={{ fontSize: '0.78rem', fontFamily: "'Fira Code', monospace", color: '#484f58', lineHeight: '1.5', height: '1.17rem' }}>
+                                                                                    {i + 1}
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                        {/* Code Input Area */}
+                                                                        <textarea
+                                                                            value={assignmentText}
+                                                                            onChange={(e) => setAssignmentText(e.target.value)}
+                                                                            placeholder={`// Write your ${exercise.langHint.toUpperCase()} code here...\n// The AI grader starts you at 5/100.\n// You must EARN every point.\n// Be thorough. Include comments.\n`}
+                                                                            disabled={isGrading}
+                                                                            spellCheck={false}
+                                                                            style={{
+                                                                                flex: 1,
+                                                                                padding: '1rem',
+                                                                                background: '#0d1117',
+                                                                                color: '#c9d1d9',
+                                                                                border: 'none',
+                                                                                outline: 'none',
+                                                                                fontSize: '0.85rem',
+                                                                                fontFamily: "'Fira Code', 'Cascadia Code', 'SF Mono', 'Consolas', monospace",
+                                                                                lineHeight: '1.5',
+                                                                                resize: 'vertical',
+                                                                                minHeight: '280px',
+                                                                                boxSizing: 'border-box',
+                                                                                caretColor: '#58a6ff',
+                                                                                tabSize: 2
+                                                                            }}
+                                                                            onKeyDown={(e) => {
+                                                                                if (e.key === 'Tab') {
+                                                                                    e.preventDefault();
+                                                                                    const start = e.target.selectionStart;
+                                                                                    const end = e.target.selectionEnd;
+                                                                                    const newVal = assignmentText.substring(0, start) + '  ' + assignmentText.substring(end);
+                                                                                    setAssignmentText(newVal);
+                                                                                    setTimeout(() => { e.target.selectionStart = e.target.selectionEnd = start + 2; }, 0);
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    </div>
+
+                                                                    {/* Submit Bar */}
+                                                                    <div style={{ padding: '1rem 1.5rem', background: '#161b22', borderTop: '2px solid #30363d', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                                                                        <div style={{ fontSize: '0.7rem', color: '#8b949e', fontWeight: 700 }}>
+                                                                            {assignmentText.trim().length} characters &nbsp;•&nbsp; {assignmentText.split('\n').length} lines &nbsp;•&nbsp; {exercise.langHint.toUpperCase()}
+                                                                        </div>
+                                                                        <button
+                                                                            onClick={handleGradeAssignment}
+                                                                            disabled={isGrading || !assignmentText.trim()}
+                                                                            style={{
+                                                                                background: isGrading ? '#21262d' : '#238636',
+                                                                                color: isGrading ? '#484f58' : '#ffffff',
+                                                                                border: '2px solid #000',
+                                                                                padding: '0.8rem 2rem',
+                                                                                borderRadius: '0.6rem',
+                                                                                fontFamily: 'Outfit',
+                                                                                fontWeight: 955,
+                                                                                textTransform: 'uppercase',
+                                                                                fontSize: '0.85rem',
+                                                                                cursor: (isGrading || !assignmentText.trim()) ? 'not-allowed' : 'pointer',
+                                                                                boxShadow: (isGrading || !assignmentText.trim()) ? 'none' : '3px 3px 0 #000000',
+                                                                                transition: 'all 0.15s ease',
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                gap: '0.5rem'
+                                                                            }}
+                                                                        >
+                                                                            {isGrading ? (
+                                                                                <>🧠 AI Analyzing Code Step-by-Step...</>
+                                                                            ) : (
+                                                                                <>
+                                                                                    <Cpu size={16} /> Submit & Grade Code
+                                                                                </>
+                                                                            )}
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
                                                             )}
-                                                        </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
-                                        </div>
+                                        </>
                                     );
-                                })()}
-                            </>
+                                })()}                            </>
                         );
                     })()}
                 </div>

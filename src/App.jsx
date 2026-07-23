@@ -5835,14 +5835,14 @@ const AcademyDashboard = () => {
         });
     }, []);
 
-    // Fetch peer submissions from Supabase
+    // Fetch peer submissions from Supabase (filtered by track/course)
     useEffect(() => {
         if (studentSession) {
-            supabase.from('peer_submissions').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+            supabase.from('peer_submissions').select('*').eq('track', selectedCourse).order('created_at', { ascending: false }).then(({ data }) => {
                 if (data) setPeerSubmissions(data);
             });
         }
-    }, [studentSession]);
+    }, [studentSession, selectedCourse]);
 
     // Fetch student's peer groups
     const [myPeerGroups, setMyPeerGroups] = useState([]);
@@ -5851,7 +5851,7 @@ const AcademyDashboard = () => {
     const [peerSubmitLoading, setPeerSubmitLoading] = useState(false);
     useEffect(() => {
         if (studentSession && studentSession.email) {
-            supabase.from('peer_groups').select('*').then(({ data }) => {
+            supabase.from('peer_groups').select('*').eq('track', selectedCourse).then(({ data }) => {
                 if (data) {
                     const myGroups = data.filter(g =>
                         g.members.some(m => m.email === studentSession.email)
@@ -5860,7 +5860,7 @@ const AcademyDashboard = () => {
                 }
             });
         }
-    }, [studentSession]);
+    }, [studentSession, selectedCourse]);
 
     const handleSubmitPeerProject = async (group) => {
         if (!peerSubmitText.trim()) { alert('Paste your project link or describe your submission.'); return; }
@@ -5876,7 +5876,7 @@ const AcademyDashboard = () => {
             });
             if (error) throw error;
             setPeerSubmitText('');
-            const { data } = await supabase.from('peer_submissions').select('*').order('created_at', { ascending: false });
+            const { data } = await supabase.from('peer_submissions').select('*').eq('track', selectedCourse).order('created_at', { ascending: false });
             if (data) setPeerSubmissions(data);
             alert('✅ Submission received! You will see your score within 24 hours after admin review.');
         } catch (err) {
@@ -5956,6 +5956,7 @@ const AcademyDashboard = () => {
             .from('peer_messages')
             .select('*')
             .eq('cohort', studentCohort)
+            .eq('track', selectedCourse)
             .order('created_at', { ascending: false });
         if (!error && data) {
             setPeerPosts(data.map(m => ({
@@ -5968,6 +5969,7 @@ const AcademyDashboard = () => {
                 authorAvatar: m.author_avatar,
                 date: m.message_date,
                 cohort: m.cohort,
+                track: m.track,
                 replies: m.replies || []
             })));
         }
@@ -5978,9 +5980,9 @@ const AcademyDashboard = () => {
         if (studentSession) {
             fetchPeerPosts();
         }
-    }, [studentSession, studentCohort]);
+    }, [studentSession, studentCohort, selectedCourse]);
 
-    // Real-time subscription for peer messages
+    // Real-time subscription for peer messages (filtered by cohort + track client-side)
     useEffect(() => {
         if (!studentSession) return;
 
@@ -5993,6 +5995,7 @@ const AcademyDashboard = () => {
                 filter: `cohort=eq.${studentCohort}`
             }, (payload) => {
                 const m = payload.new;
+                if (m.track && m.track !== selectedCourse) return;
                 setPeerPosts(prev => {
                     if (prev.some(p => p.id === m.id)) return prev;
                     return [...prev, {
@@ -6005,6 +6008,7 @@ const AcademyDashboard = () => {
                         authorAvatar: m.author_avatar,
                         date: m.message_date,
                         cohort: m.cohort,
+                        track: m.track,
                         replies: m.replies || []
                     }];
                 });
@@ -6016,6 +6020,7 @@ const AcademyDashboard = () => {
                 filter: `cohort=eq.${studentCohort}`
             }, (payload) => {
                 const m = payload.new;
+                if (m.track && m.track !== selectedCourse) return;
                 setPeerPosts(prev => prev.map(p =>
                     p.id === m.id ? {
                         ...p,
@@ -6028,7 +6033,7 @@ const AcademyDashboard = () => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [studentSession, studentCohort]);
+    }, [studentSession, studentCohort, selectedCourse]);
 
     // Discord Peer Hub states
     const [activeChannel, setActiveChannel] = useState('general-questions');
@@ -6472,6 +6477,7 @@ const AcademyDashboard = () => {
                         date: 'Today at 9:15 AM',
                         body: 'Anything that you would like to say?',
                         cohort: studentCohort,
+                        track: selectedCourse,
                         replies: []
                     },
                     {
@@ -6482,6 +6488,7 @@ const AcademyDashboard = () => {
                         date: 'Today at 10:23 AM',
                         body: "Please tell me, I've been waiting for one hour.",
                         cohort: studentCohort,
+                        track: selectedCourse,
                         replies: []
                     },
                     {
@@ -6492,6 +6499,7 @@ const AcademyDashboard = () => {
                         date: 'Today at 10:27 AM',
                         body: '*tremble fearfully*',
                         cohort: studentCohort,
+                        track: selectedCourse,
                         replies: []
                     },
                     {
@@ -6502,6 +6510,7 @@ const AcademyDashboard = () => {
                         date: 'Today at 10:27 AM',
                         body: 'Do you have something to say Wumpus?\nor maybe anyone else?\npls I want to hear you guys',
                         cohort: studentCohort,
+                        track: selectedCourse,
                         replies: []
                     },
                     {
@@ -6512,6 +6521,7 @@ const AcademyDashboard = () => {
                         date: 'Today at 10:29 AM',
                         body: '*smells the sandwich that Wumpus just left*',
                         cohort: studentCohort,
+                        track: selectedCourse,
                         replies: []
                     },
                     {
@@ -6522,6 +6532,7 @@ const AcademyDashboard = () => {
                         date: 'Today at 10:29 AM',
                         body: "come on\nSo as nobody is asking, I'll ask first\nDoes anybody feels like something is different?",
                         cohort: studentCohort,
+                        track: selectedCourse,
                         replies: []
                     },
                     {
@@ -6532,6 +6543,7 @@ const AcademyDashboard = () => {
                         date: 'Today at 10:35 AM',
                         body: 'Getting TypeError: Illegal constructor in React — Make sure you import components properly from lucide-react!',
                         cohort: studentCohort,
+                        track: selectedCourse,
                         replies: [
                             { author: 'Ademuwagun Precious', authorAvatar: '', body: 'Thanks Samuel! This saved me hours of debugging.', date: 'Today at 10:40 AM' }
                         ]
@@ -6539,7 +6551,7 @@ const AcademyDashboard = () => {
                 ];
 
                 const activeList = peerPosts.length > 0 ? peerPosts : seedMessages;
-                const channelMessages = activeList.filter(m => (m.channel === activeChannel || (!m.channel && activeChannel === 'general-questions')) && (m.cohort === studentCohort || !m.cohort));
+                const channelMessages = activeList.filter(m => (m.channel === activeChannel || (!m.channel && activeChannel === 'general-questions')) && (m.cohort === studentCohort || !m.cohort) && (m.track === selectedCourse || !m.track));
 
                 const handleSendDiscordMessage = async (e) => {
                     if (e) e.preventDefault();
@@ -6578,6 +6590,7 @@ const AcademyDashboard = () => {
                                 author_avatar: studentAvatar,
                                 message_date: `Today at ${timeStr}`,
                                 cohort: studentCohort,
+                                track: selectedCourse,
                                 replies: []
                             }])
                             .select()
@@ -6593,6 +6606,7 @@ const AcademyDashboard = () => {
                                 authorAvatar: data.author_avatar,
                                 date: data.message_date,
                                 cohort: data.cohort,
+                                track: data.track,
                                 replies: data.replies || []
                             }]);
                         }
@@ -7377,10 +7391,10 @@ const AcademyDashboard = () => {
             {/* Mobile course modules menu trigger (hidden on desktop via CSS) */}
             {(() => {
                 const activePostsList = peerPosts.length > 0 ? peerPosts : [
-                    { id: 1, title: 'Getting TypeError: Illegal constructor in React', body: '', tag: 'Bug 🐛', author: 'Ogunkoya Samuel Opemipo', authorAvatar: '', date: '7/19/2026', cohort: studentCohort, replies: [{ author: 'Ademuwagun Precious', authorAvatar: '', body: 'Thanks Samuel!', date: '7/19/2026' }] },
-                    { id: 2, title: 'HTML Intro grading fails - help!', body: '', tag: 'Question ❓', author: 'Chioma Okafor', authorAvatar: '', date: '7/19/2026', cohort: studentCohort, replies: [{ author: 'Omotoyosi Agboola', authorAvatar: '', body: 'Add DOCTYPE!', date: '7/19/2026' }] }
+                    { id: 1, title: 'Getting TypeError: Illegal constructor in React', body: '', tag: 'Bug 🐛', author: 'Ogunkoya Samuel Opemipo', authorAvatar: '', date: '7/19/2026', cohort: studentCohort, track: selectedCourse, replies: [{ author: 'Ademuwagun Precious', authorAvatar: '', body: 'Thanks Samuel!', date: '7/19/2026' }] },
+                    { id: 2, title: 'HTML Intro grading fails - help!', body: '', tag: 'Question ❓', author: 'Chioma Okafor', authorAvatar: '', date: '7/19/2026', cohort: studentCohort, track: selectedCourse, replies: [{ author: 'Omotoyosi Agboola', authorAvatar: '', body: 'Add DOCTYPE!', date: '7/19/2026' }] }
                 ];
-                const cohortFilteredPosts = activePostsList.filter(p => p.cohort === studentCohort);
+                const cohortFilteredPosts = activePostsList.filter(p => p.cohort === studentCohort && (p.track === selectedCourse || !p.track));
                 // keep unreadPeerCount in scope for badge updates
                 void cohortFilteredPosts.filter(p => !readPostIds.includes(p.id)).length;
 
@@ -8429,6 +8443,7 @@ const AcademyDashboard = () => {
                                 author_avatar: studentAvatar,
                                 message_date: new Date().toLocaleDateString(),
                                 cohort: studentCohort,
+                                track: selectedCourse,
                                 replies: []
                             }])
                             .select()
@@ -8444,6 +8459,7 @@ const AcademyDashboard = () => {
                                 authorAvatar: data.author_avatar,
                                 date: data.message_date,
                                 cohort: data.cohort,
+                                track: data.track,
                                 replies: data.replies || []
                             }, ...prev]);
                         }
@@ -8488,6 +8504,7 @@ const AcademyDashboard = () => {
                             authorAvatar: '',
                             date: '7/19/2026',
                             cohort: studentCohort,
+                            track: selectedCourse,
                             replies: [
                                 { author: 'Ademuwagun Precious', authorAvatar: '', body: 'Thanks Samuel! This saved me hours of debugging.', date: '7/19/2026' }
                             ]
@@ -8501,13 +8518,14 @@ const AcademyDashboard = () => {
                             authorAvatar: '',
                             date: '7/19/2026',
                             cohort: studentCohort,
+                            track: selectedCourse,
                             replies: [
                                 { author: 'Omotoyosi Agboola', authorAvatar: '', body: 'Make sure you add the exact DOCTYPE declaration: <!doctype html> at the very top. The strict AI grader validates the entire skeleton!', date: '7/19/2026' }
                             ]
                         }
                     ];
 
-                    const cohortFilteredPosts = activePosts.filter(p => p.cohort === studentCohort);
+                    const cohortFilteredPosts = activePosts.filter(p => p.cohort === studentCohort && (p.track === selectedCourse || !p.track));
 
                     return (
                         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 420px) 1fr', gap: '2rem', alignItems: 'start', width: '100%' }} className="peer-hub-grid">
@@ -8998,6 +9016,7 @@ const AcademyDashboard = () => {
                                         authorAvatar: studentAvatar,
                                         date: new Date().toLocaleDateString(),
                                         cohort: studentCohort,
+                                        track: selectedCourse,
                                         replies: []
                                     };
                                     const { data, error } = await supabase
@@ -9011,6 +9030,7 @@ const AcademyDashboard = () => {
                                             author_avatar: newPost.authorAvatar,
                                             message_date: newPost.date,
                                             cohort: newPost.cohort,
+                                            track: selectedCourse,
                                             replies: []
                                         }])
                                         .select()
@@ -9026,6 +9046,7 @@ const AcademyDashboard = () => {
                                             authorAvatar: data.author_avatar,
                                             date: data.message_date,
                                             cohort: data.cohort,
+                                            track: data.track,
                                             replies: data.replies || []
                                         }, ...prev]);
                                     }

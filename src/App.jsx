@@ -1780,10 +1780,31 @@ const Speakers = ({ dynamicSpeakers, speakersMode = 'live', comingSoonText = 'Ex
                                         <p className="speaker-role">{s.role}</p>
                                         <div className="speaker-expertise"><div className="dot" />{s.expertise}</div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                        {/* Custom modules */}
+                                        {customModules.filter(m => m.track === selectedTrackAdmin).map((cm, i) => {
+                                            const modIdx = (TRACK_MODULES[selectedTrackAdmin]?.length || 0) + i;
+                                            const released = isModuleReleased(selectedCohortAdmin, selectedTrackAdmin, modIdx);
+                                            const releaseRecord = releasedModules.find(r => r.cohort === selectedCohortAdmin && r.track === selectedTrackAdmin && r.module_index === modIdx);
+                                            return (
+                                                <div key={cm.id} style={{ background: '#f0f9ff', border: `3px solid ${released ? '#059669' : '#93c5fd'}`, padding: '1.5rem', boxShadow: released ? '6px 6px 0 #059669' : '4px 4px 0 #93c5fd' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', margin: 0 }}>{cm.title} <span style={{ fontSize: '0.65rem', background: '#3b82f6', color: '#fff', padding: '0.15rem 0.4rem', borderRadius: '0.2rem', marginLeft: '0.3rem' }}>CUSTOM</span></h4>
+                                                        {released ? <CheckCircle size={20} color="#059669" /> : <Lock size={20} color="#9ca3af" />}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.5rem', color: released ? '#059669' : '#9ca3af' }}>
+                                                        {released ? '🟢 RELEASED' : '⚪ NOT RELEASED'} · {cm.lessons?.length || 0} lessons
+                                                    </div>
+                                                    {released && releaseRecord && (
+                                                        <div style={{ fontSize: '0.65rem', color: '#6b7280', marginBottom: '1rem', fontWeight: 600 }}>Released: {new Date(releaseRecord.released_at).toLocaleString()}</div>
+                                                    )}
+                                                    <button onClick={() => toggleModuleRelease(selectedCohortAdmin, selectedTrackAdmin, modIdx)} style={{ width: '100%', padding: '0.8rem', background: released ? '#dc2626' : '#059669', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '3px 3px 0 rgba(0,0,0,0.4)' }}>{released ? '🚫 Unrelease Module' : '✅ Release Module to Students'}</button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                 )}
             </div>
         </section>
@@ -2460,6 +2481,52 @@ const RegisterModal = ({ isOpen, onClose, initialType, isRegistrationOpen }) => 
 };
 
 /* ───────────────────────────────────────────
+   RECENT GRADES LIST (Admin helper)
+─────────────────────────────────────────── */
+const RecentGradesList = ({ selectedCohort, selectedTrack }) => {
+    const [grades, setGrades] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        setLoading(true);
+        supabase.from('manual_grades').select('*')
+            .eq('cohort', selectedCohort)
+            .eq('track', selectedTrack)
+            .order('graded_at', { ascending: false })
+            .limit(20)
+            .then(({ data }) => { setGrades(data || []); setLoading(false); });
+    }, [selectedCohort, selectedTrack]);
+
+    if (loading) return <div style={{ padding: '1rem', color: '#888', fontWeight: 700 }}>Loading grades...</div>;
+    if (grades.length === 0) return <div style={{ padding: '1rem', color: '#888', fontWeight: 700, borderTop: '2px solid #eee' }}>No grades recorded for this cohort/track yet.</div>;
+
+    return (
+        <div style={{ borderTop: '2px solid #000', paddingTop: '1.5rem' }}>
+            <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', margin: '0 0 1rem 0', textTransform: 'uppercase' }}>Recent Grades ({grades.length})</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {grades.map(g => (
+                    <div key={g.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.7rem 0.8rem', border: '2px solid #eee', background: '#f8fafc' }}>
+                        <div>
+                            <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem' }}>{g.student_name}</div>
+                            <div style={{ fontSize: '0.65rem', color: '#888' }}>{g.student_email} · Module {g.module_index + 1}</div>
+                            {g.feedback && <div style={{ fontSize: '0.65rem', color: '#555', fontStyle: 'italic', marginTop: '0.15rem' }}>"{g.feedback}"</div>}
+                        </div>
+                        <div style={{
+                            width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #000',
+                            background: g.score >= 70 ? '#22c55e' : g.score >= 50 ? '#f59e0b' : '#ef4444',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontWeight: 950, fontSize: '0.7rem', color: '#fff', flexShrink: 0
+                        }}>
+                            {g.score}%
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+/* ───────────────────────────────────────────
    ADMIN DASHBOARD
 ─────────────────────────────────────────── */
 const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen, speakersMode, comingSoonText, dynamicSpeakers, dynamicTeam }) => {
@@ -2488,6 +2555,10 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [cohortLocks, setCohortLocks] = useState(() => JSON.parse(localStorage.getItem('fta-cohort-locks') || '{}'));
     const [notifTitle, setNotifTitle] = useState('');
     const [notifBody, setNotifBody] = useState('');
+    const [releasedModules, setReleasedModules] = useState([]);
+    const [customModules, setCustomModules] = useState([]);
+    const [newModuleForm, setNewModuleForm] = useState({ title: '', description: '', lessons: [] });
+    const [newLessonInput, setNewLessonInput] = useState({ title: '', videoUrl: '', notes: '' });
 
     useEffect(() => {
         fetchRegistrations();
@@ -2495,7 +2566,37 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         fetchPartners();
         fetchFounders();
         fetchWaitlist();
+        fetchReleasedModules();
+        supabase.from('custom_modules').select('*').order('order_index').then(({ data }) => {
+            if (data) setCustomModules(data);
+        });
     }, []);
+
+    const fetchReleasedModules = async () => {
+        const { data, error } = await supabase.from('module_releases').select('*').order('module_index', { ascending: true });
+        if (!error && data) setReleasedModules(data);
+    };
+
+    const isModuleReleased = (cohort, track, modIdx) => {
+        return releasedModules.some(r => r.cohort === cohort && r.track === track && r.module_index === modIdx);
+    };
+
+    const toggleModuleRelease = async (cohort, track, modIdx) => {
+        const released = isModuleReleased(cohort, track, modIdx);
+        if (released) {
+            const { error } = await supabase.from('module_releases').delete().eq('cohort', cohort).eq('track', track).eq('module_index', modIdx);
+            if (!error) {
+                setReleasedModules(prev => prev.filter(r => !(r.cohort === cohort && r.track === track && r.module_index === modIdx)));
+                alert(`Module ${modIdx + 1} unreleased from ${cohort} — ${track}`);
+            }
+        } else {
+            const { error } = await supabase.from('module_releases').insert([{ cohort, track, module_index: modIdx }]);
+            if (!error) {
+                setReleasedModules(prev => [...prev, { cohort, track, module_index: modIdx, released_at: new Date().toISOString() }]);
+                alert(`✅ Module ${modIdx + 1} released to ${cohort} — ${track}`);
+            }
+        }
+    };
 
     const fetchPartners = async () => {
         const { data, error } = await supabase.from('partners').select('*').order('created_at', { ascending: true });
@@ -3147,22 +3248,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                         if (confirm(`Give Cohort One admission to ${w.name} (${w.email})?`)) {
                                                                             try {
                                                                                 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                                                                                const apiBase = isLocal ? 'http://localhost:3001' : '';
-                                                                                const response = await fetch(`${apiBase}/api/send-admission`, {
-                                                                                    method: 'POST',
-                                                                                    headers: { 'Content-Type': 'application/json' },
-                                                                                    body: JSON.stringify({
-                                                                                        email: w.email,
-                                                                                        name: w.name,
-                                                                                        course: w.company_name || 'Frontend Engineering'
-                                                                                    })
-                                                                                });
 
-                                                                                if (!response.ok) {
-                                                                                    const errData = await response.json();
-                                                                                    throw new Error(errData.error || 'Failed to send email');
-                                                                                }
-
+                                                                                // Save admission status to Supabase first
                                                                                 const { error: updateError } = await supabase
                                                                                     .from('registrations')
                                                                                     .update({
@@ -3177,7 +3264,37 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
 
                                                                                 if (updateError) throw updateError;
 
-                                                                                alert(`Admission granted successfully to ${w.name}!`);
+                                                                                // Send admission email — only works on Vercel (not local dev)
+                                                                                if (!isLocal) {
+                                                                                    let emailSent = false;
+                                                                                    try {
+                                                                                        const response = await fetch('/api/send-admission', {
+                                                                                            method: 'POST',
+                                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                                            body: JSON.stringify({
+                                                                                                email: w.email,
+                                                                                                name: w.name,
+                                                                                                course: w.company_name || 'Frontend Engineering'
+                                                                                            })
+                                                                                        });
+                                                                                        if (response.ok) {
+                                                                                            emailSent = true;
+                                                                                        } else {
+                                                                                            const errData = await response.json().catch(() => ({}));
+                                                                                            console.warn('Email send failed:', errData.error);
+                                                                                        }
+                                                                                    } catch (emailErr) {
+                                                                                        console.warn('Email request failed:', emailErr);
+                                                                                    }
+                                                                                    if (emailSent) {
+                                                                                        alert(`✅ Admission granted & email sent to ${w.name}!`);
+                                                                                    } else {
+                                                                                        alert(`✅ ${w.name} marked as admitted.\n\n⚠️ Email failed to send. Check that EMAIL_USER and EMAIL_PASS are set in your Vercel environment variables.`);
+                                                                                    }
+                                                                                } else {
+                                                                                    alert(`✅ ${w.name} marked as admitted in database.\n\n(Email not sent — running locally. Deploy to Vercel to send emails.)`);
+                                                                                }
+
                                                                                 fetchWaitlist();
                                                                             } catch (err) {
                                                                                 console.error('Error giving admission:', err);
@@ -3621,13 +3738,12 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                 {/* ─── FTA CONTROL PANEL ─── */}
                 {activeTab === 'fta-control' && (() => {
                     const COHORTS = ['Cohort 1', 'Cohort 2', 'Cohort 3', 'Cohort 4', 'Cohort 5'];
-                    const TRACKS = ['Frontend Engineering', 'Backend Engineering', 'Product Design'];
-                    const MODULE_NAMES = [
-                        'Module 1: Internet & Web Fundamentals',
-                        'Module 2: Frontend Basics',
-                        'Module 3: JavaScript & APIs',
-                        'Module 4: Advanced Frontend'
-                    ];
+                    const TRACKS = ['Frontend Engineering', 'Backend Engineering', 'Product Design (UI/UX)'];
+                    const TRACK_MODULES = {
+                        'Frontend Engineering': [...ACADEMY_COURSES['Frontend Engineering'].modules.map((m, i) => ({ index: i, title: m.title })), ...customModules.filter(m => m.track === 'Frontend Engineering').map((m, i) => ({ index: ACADEMY_COURSES['Frontend Engineering'].modules.length + i, title: m.title }))],
+                        'Backend Engineering': [...ACADEMY_COURSES['Backend Engineering'].modules.map((m, i) => ({ index: i, title: m.title })), ...customModules.filter(m => m.track === 'Backend Engineering').map((m, i) => ({ index: ACADEMY_COURSES['Backend Engineering'].modules.length + i, title: m.title }))],
+                        'Product Design (UI/UX)': [...ACADEMY_COURSES['Product Design (UI/UX)'].modules.map((m, i) => ({ index: i, title: m.title })), ...customModules.filter(m => m.track === 'Product Design (UI/UX)').map((m, i) => ({ index: ACADEMY_COURSES['Product Design (UI/UX)'].modules.length + i, title: m.title }))],
+                    };
                     // (states declared at top of AdminDashboard to follow Rules of Hooks)
 
                     const toggleModuleLock = (modIdx) => {
@@ -3674,7 +3790,10 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
 
                     const ftaTabs = [
                         { id: 'cohort', label: '👥 Student Assignment' },
+                        { id: 'release', label: '📚 Release Modules' },
                         { id: 'curriculum', label: '🔒 Curriculum Locks' },
+                        { id: 'addmodule', label: '➕ Add Module' },
+                        { id: 'grade', label: '📝 Grade Submissions' },
                         { id: 'notify', label: '📣 Send Notification' },
                         { id: 'leaderboard', label: '🏆 Leaderboard' },
                     ];
@@ -3782,7 +3901,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                         ))}
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.2rem' }}>
-                                        {MODULE_NAMES.map((modName, modIdx) => {
+                                        {(TRACK_MODULES[selectedTrackAdmin] || []).map(({ index: modIdx, title: modName }) => {
                                             const key = `${selectedCohortAdmin}-${selectedTrackAdmin}-module-${modIdx}`;
                                             const isLocked = !!cohortLocks[key];
                                             return (
@@ -3798,6 +3917,60 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                         onClick={() => toggleModuleLock(modIdx)}
                                                         style={{ width: '100%', padding: '0.8rem', background: isLocked ? '#059669' : '#dc2626', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '3px 3px 0 rgba(0,0,0,0.4)' }}
                                                     >{isLocked ? '🔓 Unlock Module' : '🔒 Lock Module'}</button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ── RELEASE MODULES ── */}
+                            {ftaTab === 'release' && (
+                                <div>
+                                    <div style={{ background: '#fff', border: '3px solid #000', padding: '1.5rem 2rem', marginBottom: '2rem', boxShadow: '6px 6px 0 #000' }}>
+                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', margin: '0 0 0.5rem 0', textTransform: 'uppercase' }}>📚 Weekly Module Release</h3>
+                                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#666', lineHeight: '1.5' }}>Release modules to students cohort by cohort. Unreleased modules are completely hidden from the student dashboard. Release one module per week for each cohort.</p>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                                        {COHORTS.map(c => (
+                                            <button key={c} onClick={() => setSelectedCohortAdmin(c)} style={{
+                                                padding: '0.6rem 1.2rem', border: '3px solid #000', background: selectedCohortAdmin === c ? '#000' : '#fff',
+                                                color: selectedCohortAdmin === c ? '#fff' : '#000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer',
+                                                boxShadow: selectedCohortAdmin === c ? 'none' : '3px 3px 0 #000'
+                                            }}>{c}</button>
+                                        ))}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                                        {TRACKS.map(t => (
+                                            <button key={t} onClick={() => setSelectedTrackAdmin(t)} style={{
+                                                padding: '0.6rem 1.2rem', border: '3px solid #000', background: selectedTrackAdmin === t ? 'var(--accent-r)' : '#fff',
+                                                color: selectedTrackAdmin === t ? '#fff' : '#000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer',
+                                                boxShadow: selectedTrackAdmin === t ? 'none' : '3px 3px 0 #000'
+                                            }}>{t}</button>
+                                        ))}
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem' }}>
+                                        {(TRACK_MODULES[selectedTrackAdmin] || []).map(({ index: modIdx, title: modName }) => {
+                                            const released = isModuleReleased(selectedCohortAdmin, selectedTrackAdmin, modIdx);
+                                            const releaseRecord = releasedModules.find(r => r.cohort === selectedCohortAdmin && r.track === selectedTrackAdmin && r.module_index === modIdx);
+                                            return (
+                                                <div key={modIdx} style={{ background: '#fff', border: `3px solid ${released ? '#059669' : '#e5e7eb'}`, padding: '1.5rem', boxShadow: released ? '6px 6px 0 #059669' : '4px 4px 0 #e5e7eb', opacity: released ? 1 : 0.85 }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', margin: 0 }}>{modName}</h4>
+                                                        {released ? <CheckCircle size={20} color="#059669" /> : <Lock size={20} color="#9ca3af" />}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.5rem', color: released ? '#059669' : '#9ca3af' }}>
+                                                        {released ? `🟢 RELEASED — Visible to students` : '⚪ NOT RELEASED — Hidden from students'}
+                                                    </div>
+                                                    {released && releaseRecord && (
+                                                        <div style={{ fontSize: '0.65rem', color: '#6b7280', marginBottom: '1rem', fontWeight: 600 }}>
+                                                            Released: {new Date(releaseRecord.released_at).toLocaleString()}
+                                                        </div>
+                                                    )}
+                                                    <button
+                                                        onClick={() => toggleModuleRelease(selectedCohortAdmin, selectedTrackAdmin, modIdx)}
+                                                        style={{ width: '100%', padding: '0.8rem', background: released ? '#dc2626' : '#059669', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '3px 3px 0 rgba(0,0,0,0.4)' }}
+                                                    >{released ? '🚫 Unrelease Module' : '✅ Release Module to Students'}</button>
                                                 </div>
                                             );
                                         })}
@@ -3863,7 +4036,139 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                 </div>
                             )}
 
-                            {/* ── LEADERBOARD ── */}
+                            {/* ── ADD MODULE ── */}
+                            {ftaTab === 'addmodule' && (
+                                <div>
+                                    <div style={{ background: '#fff', border: '3px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000', marginBottom: '2rem' }}>
+                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', margin: '0 0 1rem 0', textTransform: 'uppercase' }}>➕ Add New Module</h3>
+                                        <p style={{ fontSize: '0.8rem', color: '#71717a', marginBottom: '1.5rem', fontWeight: 700 }}>Create a custom module that will appear for students in the selected track.</p>
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem' }}>Target Track</label>
+                                                <select value={selectedTrackAdmin} onChange={e => setSelectedTrackAdmin(e.target.value)} style={{ border: '3px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%' }}>
+                                                    {['Frontend Engineering', 'Backend Engineering', 'Product Design (UI/UX)'].map(t => <option key={t} value={t}>{t}</option>)}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem' }}>Module Title</label>
+                                                <input value={newModuleForm.title} onChange={e => setNewModuleForm(p => ({ ...p, title: e.target.value }))} placeholder="e.g. Module 8: Advanced Patterns" style={{ border: '3px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%' }} />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem' }}>Description</label>
+                                                <input value={newModuleForm.description} onChange={e => setNewModuleForm(p => ({ ...p, description: e.target.value }))} placeholder="Short description" style={{ border: '3px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%' }} />
+                                            </div>
+                                            <div style={{ border: '2px dashed #ccc', padding: '1rem', borderRadius: '0.5rem' }}>
+                                                <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem', margin: '0 0 0.8rem 0' }}>Add Lessons</h4>
+                                                <input value={newLessonInput.title} onChange={e => setNewLessonInput(p => ({ ...p, title: e.target.value }))} placeholder="Lesson title (e.g. 1. Introduction)" style={{ border: '2px solid #000', padding: '0.6rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%', marginBottom: '0.5rem' }} />
+                                                <input value={newLessonInput.videoUrl} onChange={e => setNewLessonInput(p => ({ ...p, videoUrl: e.target.value }))} placeholder="YouTube or video URL" style={{ border: '2px solid #000', padding: '0.6rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%', marginBottom: '0.5rem' }} />
+                                                <textarea value={newLessonInput.notes} onChange={e => setNewLessonInput(p => ({ ...p, notes: e.target.value }))} placeholder="Markdown lesson notes..." rows={3} style={{ border: '2px solid #000', padding: '0.6rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%', marginBottom: '0.5rem', resize: 'vertical' }} />
+                                                <button onClick={() => {
+                                                    if (!newLessonInput.title) return;
+                                                    setNewModuleForm(p => ({ ...p, lessons: [...p.lessons, { ...newLessonInput, id: `custom-${Date.now()}-${p.lessons.length}` }] }));
+                                                    setNewLessonInput({ title: '', videoUrl: '', notes: '' });
+                                                }} style={{ padding: '0.5rem 1rem', background: '#22c55e', color: '#fff', border: '2px solid #000', fontWeight: 900, fontSize: '0.75rem', cursor: 'pointer', textTransform: 'uppercase' }}>+ Add Lesson</button>
+                                            </div>
+                                            {newModuleForm.lessons.length > 0 && (
+                                                <div>
+                                                    <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', margin: '0 0 0.5rem 0' }}>Lessons Added ({newModuleForm.lessons.length})</h4>
+                                                    {newModuleForm.lessons.map((l, i) => (
+                                                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', border: '1px solid #eee', marginBottom: '0.3rem', fontSize: '0.75rem', fontWeight: 700 }}>
+                                                            <span>{l.title}</span>
+                                                            <button onClick={() => setNewModuleForm(p => ({ ...p, lessons: p.lessons.filter((_, j) => j !== i) }))} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.2rem 0.5rem', cursor: 'pointer', fontWeight: 900, fontSize: '0.65rem' }}>✕</button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            <button onClick={async () => {
+                                                if (!newModuleForm.title || newModuleForm.lessons.length === 0) { alert('Add a title and at least one lesson.'); return; }
+                                                const { error } = await supabase.from('custom_modules').insert({
+                                                    track: selectedTrackAdmin,
+                                                    title: newModuleForm.title,
+                                                    description: newModuleForm.description,
+                                                    lessons: newModuleForm.lessons,
+                                                    order_index: (ACADEMY_COURSES[selectedTrackAdmin]?.modules.length || 0) + customModules.filter(m => m.track === selectedTrackAdmin).length
+                                                });
+                                                if (error) { alert('Error: ' + error.message); return; }
+                                                const { data } = await supabase.from('custom_modules').select('*').order('order_index');
+                                                setCustomModules(data || []);
+                                                setNewModuleForm({ title: '', description: '', lessons: [] });
+                                                alert('Module added successfully!');
+                                            }} style={{ padding: '1rem', background: 'var(--accent-b, #3b82f6)', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.9rem', cursor: 'pointer', boxShadow: '4px 4px 0 #000' }}>Save Module to Track</button>
+                                        </div>
+                                    </div>
+
+                                    {customModules.length > 0 && (
+                                        <div style={{ background: '#fff', border: '3px solid #000', padding: '1.5rem', boxShadow: '6px 6px 0 #000' }}>
+                                            <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem', margin: '0 0 1rem 0', textTransform: 'uppercase' }}>Custom Modules Created</h3>
+                                            {customModules.map(m => (
+                                                <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem', border: '2px solid #eee', marginBottom: '0.5rem' }}>
+                                                    <div>
+                                                        <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem' }}>{m.title}</div>
+                                                        <div style={{ fontSize: '0.7rem', color: '#888' }}>{m.track} · {m.lessons?.length || 0} lessons</div>
+                                                    </div>
+                                                    <button onClick={async () => { await supabase.from('custom_modules').delete().eq('id', m.id); const { data } = await supabase.from('custom_modules').select('*').order('order_index'); setCustomModules(data || []); }} style={{ background: '#ef4444', color: '#fff', border: '2px solid #000', padding: '0.3rem 0.6rem', fontWeight: 900, fontSize: '0.7rem', cursor: 'pointer' }}>Delete</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* ── GRADE SUBMISSIONS ── */}
+                            {ftaTab === 'grade' && (
+                                <div>
+                                    <div style={{ background: '#fff', border: '3px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
+                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', margin: '0 0 1.5rem 0', textTransform: 'uppercase' }}>📝 Grade Student Submissions</h3>
+                                        <p style={{ fontSize: '0.8rem', color: '#71717a', marginBottom: '1.5rem', fontWeight: 700 }}>Manually grade peer submissions or individual student performance. Grades appear in student profiles.</p>
+                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                                            <select value={selectedCohortAdmin} onChange={e => setSelectedCohortAdmin(e.target.value)} style={{ border: '3px solid #000', padding: '0.6rem', fontFamily: 'Outfit', fontWeight: 700 }}>
+                                                {COHORTS.map(c => <option key={c} value={c}>{c}</option>)}
+                                            </select>
+                                            <select value={selectedTrackAdmin} onChange={e => setSelectedTrackAdmin(e.target.value)} style={{ border: '3px solid #000', padding: '0.6rem', fontFamily: 'Outfit', fontWeight: 700 }}>
+                                                {['Frontend Engineering', 'Backend Engineering', 'Product Design (UI/UX)'].map(t => <option key={t} value={t}>{t}</option>)}
+                                            </select>
+                                        </div>
+                                        <div style={{ border: '2px dashed #ccc', padding: '1.5rem', borderRadius: '0.5rem', marginBottom: '2rem' }}>
+                                            <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', margin: '0 0 1rem 0' }}>Manual Grade Entry</h4>
+                                            <div style={{ display: 'grid', gap: '0.8rem' }}>
+                                                <input id="grade-student-email" type="email" placeholder="Student email" style={{ border: '2px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700 }} />
+                                                <input id="grade-student-name" type="text" placeholder="Student name" style={{ border: '2px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700 }} />
+                                                <select id="grade-module-index" style={{ border: '2px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700 }}>
+                                                    {(ACADEMY_COURSES[selectedTrackAdmin]?.modules || []).map((m, i) => (
+                                                        <option key={i} value={i}>Module {i + 1}: {m.title.replace(/^Module \d+: /, '')}</option>
+                                                    ))}
+                                                </select>
+                                                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                                                    <input id="grade-score" type="number" min="0" max="100" defaultValue="0" placeholder="Score 0-100" style={{ border: '2px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '120px' }} />
+                                                    <span style={{ fontWeight: 900, fontSize: '0.8rem' }}>/ 100</span>
+                                                </div>
+                                                <textarea id="grade-feedback" rows={2} placeholder="Feedback (optional)" style={{ border: '2px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, resize: 'vertical' }} />
+                                                <button onClick={async () => {
+                                                    const email = document.getElementById('grade-student-email')?.value?.trim();
+                                                    const name = document.getElementById('grade-student-name')?.value?.trim();
+                                                    const moduleIndex = parseInt(document.getElementById('grade-module-index')?.value || '0');
+                                                    const score = parseInt(document.getElementById('grade-score')?.value || '0');
+                                                    const feedback = document.getElementById('grade-feedback')?.value?.trim() || '';
+                                                    if (!email || !name) { alert('Enter student email and name.'); return; }
+                                                    if (score < 0 || score > 100) { alert('Score must be 0-100.'); return; }
+                                                    const { error } = await supabase.from('manual_grades').insert({
+                                                        student_email: email, student_name: name, cohort: selectedCohortAdmin,
+                                                        track: selectedTrackAdmin, module_index: moduleIndex, score, feedback
+                                                    });
+                                                    if (error) { alert('Error: ' + error.message); return; }
+                                                    alert(`Grade saved for ${name}: Module ${moduleIndex + 1} = ${score}/100`);
+                                                    document.getElementById('grade-student-email').value = '';
+                                                    document.getElementById('grade-student-name').value = '';
+                                                    document.getElementById('grade-score').value = '0';
+                                                    document.getElementById('grade-feedback').value = '';
+                                                }} style={{ padding: '0.8rem', background: '#22c55e', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', boxShadow: '4px 4px 0 #000' }}>Submit Grade</button>
+                                            </div>
+                                        </div>
+                                        <RecentGradesList selectedCohort={selectedCohortAdmin} selectedTrack={selectedTrackAdmin} />
+                                    </div>
+                                </div>
+                            )}
+
                             {ftaTab === 'leaderboard' && (
                                 <div>
                                     <div style={{ background: '#fff', border: '3px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
@@ -4093,37 +4398,31 @@ const ACADEMY_COURSES = {
         description: 'Master visual layouts, UI components, state management, and modern React web applications.',
         modules: [
             {
-                title: 'Module 1: Internet & HTML Foundations',
+                title: 'Module 1: Grit & Growth Mindset',
                 lessons: [
                     {
-                        id: 'fe-internet-https',
-                        title: '1. Internet and HTTPS',
-                        videoUrl: 'https://www.youtube.com/embed/wW2A5SZ3GkI',
-                        notes: `### Internet and HTTPS\n\nLearn how data travels across the global network, what IP addresses are, and how the Domain Name System (DNS) maps domain names to servers.\n\n*   **HTTP**: HyperText Transfer Protocol is the foundation of data exchange on the web.\n*   **HTTPS**: The secure version of HTTP. It encrypts communication using SSL/TLS protocols to prevent data interception.`
+                        id: 'fe-grit-intro',
+                        title: '1. What is Grit? — Angela Duckworth',
+                        videoUrl: 'https://www.youtube.com/embed/H14bBuluwB8',
+                        notes: `### What is Grit?\n\nGrit is passion and perseverance for long-term goals. Angela Duckworth's research shows that talent alone does not make you great — sustained effort does.\n\n*   **Grit > Talent**: IQ and talent are not the best predictors of success.\n*   **Effort Counts Twice**: Talent × Effort = Skill. Skill × Effort = Achievement.\n*   **The Hard Thing Rule**: Do one hard thing that requires deliberate practice.`
                     },
                     {
-                        id: 'fe-html-intro',
-                        title: '2. HTML & Introduction to Tags',
-                        videoUrl: 'https://www.youtube.com/embed/K_EVuLegRZ0',
-                        notes: `### HTML Introduction & Tags\n\nHTML (HyperText Markup Language) defines the structure and layout of a web page using a system of elements and tags.\n\n*   **Tags**: Elements are wrapped in opening and closing tags (e.g. <h1> and </h1>).\n*   **Attributes**: Provide additional information about tags (e.g. href for anchors, src for images).`
+                        id: 'fe-growth-intro',
+                        title: '2. Growth Mindset — Carol Dweck',
+                        videoUrl: 'https://www.youtube.com/embed/ghRqS3-9LVM',
+                        notes: `### Growth Mindset vs Fixed Mindset\n\nCarol Dweck's research reveals two beliefs about ability that shape how we learn.\n\n*   **Fixed Mindset**: "I'm either good or bad at this." Avoids challenges, gives up easily.\n*   **Growth Mindset**: "I can improve with effort." Embraces challenges, persists through setbacks.\n*   **The Power of Yet**: "I don't understand it YET" vs "I don't understand it."`
                     },
                     {
-                        id: 'fe-html-textual',
-                        title: '3. Textual Tags',
-                        videoUrl: 'https://www.youtube.com/embed/VkWJQe_EsjQ',
-                        notes: `### Textual Elements in HTML\n\nProperly structure headers, paragraphs, lists, and semantic tags for textual content.\n\n*   **Headers**: <h1> to <h6> establish document hierarchy.\n*   **Paragraphs**: Use <p> to separate blocks of text.\n*   **Formatting**: Use <strong> for bold importance and <em> for emphasis.`
+                        id: 'fe-nigerian-tech',
+                        title: '3. Tech Problems in Nigeria & How You Can Solve Them',
+                        videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                        notes: `### Real Problems You Can Solve With Code\n\nNigeria faces unique challenges that tech skills can address:\n\n*   **Financial Inclusion**: 36M+ adults are unbanked. Build fintech solutions.\n*   **Healthcare Access**: Rural areas lack doctors. Telemedicine apps save lives.\n*   **Education Gaps**: Quality learning materials are scarce. Build EdTech platforms.\n*   **Agriculture**: Farmers lack market access. Create marketplace platforms.\n\n**Your track is your weapon.** Frontend engineers build the interfaces people interact with.`
                     },
                     {
-                        id: 'fe-html-tables',
-                        title: '4. Table Tags',
-                        videoUrl: 'https://www.youtube.com/embed/e62D-aayveY',
-                        notes: `### Creating Tables in HTML\n\nTables are useful for displaying structured, tabular data. Avoid using tables for page layouts!\n\n*   <table>: The root container element.\n*   <tr>: Defines a table row.\n*   <th>: Defines a header cell (bold and centered by default).\n*   <td>: Defines a standard data cell.`
-                    },
-                    {
-                        id: 'fe-html-full',
-                        title: '5. Full HTML',
-                        videoUrl: 'https://www.youtube.com/embed/kUMe1FH4CHE',
-                        notes: `### Full HTML Document Structure\n\nA valid HTML5 document follows a strict container layout:\n\n*   \`<!DOCTYPE html>\`: Informs the browser that this is an HTML5 document.\n*   <html>: Encases all content.\n*   <head>: Contains metadata, page title, and link stylesheets.\n*   <body>: Contains all visual content seen by users.`
+                        id: 'fe-collaboration',
+                        title: '4. How Developers Work Together to Build Solutions',
+                        videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                        notes: `### Collaboration in Tech\n\nGreat software is never built alone:\n\n*   **Pair Programming**: Two developers, one screen. Real-time code review.\n*   **Version Control**: Git lets teams work on the same codebase without conflicts.\n*   **Agile Sprints**: Break big goals into 1-2 week chunks. Ship, get feedback, improve.\n*   **Code Reviews**: Every pull request is a learning opportunity.`
                     }
                 ]
             },
@@ -4451,19 +4750,31 @@ const ACADEMY_COURSES = {
         description: 'Build robust servers, secure APIs, handle authentication, and orchestrate SQL databases.',
         modules: [
             {
-                title: 'Module 1: Server architecture with Node.js & Express',
+                title: 'Module 1: Grit & Growth Mindset',
                 lessons: [
                     {
-                        id: 'be-node-intro',
-                        title: '1. Building HTTP Servers & Routing API requests',
-                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
-                        notes: `### Node.js HTTP Basics\n\nNode.js enables JS execution server-side. Express.js is a lightweight wrapper to easily parse routes.\n\nCode Example:\nconst express = require('express');\nconst app = express();\napp.get("/api/v1/users", (req, res) => {\n    res.status(200).json({ status: "success" });\n});`
+                        id: 'be-grit-intro',
+                        title: '1. What is Grit? — Angela Duckworth',
+                        videoUrl: 'https://www.youtube.com/embed/H14bBuluwB8',
+                        notes: `### What is Grit?\n\nGrit is passion and perseverance for long-term goals. Angela Duckworth's research shows that talent alone does not make you great — sustained effort does.\n\n*   **Grit > Talent**: IQ and talent are not the best predictors of success.\n*   **Effort Counts Twice**: Talent × Effort = Skill. Skill × Effort = Achievement.\n*   **The Hard Thing Rule**: Do one hard thing that requires deliberate practice.`
                     },
                     {
-                        id: 'be-node-db',
-                        title: '2. Connecting Supabase Client & PostgreSQL Tables',
-                        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-                        notes: `### Postgres & Supabase CRUD\n\nConnect safely using Service Role keys or Anon keys depending on read/write policies.\n\nExample Select:\nconst { data, error } = await supabase\n    .from("registrations")\n    .select("*");`
+                        id: 'be-growth-intro',
+                        title: '2. Growth Mindset — Carol Dweck',
+                        videoUrl: 'https://www.youtube.com/embed/ghRqS3-9LVM',
+                        notes: `### Growth Mindset vs Fixed Mindset\n\nCarol Dweck's research reveals two beliefs about ability that shape how we learn.\n\n*   **Fixed Mindset**: "I'm either good or bad at this." Avoids challenges, gives up easily.\n*   **Growth Mindset**: "I can improve with effort." Embraces challenges, persists through setbacks.\n*   **The Power of Yet**: "I don't understand it YET" vs "I don't understand it."`
+                    },
+                    {
+                        id: 'be-nigerian-tech',
+                        title: '3. Tech Problems in Nigeria & How You Can Solve Them',
+                        videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                        notes: `### Real Problems You Can Solve With Code\n\nNigeria faces unique challenges that tech skills can address:\n\n*   **Financial Inclusion**: 36M+ adults are unbanked. Build fintech solutions.\n*   **Healthcare Access**: Rural areas lack doctors. Telemedicine apps save lives.\n*   **Education Gaps**: Quality learning materials are scarce. Build EdTech platforms.\n*   **Agriculture**: Farmers lack market access. Create marketplace platforms.\n\n**Your track is your weapon.** Backend engineers build the systems that power solutions.`
+                    },
+                    {
+                        id: 'be-collaboration',
+                        title: '4. How Developers Work Together to Build Solutions',
+                        videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                        notes: `### Collaboration in Tech\n\nGreat software is never built alone:\n\n*   **Pair Programming**: Two developers, one screen. Real-time code review.\n*   **Version Control**: Git lets teams work on the same codebase without conflicts.\n*   **Agile Sprints**: Break big goals into 1-2 week chunks. Ship, get feedback, improve.\n*   **Code Reviews**: Every pull request is a learning opportunity.`
                     }
                 ]
             }
@@ -4473,37 +4784,31 @@ const ACADEMY_COURSES = {
         description: 'Master User Experience (UX), Behavioral Psychology, Figma UI Design, Design Systems, and AI-Assisted Workflows.',
         modules: [
             {
-                title: 'Module 1: Foundations of UX & Behavioral Psychology',
+                title: 'Module 1: Grit & Growth Mindset',
                 lessons: [
                     {
-                        id: 'pd-ux-intro',
-                        title: '1. What is UX Design',
-                        videoUrl: 'https://www.youtube.com/embed/ziQEqGZB8GE',
-                        notes: `### What is User Experience (UX) Design?\n\nUser Experience (UX) design is the process design teams use to create products that provide meaningful and relevant experiences to users.\n\n*   **Usability**: How easy and intuitive a product is to navigate.\n*   **Utility**: Whether the product solves real problems for users.\n*   **Desirability**: The visual and emotional appeal of the product.`
+                        id: 'pd-grit-intro',
+                        title: '1. What is Grit? — Angela Duckworth',
+                        videoUrl: 'https://www.youtube.com/embed/H14bBuluwB8',
+                        notes: `### What is Grit?\n\nGrit is passion and perseverance for long-term goals. Angela Duckworth's research shows that talent alone does not make you great — sustained effort does.\n\n*   **Grit > Talent**: IQ and talent are not the best predictors of success.\n*   **Effort Counts Twice**: Talent × Effort = Skill. Skill × Effort = Achievement.\n*   **The Hard Thing Rule**: Do one hard thing that requires deliberate practice.`
                     },
                     {
-                        id: 'pd-fogg-model',
-                        title: '2. BJ Fogg’s Behavior Model',
-                        videoUrl: 'https://www.youtube.com/embed/P0Dpi4KbW4g',
-                        notes: `### BJ Fogg's Behavior Model (B = MAP)\n\nBehavior occurs when three elements converge at the same moment: Motivation, Ability, and a Prompt.\n\n*   **B = MAP**: Behavior = Motivation × Ability × Prompt.\n*   **Motivation**: High vs. low user desire to perform an action.\n*   **Ability**: Making the target behavior simpler to increase likelihood.\n*   **Prompt**: The trigger that cues the user to act.`
+                        id: 'pd-growth-intro',
+                        title: '2. Growth Mindset — Carol Dweck',
+                        videoUrl: 'https://www.youtube.com/embed/ghRqS3-9LVM',
+                        notes: `### Growth Mindset vs Fixed Mindset\n\nCarol Dweck's research reveals two beliefs about ability that shape how we learn.\n\n*   **Fixed Mindset**: "I'm either good or bad at this." Avoids challenges, gives up easily.\n*   **Growth Mindset**: "I can improve with effort." Embraces challenges, persists through setbacks.\n*   **The Power of Yet**: "I don't understand it YET" vs "I don't understand it."`
                     },
                     {
-                        id: 'pd-action-funnel',
-                        title: '3. How to Use Action Funnel in UX',
-                        videoUrl: 'https://www.youtube.com/embed/86-ARkNt_d4',
-                        notes: `### The Action Funnel in UX\n\nUnderstand how users progress through steps in a conversion flow.\n\n*   **Awareness**: User notices the prompt or call-to-action.\n*   **Evaluation**: User weighs effort vs reward.\n*   **Execution**: Completing the action with minimal friction.`
+                        id: 'pd-nigerian-tech',
+                        title: '3. Tech Problems in Nigeria & How You Can Solve Them',
+                        videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                        notes: `### Real Problems You Can Solve With Design\n\nNigeria faces unique challenges that design skills can address:\n\n*   **Financial Inclusion**: 36M+ adults are unbanked. Design accessible fintech apps.\n*   **Healthcare Access**: Rural areas lack doctors. Design telemedicine experiences.\n*   **Education Gaps**: Quality learning materials are scarce. Design learning platforms.\n*   **Agriculture**: Farmers lack market access. Design marketplace experiences.\n\n**Your track is your weapon.** Product designers craft the experiences people love to use.`
                     },
                     {
-                        id: 'pd-thinking-spectrum',
-                        title: '4. Spectrum of Thinking Interventions',
-                        videoUrl: 'https://www.youtube.com/embed/3u-EoqRu2k4',
-                        notes: `### Spectrum of Thinking Interventions\n\nDesigning interfaces that match cognitive load and user decision-making styles.\n\n*   **Fast Thinking (System 1)**: Intuitive, automatic, low effort.\n*   **Slow Thinking (System 2)**: Deliberate, analytical, high effort.`
-                    },
-                    {
-                        id: 'pd-vs-uiux',
-                        title: '5. Product Design vs UI/UX',
-                        videoUrl: 'https://www.youtube.com/embed/Vs4LZM1oirM',
-                        notes: `### Product Design vs UI/UX Design\n\nClarifying roles and scope across digital product creation:\n\n*   **UX Design**: Focuses on user journey, wireframing, architecture, and research.\n*   **UI Design**: Focuses on visual styling, typography, colors, and layout.\n*   **Product Design**: Encompasses end-to-end business strategy, user needs, and product execution.`
+                        id: 'pd-collaboration',
+                        title: '4. How Designers Work Together to Build Solutions',
+                        videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                        notes: `### Collaboration in Tech\n\nGreat products are never designed alone:\n\n*   **Design Sprints**: Five-day process to solve problems quickly.\n*   **Design Systems**: Shared components ensure consistency across products.\n*   **User Testing**: Test prototypes with real users before building.\n*   **Handoff**: Clear specs and documentation for developers.`
                     }
                 ]
             },
@@ -5254,6 +5559,8 @@ const AcademyDashboard = () => {
 
     // Cohort — assigned by admin, NOT student-selectable
     const studentCohort = localStorage.getItem('fta-admin-assigned-cohort') || 'Cohort 1';
+    const [releasedModuleIndices, setReleasedModuleIndices] = useState([]);
+    const [releaseLoading, setReleaseLoading] = useState(true);
     const [assignmentText, setAssignmentText] = useState('');
     const [isGrading, setIsGrading] = useState(false);
     const [gradingResult, setGradingResult] = useState(null);
@@ -5262,12 +5569,170 @@ const AcademyDashboard = () => {
     // Sub-tab switching
     const [academyTab, setAcademyTab] = useState('curriculum'); // 'curriculum' | 'peers' | 'notifications'
 
-    // Peer posts states
-    const [peerPosts, setPeerPosts] = useState(() => JSON.parse(localStorage.getItem('fta-peer-posts') || '[]'));
+    // Student Score & Manual Grades State
+    const [manualGrades, setManualGrades] = useState([]);
+    const [customModules, setCustomModules] = useState([]);
+    const [selectedScoreModule, setSelectedScoreModule] = useState(null);
+    const [peerSubmissions, setPeerSubmissions] = useState([]);
+
+    // Fetch manual grades from Supabase
+    useEffect(() => {
+        if (studentSession && studentSession.email) {
+            supabase.from('manual_grades').select('*').eq('student_email', studentSession.email).then(({ data }) => {
+                if (data) setManualGrades(data);
+            });
+        }
+    }, [studentSession]);
+
+    // Fetch custom modules from Supabase
+    useEffect(() => {
+        supabase.from('custom_modules').select('*').order('order_index').then(({ data }) => {
+            if (data) setCustomModules(data);
+        });
+    }, []);
+
+    // Fetch peer submissions from Supabase
+    useEffect(() => {
+        if (studentSession) {
+            supabase.from('peer_submissions').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+                if (data) setPeerSubmissions(data);
+            });
+        }
+    }, [studentSession]);
+
+    // Calculate total score from manual grades + exercise scores
+    const totalScore = React.useMemo(() => {
+        let total = 0;
+        let count = 0;
+        if (manualGrades.length > 0) {
+            manualGrades.forEach(g => { total += g.score; count++; });
+        }
+        // Add exercise scores
+        const exerciseState = gradingResult?.breakdown || {};
+        Object.values(exerciseState).forEach(b => {
+            if (b.earned) { total += b.earned; count++; }
+        });
+        if (count === 0) return 0;
+        return Math.round(total / count);
+    }, [manualGrades, gradingResult]);
+
+    // Get per-module grade breakdown
+    const moduleGrades = React.useMemo(() => {
+        const track = selectedCourse;
+        const course = ACADEMY_COURSES[track];
+        if (!course) return [];
+        const builtinModules = course.modules.map((mod, idx) => {
+            const grade = manualGrades.find(g => g.module_index === idx && g.track === track);
+            return {
+                index: idx,
+                title: mod.title,
+                score: grade ? grade.score : null,
+                feedback: grade ? grade.feedback : null,
+                graded_at: grade ? grade.graded_at : null,
+                isCustom: false
+            };
+        });
+        const customMods = customModules.filter(m => m.track === track).map((cm, i) => {
+            const idx = course.modules.length + i;
+            const grade = manualGrades.find(g => g.module_index === idx && g.track === track);
+            return {
+                index: idx,
+                title: cm.title,
+                score: grade ? grade.score : null,
+                feedback: grade ? grade.feedback : null,
+                graded_at: grade ? grade.graded_at : null,
+                isCustom: true
+            };
+        });
+        return [...builtinModules, ...customMods];
+    }, [manualGrades, selectedCourse, customModules]);
+
+    // Peer posts states — loaded from Supabase, not localStorage
+    const [peerPosts, setPeerPosts] = useState([]);
+    const [peerPostsLoaded, setPeerPostsLoaded] = useState(false);
     const [peerTitle, setPeerTitle] = useState('');
     const [peerBody, setPeerBody] = useState('');
     const [peerTag, setPeerTag] = useState('Bug 🐛');
     const [replyInputs, setReplyInputs] = useState({});
+
+    const fetchPeerPosts = async () => {
+        const { data, error } = await supabase
+            .from('peer_messages')
+            .select('*')
+            .eq('cohort', studentCohort)
+            .order('created_at', { ascending: false });
+        if (!error && data) {
+            setPeerPosts(data.map(m => ({
+                id: m.id,
+                channel: m.channel,
+                title: m.title,
+                body: m.body,
+                tag: m.tag,
+                author: m.author,
+                authorAvatar: m.author_avatar,
+                date: m.message_date,
+                cohort: m.cohort,
+                replies: m.replies || []
+            })));
+        }
+        setPeerPostsLoaded(true);
+    };
+
+    useEffect(() => {
+        if (studentSession) {
+            fetchPeerPosts();
+        }
+    }, [studentSession, studentCohort]);
+
+    // Real-time subscription for peer messages
+    useEffect(() => {
+        if (!studentSession) return;
+
+        const channel = supabase
+            .channel('peer-messages-realtime')
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'peer_messages',
+                filter: `cohort=eq.${studentCohort}`
+            }, (payload) => {
+                const m = payload.new;
+                setPeerPosts(prev => {
+                    if (prev.some(p => p.id === m.id)) return prev;
+                    return [...prev, {
+                        id: m.id,
+                        channel: m.channel,
+                        title: m.title,
+                        body: m.body,
+                        tag: m.tag,
+                        author: m.author,
+                        authorAvatar: m.author_avatar,
+                        date: m.message_date,
+                        cohort: m.cohort,
+                        replies: m.replies || []
+                    }];
+                });
+            })
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'peer_messages',
+                filter: `cohort=eq.${studentCohort}`
+            }, (payload) => {
+                const m = payload.new;
+                setPeerPosts(prev => prev.map(p =>
+                    p.id === m.id ? {
+                        ...p,
+                        replies: m.replies || []
+                    } : p
+                ));
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [studentSession, studentCohort]);
 
     // Discord Peer Hub states
     const [activeChannel, setActiveChannel] = useState('general-questions');
@@ -5286,8 +5751,8 @@ const AcademyDashboard = () => {
     });
 
     // Compute live user module exercise scores
-    const moduleIndicesAll = [0, 1, 2, 3];
-    const allScores = moduleIndicesAll.map(idx => localStorage.getItem(`fta-exercise-score-mod-${idx}`)).filter(Boolean).map(Number);
+    const totalModules = course.modules.length;
+    const allScores = releasedModuleIndices.map(idx => localStorage.getItem(`fta-exercise-score-mod-${idx}`)).filter(Boolean).map(Number);
     const completedCount = allScores.length;
     const avgScore = completedCount > 0 ? Math.round(allScores.reduce((a,b)=>a+b,0)/completedCount) : 0;
     const passedCount = allScores.filter(s => s >= 50).length;
@@ -5299,12 +5764,49 @@ const AcademyDashboard = () => {
 
     // Sync selected lesson when course changes
     useEffect(() => {
-        const newFirstLesson = course.modules[0].lessons[0];
-        setSelectedLesson(newFirstLesson);
-        setSelectedModIdx(0);
-        setSelectedLesIdx(0);
-        setExpandedModules({ 0: true });
+        if (releasedModulesWithIndex.length > 0) {
+            const firstReleased = releasedModulesWithIndex[0];
+            setSelectedLesson(firstReleased.lessons[0]);
+            setSelectedModIdx(firstReleased.originalIdx);
+            setSelectedLesIdx(0);
+            setExpandedModules({ [firstReleased.originalIdx]: true });
+        } else {
+            setSelectedLesson(course.modules[0].lessons[0]);
+            setSelectedModIdx(0);
+            setSelectedLesIdx(0);
+            setExpandedModules({ 0: true });
+        }
     }, [selectedCourse]);
+
+    // Fetch released modules for this student's cohort + track
+    useEffect(() => {
+        const fetchReleases = async () => {
+            setReleaseLoading(true);
+            const { data, error } = await supabase
+                .from('module_releases')
+                .select('module_index')
+                .eq('cohort', studentCohort)
+                .eq('track', selectedCourse);
+            if (!error && data) {
+                setReleasedModuleIndices(data.map(r => r.module_index));
+            }
+            setReleaseLoading(false);
+        };
+        fetchReleases();
+    }, [studentCohort, selectedCourse]);
+
+    // Build released-only module list
+    const releasedModules = course.modules.filter((_, idx) => releasedModuleIndices.includes(idx));
+    const hasReleasedModules = releasedModules.length > 0;
+    const releasedModulesWithIndex = [
+        ...course.modules.map((mod, idx) => ({ originalIdx: idx, ...mod })),
+        ...customModules.filter(m => m.track === selectedCourse).map((m, i) => ({
+            originalIdx: course.modules.length + i,
+            title: m.title,
+            lessons: m.lessons || [],
+            isCustom: true
+        }))
+    ].filter(m => releasedModuleIndices.includes(m.originalIdx));
 
     // Sync assignment text and grading status when lesson changes or on submission
     useEffect(() => {
@@ -5326,6 +5828,11 @@ const AcademyDashboard = () => {
 
     // Check if a lesson is locked
     const isLessonLocked = (les, modIdx, lesIdx) => {
+        // 0. Module not released → hidden/locked
+        if (!releasedModuleIndices.includes(modIdx)) {
+            return true;
+        }
+
         // 1. Admin cohort lock check
         const cohortLocks = JSON.parse(localStorage.getItem('fta-cohort-locks') || '{}');
         const isModuleLockedByAdmin = cohortLocks[`${studentCohort}-${selectedCourse}-module-${modIdx}`];
@@ -5737,45 +6244,61 @@ const AcademyDashboard = () => {
                 const activeList = peerPosts.length > 0 ? peerPosts : seedMessages;
                 const channelMessages = activeList.filter(m => (m.channel === activeChannel || (!m.channel && activeChannel === 'general-questions')) && (m.cohort === studentCohort || !m.cohort));
 
-                const handleSendDiscordMessage = (e) => {
+                const handleSendDiscordMessage = async (e) => {
                     if (e) e.preventDefault();
                     if (!discordInput.trim()) return;
 
+                    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
                     if (replyTargetPost) {
-                        const updated = activeList.map(p => {
-                            if (p.id === replyTargetPost.id) {
-                                return {
-                                    ...p,
-                                    replies: [...(p.replies || []), {
-                                        author: studentName,
-                                        authorAvatar: studentAvatar,
-                                        body: discordInput,
-                                        date: `Today at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                                    }]
-                                };
-                            }
-                            return p;
-                        });
-                        setPeerPosts(updated);
-                        localStorage.setItem('fta-peer-posts', JSON.stringify(updated));
+                        const newReply = {
+                            author: studentName,
+                            authorAvatar: studentAvatar,
+                            body: discordInput,
+                            date: `Today at ${timeStr}`
+                        };
+                        const updatedReplies = [...(replyTargetPost.replies || []), newReply];
+                        const { error } = await supabase
+                            .from('peer_messages')
+                            .update({ replies: updatedReplies })
+                            .eq('id', replyTargetPost.id);
+                        if (!error) {
+                            setPeerPosts(prev => prev.map(p =>
+                                p.id === replyTargetPost.id ? { ...p, replies: updatedReplies } : p
+                            ));
+                        }
                         setDiscordInput('');
                         setReplyTargetPost(null);
                     } else {
-                        const newMsg = {
-                            id: Date.now(),
-                            channel: activeChannel,
-                            title: discordInput.slice(0, 50),
-                            body: discordInput,
-                            tag: 'Chat',
-                            author: studentName,
-                            authorAvatar: studentAvatar,
-                            date: `Today at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-                            cohort: studentCohort,
-                            replies: []
-                        };
-                        const updated = [...activeList, newMsg];
-                        setPeerPosts(updated);
-                        localStorage.setItem('fta-peer-posts', JSON.stringify(updated));
+                        const { data, error } = await supabase
+                            .from('peer_messages')
+                            .insert([{
+                                channel: activeChannel,
+                                title: discordInput.slice(0, 50),
+                                body: discordInput,
+                                tag: 'Chat',
+                                author: studentName,
+                                author_avatar: studentAvatar,
+                                message_date: `Today at ${timeStr}`,
+                                cohort: studentCohort,
+                                replies: []
+                            }])
+                            .select()
+                            .single();
+                        if (!error && data) {
+                            setPeerPosts(prev => [...prev, {
+                                id: data.id,
+                                channel: data.channel,
+                                title: data.title,
+                                body: data.body,
+                                tag: data.tag,
+                                author: data.author,
+                                authorAvatar: data.author_avatar,
+                                date: data.message_date,
+                                cohort: data.cohort,
+                                replies: data.replies || []
+                            }]);
+                        }
                         setDiscordInput('');
                     }
                 };
@@ -6301,9 +6824,9 @@ const AcademyDashboard = () => {
                                             {/* Stat Cards 2x2 Grid */}
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                                                 {[
-                                                    { label: 'Modules Done', val: `${completedCount}/4`, color: '#000' },
+                                                    { label: 'Modules Done', val: `${completedCount}/${releasedModuleIndices.length}`, color: '#000' },
                                                     { label: 'Avg Score', val: avgScore > 0 ? `${avgScore}/100` : '—', color: avgScore >= 50 ? '#059669' : avgScore > 0 ? '#dc2626' : '#94a3b8' },
-                                                    { label: 'Passed', val: `${passedCount}/4`, color: '#059669' },
+                                                    { label: 'Passed', val: `${passedCount}/${releasedModuleIndices.length}`, color: '#059669' },
                                                     { label: 'Cohort', val: studentCohort, color: '#6d28d9' },
                                                 ].map((stat, i) => (
                                                     <div key={i} style={{ background: '#fff', border: '2px solid #000', borderRadius: '0.5rem', padding: '0.5rem 0.7rem', textAlign: 'center', boxShadow: '2px 2px 0 #000' }}>
@@ -6441,9 +6964,9 @@ const AcademyDashboard = () => {
                                             {/* Stat Cards 2x2 Grid */}
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
                                                 {[
-                                                    { label: 'Modules Done', val: `${completedCount}/4`, color: '#000' },
+                                                    { label: 'Modules Done', val: `${completedCount}/${releasedModuleIndices.length}`, color: '#000' },
                                                     { label: 'Avg Score', val: avgScore > 0 ? `${avgScore}/100` : '—', color: avgScore >= 50 ? '#059669' : avgScore > 0 ? '#dc2626' : '#94a3b8' },
-                                                    { label: 'Passed', val: `${passedCount}/4`, color: '#059669' },
+                                                    { label: 'Passed', val: `${passedCount}/${releasedModuleIndices.length}`, color: '#059669' },
                                                     { label: 'Cohort', val: studentCohort, color: '#6d28d9' },
                                                 ].map((stat, i) => (
                                                     <div key={i} style={{ background: '#f8fafc', border: '2px solid #000', borderRadius: '0.4rem', padding: '0.4rem 0.5rem', textAlign: 'center', boxShadow: '2px 2px 0 #000' }}>
@@ -6546,86 +7069,98 @@ const AcademyDashboard = () => {
                         {course.description}
                     </p>
 
-                    {course.modules.map((mod, modIdx) => {
-                        const isExpanded = !!expandedModules[modIdx];
+                    {releaseLoading ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
+                            <p style={{ fontWeight: 700, fontSize: '0.85rem' }}>Loading modules...</p>
+                        </div>
+                    ) : !hasReleasedModules ? (
+                        <div style={{ textAlign: 'center', padding: '2rem 1rem', background: '#f8fafc', border: '2px dashed #d1d5db', borderRadius: '0.5rem' }}>
+                            <Lock size={32} color="#9ca3af" style={{ margin: '0 auto 1rem auto' }} />
+                            <p style={{ fontWeight: 900, fontSize: '0.9rem', color: '#374151', margin: '0 0 0.5rem 0' }}>No Modules Released Yet</p>
+                            <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: 0 }}>Your instructor hasn't released any modules for your cohort yet. Please check back later.</p>
+                        </div>
+                    ) : (
+                        releasedModulesWithIndex.map(({ originalIdx, ...mod }) => {
+                            const isExpanded = !!expandedModules[originalIdx];
 
-                        return (
-                            <div key={modIdx} style={{ marginBottom: '1rem', border: '2px solid #000', borderRadius: '0.5rem', overflow: 'hidden' }}>
-                                {/* Module Accordion Header */}
-                                <div
-                                    onClick={() => toggleModule(modIdx)}
-                                    style={{
-                                        background: isExpanded ? '#000000' : '#f8fafc',
-                                        color: isExpanded ? '#ffffff' : '#000000',
-                                        padding: '0.8rem 1rem',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        userSelect: 'none',
-                                        transition: 'background 0.2s ease'
-                                    }}
-                                >
-                                    <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                                        {mod.title}
-                                    </span>
-                                    {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                                </div>
-
-                                {/* Module Lessons List */}
-                                {isExpanded && (
-                                    <div style={{ background: '#ffffff', padding: '0.5rem' }}>
-                                        {mod.lessons.map((les, lesIdx) => {
-                                            const isSelected = selectedLesson.id === les.id;
-                                            const locked = isLessonLocked(les, modIdx, lesIdx);
-
-                                            return (
-                                                <button
-                                                    key={les.id}
-                                                    onClick={() => {
-                                                        if (!locked) {
-                                                            setSelectedLesson(les);
-                                                        }
-                                                    }}
-                                                    disabled={locked}
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '0.6rem',
-                                                        width: '100%',
-                                                        padding: '0.6rem 0.8rem',
-                                                        margin: '0.2rem 0',
-                                                        border: '2px solid',
-                                                        borderColor: isSelected ? 'var(--accent-r)' : 'transparent',
-                                                        background: isSelected ? '#fff0f3' : locked ? '#f1f5f9' : 'transparent',
-                                                        borderRadius: '0.4rem',
-                                                        cursor: locked ? 'not-allowed' : 'pointer',
-                                                        textAlign: 'left',
-                                                        color: locked ? '#94a3b8' : '#000000',
-                                                        fontWeight: isSelected ? 900 : 700,
-                                                        fontSize: '0.8rem',
-                                                        opacity: locked ? 0.7 : 1,
-                                                        transition: 'all 0.1s ease'
-                                                    }}
-                                                >
-                                                    {locked ? (
-                                                        <Lock size={14} style={{ color: '#94a3b8', flexShrink: 0 }} />
-                                                    ) : isSelected ? (
-                                                        <CheckCircle size={14} style={{ color: 'var(--accent-r)', flexShrink: 0 }} />
-                                                    ) : (
-                                                        <PlayCircle size={14} style={{ color: '#64748b', flexShrink: 0 }} />
-                                                    )}
-                                                    <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                        {les.title}
-                                                    </span>
-                                                </button>
-                                            );
-                                        })}
+                            return (
+                                <div key={originalIdx} style={{ marginBottom: '1rem', border: '2px solid #000', borderRadius: '0.5rem', overflow: 'hidden' }}>
+                                    {/* Module Accordion Header */}
+                                    <div
+                                        onClick={() => toggleModule(originalIdx)}
+                                        style={{
+                                            background: isExpanded ? '#000000' : '#f8fafc',
+                                            color: isExpanded ? '#ffffff' : '#000000',
+                                            padding: '0.8rem 1rem',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            userSelect: 'none',
+                                            transition: 'background 0.2s ease'
+                                        }}
+                                    >
+                                        <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                                            {mod.title}
+                                        </span>
+                                        {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                                     </div>
-                                )}
-                            </div>
-                        );
-                    })}
+
+                                    {/* Module Lessons List */}
+                                    {isExpanded && (
+                                        <div style={{ background: '#ffffff', padding: '0.5rem' }}>
+                                            {mod.lessons.map((les, lesIdx) => {
+                                                const isSelected = selectedLesson.id === les.id;
+                                                const locked = isLessonLocked(les, originalIdx, lesIdx);
+
+                                                return (
+                                                    <button
+                                                        key={les.id}
+                                                        onClick={() => {
+                                                            if (!locked) {
+                                                                setSelectedLesson(les);
+                                                            }
+                                                        }}
+                                                        disabled={locked}
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '0.6rem',
+                                                            width: '100%',
+                                                            padding: '0.6rem 0.8rem',
+                                                            margin: '0.2rem 0',
+                                                            border: '2px solid',
+                                                            borderColor: isSelected ? 'var(--accent-r)' : 'transparent',
+                                                            background: isSelected ? '#fff0f3' : locked ? '#f1f5f9' : 'transparent',
+                                                            borderRadius: '0.4rem',
+                                                            cursor: locked ? 'not-allowed' : 'pointer',
+                                                            textAlign: 'left',
+                                                            color: locked ? '#94a3b8' : '#000000',
+                                                            fontWeight: isSelected ? 900 : 700,
+                                                            fontSize: '0.8rem',
+                                                            opacity: locked ? 0.7 : 1,
+                                                            transition: 'all 0.1s ease'
+                                                        }}
+                                                    >
+                                                        {locked ? (
+                                                            <Lock size={14} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                                                        ) : isSelected ? (
+                                                            <CheckCircle size={14} style={{ color: 'var(--accent-r)', flexShrink: 0 }} />
+                                                        ) : (
+                                                            <PlayCircle size={14} style={{ color: '#64748b', flexShrink: 0 }} />
+                                                        )}
+                                                        <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            {les.title}
+                                                        </span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
                 )}
 
@@ -6633,6 +7168,22 @@ const AcademyDashboard = () => {
                 {academyTab === 'curriculum' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     {(() => {
+                        if (!hasReleasedModules && !releaseLoading) {
+                            return (
+                                <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '4rem 2rem', boxShadow: '8px 8px 0 #000000', textAlign: 'center' }}>
+                                    <div style={{ background: '#f0f9ff', color: '#3b82f6', width: '70px', height: '70px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto', border: '3px solid #000' }}>
+                                        <BookOpen size={32} />
+                                    </div>
+                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', fontSize: '1.5rem', margin: '0 0 1rem 0' }}>
+                                        Waiting for Module Release
+                                    </h2>
+                                    <p style={{ color: '#475569', fontSize: '0.95rem', fontWeight: 700, maxWidth: '500px', margin: '0 auto', lineHeight: '1.6' }}>
+                                        Your instructor hasn't released any modules for {studentCohort} yet. New content is released weekly — check back soon!
+                                    </p>
+                                </div>
+                            );
+                        }
+
                         let selectedModIdx = 0;
                         let selectedLesIdx = 0;
                         course.modules.forEach((mod, mIdx) => {
@@ -6647,6 +7198,7 @@ const AcademyDashboard = () => {
                         const isLocked = isLessonLocked(selectedLesson, selectedModIdx, selectedLesIdx);
                         const cohortLocks = JSON.parse(localStorage.getItem('fta-cohort-locks') || '{}');
                         const isLockedByAdmin = cohortLocks[`${studentCohort}-${selectedCourse}-module-${selectedModIdx}`];
+                        const isNotReleased = !releasedModuleIndices.includes(selectedModIdx);
 
                         if (isLocked) {
                             return (
@@ -6655,10 +7207,12 @@ const AcademyDashboard = () => {
                                         <Lock size={30} />
                                     </div>
                                     <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', fontSize: '1.5rem', margin: '0 0 1rem 0' }}>
-                                        {isLockedByAdmin ? "Module Locked by Administrator" : "Lecture Locked"}
+                                        {isNotReleased ? 'Module Not Yet Released' : isLockedByAdmin ? "Module Locked by Administrator" : "Lecture Locked"}
                                     </h2>
                                     <p style={{ color: '#475569', fontSize: '0.95rem', fontWeight: 700, maxWidth: '500px', margin: '0 auto 1.5rem auto', lineHeight: '1.6' }}>
-                                        {isLockedByAdmin 
+                                        {isNotReleased
+                                           ? `This module hasn't been released yet for ${studentCohort}. Wait for your instructor to release it.`
+                                           : isLockedByAdmin 
                                            ? `The administrator has locked ${course.modules[selectedModIdx]?.title || 'this module'} for students in ${studentCohort}.` 
                                            : "You must complete the previous lesson's coding assignment to unlock this lecture. Sequential learning is required!"}
                                     </p>
@@ -7151,53 +7705,68 @@ const AcademyDashboard = () => {
 
                 {/* 👥 PEER TO PEER HUB VIEW */}
                 {academyTab === 'peers' && (() => {
-                    const handleCreatePost = (e) => {
+                    const handleCreatePost = async (e) => {
                         e.preventDefault();
                         if (!peerTitle.trim() || !peerBody.trim()) {
                             alert('Please write a title and content for your peer post!');
                             return;
                         }
-                        const newPost = {
-                            id: Date.now(),
-                            title: peerTitle,
-                            body: peerBody,
-                            tag: peerTag,
-                            author: studentName,
-                            authorAvatar: studentAvatar,
-                            date: new Date().toLocaleDateString(),
-                            cohort: studentCohort,
-                            replies: []
-                        };
-                        const updated = [newPost, ...peerPosts];
-                        setPeerPosts(updated);
-                        localStorage.setItem('fta-peer-posts', JSON.stringify(updated));
+                        const { data, error } = await supabase
+                            .from('peer_messages')
+                            .insert([{
+                                channel: 'general-questions',
+                                title: peerTitle,
+                                body: peerBody,
+                                tag: peerTag,
+                                author: studentName,
+                                author_avatar: studentAvatar,
+                                message_date: new Date().toLocaleDateString(),
+                                cohort: studentCohort,
+                                replies: []
+                            }])
+                            .select()
+                            .single();
+                        if (!error && data) {
+                            setPeerPosts(prev => [{
+                                id: data.id,
+                                channel: data.channel,
+                                title: data.title,
+                                body: data.body,
+                                tag: data.tag,
+                                author: data.author,
+                                authorAvatar: data.author_avatar,
+                                date: data.message_date,
+                                cohort: data.cohort,
+                                replies: data.replies || []
+                            }, ...prev]);
+                        }
                         setPeerTitle('');
                         setPeerBody('');
                         alert('✅ Challenge ticket posted successfully in your Cohort hub!');
                     };
 
-                    const handleAddReply = (postId) => {
+                    const handleAddReply = async (postId) => {
                         const replyText = replyInputs[postId] || '';
                         if (!replyText.trim()) {
                             alert('Please write a comment first!');
                             return;
                         }
-                        const updated = peerPosts.map(p => {
-                            if (p.id === postId) {
-                                return {
-                                    ...p,
-                                    replies: [...(p.replies || []), {
-                                        author: studentName,
-                                        authorAvatar: studentAvatar,
-                                        body: replyText,
-                                        date: new Date().toLocaleDateString()
-                                    }]
-                                };
-                            }
-                            return p;
-                        });
-                        setPeerPosts(updated);
-                        localStorage.setItem('fta-peer-posts', JSON.stringify(updated));
+                        const targetPost = peerPosts.find(p => p.id === postId);
+                        const updatedReplies = [...(targetPost?.replies || []), {
+                            author: studentName,
+                            authorAvatar: studentAvatar,
+                            body: replyText,
+                            date: new Date().toLocaleDateString()
+                        }];
+                        const { error } = await supabase
+                            .from('peer_messages')
+                            .update({ replies: updatedReplies })
+                            .eq('id', postId);
+                        if (!error) {
+                            setPeerPosts(prev => prev.map(p =>
+                                p.id === postId ? { ...p, replies: updatedReplies } : p
+                            ));
+                        }
                         setReplyInputs(prev => ({ ...prev, [postId]: '' }));
                     };
 
@@ -7477,12 +8046,17 @@ const AcademyDashboard = () => {
                         </p>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                            {course.modules.map((mod, modIdx) => {
-                                const isExpanded = !!expandedModules[modIdx];
+                            {!hasReleasedModules ? (
+                                <div style={{ textAlign: 'center', padding: '2rem 1rem', background: '#f8fafc', border: '2px dashed #d1d5db', borderRadius: '0.5rem' }}>
+                                    <Lock size={24} color="#9ca3af" style={{ margin: '0 auto 0.5rem auto' }} />
+                                    <p style={{ fontWeight: 900, fontSize: '0.85rem', color: '#374151', margin: 0 }}>No Modules Released Yet</p>
+                                </div>
+                            ) : releasedModulesWithIndex.map(({ originalIdx, ...mod }) => {
+                                const isExpanded = !!expandedModules[originalIdx];
                                 return (
-                                    <div key={modIdx} style={{ border: '2px solid #000', borderRadius: '0.5rem', overflow: 'hidden' }}>
+                                    <div key={originalIdx} style={{ border: '2px solid #000', borderRadius: '0.5rem', overflow: 'hidden' }}>
                                         <div
-                                            onClick={() => toggleModule(modIdx)}
+                                            onClick={() => toggleModule(originalIdx)}
                                             style={{
                                                 background: isExpanded ? '#000000' : '#f8fafc',
                                                 color: isExpanded ? '#ffffff' : '#000000',
@@ -7503,14 +8077,14 @@ const AcademyDashboard = () => {
                                             <div style={{ background: '#fff', padding: '0.4rem' }}>
                                                 {mod.lessons.map((les, lesIdx) => {
                                                     const isSelected = selectedLesson.id === les.id;
-                                                    const locked = isLessonLocked(les, modIdx, lesIdx);
+                                                    const locked = isLessonLocked(les, originalIdx, lesIdx);
                                                     return (
                                                         <button
                                                             key={les.id}
                                                             disabled={locked}
                                                             onClick={() => {
                                                                 if (!locked) {
-                                                                    setSelectedModIdx(modIdx);
+                                                                    setSelectedModIdx(originalIdx);
                                                                     setSelectedLesIdx(lesIdx);
                                                                     setSelectedLesson(les);
                                                                     setShowMobileModulesDrawer(false);
@@ -7604,6 +8178,56 @@ const AcademyDashboard = () => {
                             )}
                         </div>
 
+                        {/* Score Circle + Per-Module Breakdown */}
+                        <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+                            <div
+                                onClick={() => setSelectedScoreModule(selectedScoreModule === null ? 'breakdown' : null)}
+                                style={{
+                                    width: '100px', height: '100px', borderRadius: '50%',
+                                    background: `conic-gradient(${totalScore >= 70 ? '#22c55e' : totalScore >= 50 ? '#f59e0b' : '#ef4444'} ${totalScore * 3.6}deg, #e5e7eb 0deg)`,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    margin: '0 auto', cursor: 'pointer', border: '4px solid #000',
+                                    boxShadow: '4px 4px 0 #000', transition: 'transform 0.2s'
+                                }}
+                                title="Click to see per-module breakdown"
+                            >
+                                <div style={{
+                                    width: '76px', height: '76px', borderRadius: '50%', background: '#fff',
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <span style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.5rem', color: totalScore >= 70 ? '#22c55e' : totalScore >= 50 ? '#f59e0b' : '#ef4444' }}>{totalScore}%</span>
+                                    <span style={{ fontSize: '0.5rem', fontWeight: 800, textTransform: 'uppercase', color: '#666' }}>Score</span>
+                                </div>
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.4rem', fontWeight: 700 }}>Click circle for breakdown</div>
+
+                            {selectedScoreModule === 'breakdown' && (
+                                <div style={{ marginTop: '1rem', border: '2px solid #000', borderRadius: '0.5rem', overflow: 'hidden' }}>
+                                    <div style={{ background: '#000', color: '#fff', padding: '0.5rem', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', fontFamily: 'Outfit' }}>Per-Module Grades</div>
+                                    {moduleGrades.length === 0 ? (
+                                        <div style={{ padding: '1rem', fontSize: '0.8rem', color: '#888' }}>No modules available</div>
+                                    ) : (
+                                        moduleGrades.map((mg) => (
+                                            <div key={mg.index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.8rem', borderBottom: '1px solid #eee', background: mg.score !== null ? '#f0fdf4' : '#fff' }}>
+                                                <div style={{ textAlign: 'left', flex: 1 }}>
+                                                    <div style={{ fontFamily: 'Outfit', fontWeight: 800, fontSize: '0.75rem' }}>{mg.title}</div>
+                                                    {mg.feedback && <div style={{ fontSize: '0.6rem', color: '#666', marginTop: '0.1rem' }}>{mg.feedback}</div>}
+                                                </div>
+                                                <div style={{
+                                                    width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #000',
+                                                    background: mg.score !== null ? (mg.score >= 70 ? '#22c55e' : mg.score >= 50 ? '#f59e0b' : '#ef4444') : '#e5e7eb',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontWeight: 950, fontSize: '0.7rem', color: mg.score !== null ? '#fff' : '#999', flexShrink: 0
+                                                }}>
+                                                    {mg.score !== null ? `${mg.score}%` : '—'}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', display: 'block', marginBottom: '0.4rem', fontFamily: 'Outfit' }}>Your Full Name / Peer Name:</label>
                             <input
@@ -7658,9 +8282,8 @@ const AcademyDashboard = () => {
                                 Dismiss
                             </button>
                             <button
-                                onClick={() => {
+                                onClick={async () => {
                                     const newPost = {
-                                        id: Date.now(),
                                         title: `Stuck on ${stuckTaskData.lessonTitle} (Score: ${stuckTaskData.score}/100)`,
                                         body: `I need help with ${stuckTaskData.lessonTitle}.\n\nMy Submitted Code:\n\`\`\`\n${stuckTaskData.code || 'No code entered'}\n\`\`\`\n\nAI Diagnostic:\n${stuckTaskData.feedback}`,
                                         tag: 'Bug 🐛',
@@ -7670,9 +8293,35 @@ const AcademyDashboard = () => {
                                         cohort: studentCohort,
                                         replies: []
                                     };
-                                    const updatedPosts = [newPost, ...peerPosts];
-                                    setPeerPosts(updatedPosts);
-                                    localStorage.setItem('fta-peer-posts', JSON.stringify(updatedPosts));
+                                    const { data, error } = await supabase
+                                        .from('peer_messages')
+                                        .insert([{
+                                            channel: 'help-and-bugs',
+                                            title: newPost.title,
+                                            body: newPost.body,
+                                            tag: newPost.tag,
+                                            author: newPost.author,
+                                            author_avatar: newPost.authorAvatar,
+                                            message_date: newPost.date,
+                                            cohort: newPost.cohort,
+                                            replies: []
+                                        }])
+                                        .select()
+                                        .single();
+                                    if (!error && data) {
+                                        setPeerPosts(prev => [{
+                                            id: data.id,
+                                            channel: data.channel,
+                                            title: data.title,
+                                            body: data.body,
+                                            tag: data.tag,
+                                            author: data.author,
+                                            authorAvatar: data.author_avatar,
+                                            date: data.message_date,
+                                            cohort: data.cohort,
+                                            replies: data.replies || []
+                                        }, ...prev]);
+                                    }
                                     setShowStuckModal(false);
                                     setAcademyTab('peers');
                                 }}

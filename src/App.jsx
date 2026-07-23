@@ -2543,6 +2543,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [peerSubmitPrompt, setPeerSubmitPrompt] = useState('');
     const [peerDeadline, setPeerDeadline] = useState('');
     const [mergeLoading, setMergeLoading] = useState(false);
+    const [adminPeerSubmissions, setAdminPeerSubmissions] = useState([]);
+    const [expandedSubmission, setExpandedSubmission] = useState(null);
 
     useEffect(() => {
         fetchRegistrations();
@@ -2555,11 +2557,17 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
             if (data) setCustomModules(data);
         });
         fetchPeerGroups();
+        fetchAdminPeerSubmissions();
     }, []);
 
     const fetchPeerGroups = async () => {
         const { data } = await supabase.from('peer_groups').select('*').order('group_number');
         if (data) setPeerGroups(data);
+    };
+
+    const fetchAdminPeerSubmissions = async () => {
+        const { data } = await supabase.from('peer_submissions').select('*').order('created_at', { ascending: false });
+        if (data) setAdminPeerSubmissions(data);
     };
 
     const handleAutoMergePeers = async () => {
@@ -4246,6 +4254,142 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                 }} style={{ padding: '0.8rem', background: '#22c55e', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', boxShadow: '4px 4px 0 #000' }}>Submit Grade</button>
                                             </div>
                                         </div>
+
+                                        {/* ── PEER PROJECT SUBMISSIONS ── */}
+                                        {(() => {
+                                            const filteredSubmissions = adminPeerSubmissions.filter(s => s.cohort === selectedCohortAdmin && s.track === selectedTrackAdmin);
+                                            if (filteredSubmissions.length === 0) {
+                                                return (
+                                                    <div style={{ borderTop: '2px solid #000', paddingTop: '1.5rem', marginBottom: '1.5rem' }}>
+                                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', margin: '0 0 0.8rem 0', textTransform: 'uppercase' }}>📂 Peer Project Submissions</h4>
+                                                        <div style={{ padding: '1rem', color: '#888', fontWeight: 700, background: '#f8fafc', border: '2px dashed #ccc', borderRadius: '0.5rem', textAlign: 'center' }}>
+                                                            No peer submissions yet for {selectedCohortAdmin} / {selectedTrackAdmin}.
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return (
+                                                <div style={{ borderTop: '2px solid #000', paddingTop: '1.5rem', marginBottom: '1.5rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', margin: 0, textTransform: 'uppercase' }}>📂 Peer Project Submissions ({filteredSubmissions.length})</h4>
+                                                        <button onClick={fetchAdminPeerSubmissions} style={{ padding: '0.3rem 0.7rem', background: '#f1f5f9', border: '2px solid #000', borderRadius: '0.3rem', fontFamily: 'Outfit', fontWeight: 800, fontSize: '0.65rem', cursor: 'pointer', textTransform: 'uppercase' }}>↻ Refresh</button>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                                        {filteredSubmissions.map(sub => {
+                                                            const isExpanded = expandedSubmission === sub.id;
+                                                            const membersList = Array.isArray(sub.members) ? sub.members : [];
+                                                            const moduleName = ACADEMY_COURSES[selectedTrackAdmin]?.modules[sub.module_index]?.title || `Module ${sub.module_index + 1}`;
+                                                            return (
+                                                                <div key={sub.id} style={{ border: '2px solid #000', borderRadius: '0.5rem', overflow: 'hidden', boxShadow: '3px 3px 0 #000' }}>
+                                                                    {/* Submission Header */}
+                                                                    <button
+                                                                        onClick={() => setExpandedSubmission(isExpanded ? null : sub.id)}
+                                                                        style={{
+                                                                            width: '100%', display: 'flex', alignItems: 'center', gap: '0.8rem',
+                                                                            padding: '0.8rem 1rem', background: isExpanded ? '#f0fdf4' : '#fff',
+                                                                            border: 'none', cursor: 'pointer', textAlign: 'left',
+                                                                            borderBottom: isExpanded ? '2px solid #000' : 'none',
+                                                                        }}
+                                                                    >
+                                                                        <div style={{
+                                                                            width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #000',
+                                                                            background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                            fontWeight: 900, fontSize: '0.65rem', color: '#1d4ed8', flexShrink: 0,
+                                                                        }}>
+                                                                            {sub.group_name ? sub.group_name.replace('Group ', 'G') : '—'}
+                                                                        </div>
+                                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                                            <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', color: '#000' }}>
+                                                                                {sub.group_name || 'Unnamed Group'}
+                                                                            </div>
+                                                                            <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700 }}>
+                                                                                {moduleName} · {membersList.length} member{membersList.length !== 1 ? 's' : ''} · {new Date(sub.created_at).toLocaleDateString()}
+                                                                            </div>
+                                                                        </div>
+                                                                        <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
+                                                                    </button>
+
+                                                                    {/* Expanded Detail */}
+                                                                    {isExpanded && (
+                                                                        <div style={{ padding: '1rem', background: '#f8fafc' }}>
+                                                                            {/* Members */}
+                                                                            <div style={{ marginBottom: '0.8rem' }}>
+                                                                                <div style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.3rem' }}>Team Members</div>
+                                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                                                                                    {membersList.map((m, i) => (
+                                                                                        <span key={i} style={{ fontSize: '0.65rem', fontWeight: 800, background: '#e0e7ff', color: '#3730a3', padding: '0.2rem 0.5rem', borderRadius: '0.3rem', border: '1px solid #6366f1' }}>
+                                                                                            {m.name || m.email}
+                                                                                        </span>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* Submission Text */}
+                                                                            <div style={{ marginBottom: '1rem' }}>
+                                                                                <div style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.3rem' }}>Submission Content</div>
+                                                                                <div style={{ background: '#fff', border: '2px solid #000', borderRadius: '0.4rem', padding: '0.8rem', fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: '1.5', whiteSpace: 'pre-wrap', maxHeight: '300px', overflowY: 'auto' }}>
+                                                                                    {sub.submission_text || 'No content submitted.'}
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* Quick Grade Form */}
+                                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5rem', alignItems: 'end' }}>
+                                                                                <div>
+                                                                                    <label style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b' }}>Feedback</label>
+                                                                                    <input
+                                                                                        id={`feedback-${sub.id}`}
+                                                                                        type="text"
+                                                                                        placeholder="Optional feedback..."
+                                                                                        style={{ width: '100%', border: '2px solid #000', padding: '0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.75rem', boxSizing: 'border-box' }}
+                                                                                    />
+                                                                                </div>
+                                                                                <div>
+                                                                                    <label style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b' }}>Score</label>
+                                                                                    <input
+                                                                                        id={`score-${sub.id}`}
+                                                                                        type="number"
+                                                                                        min="0"
+                                                                                        max="100"
+                                                                                        defaultValue="0"
+                                                                                        style={{ width: '80px', border: '2px solid #000', padding: '0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.75rem' }}
+                                                                                    />
+                                                                                </div>
+                                                                                <button
+                                                                                    onClick={async () => {
+                                                                                        const memberEmails = membersList.map(m => m.email).filter(Boolean);
+                                                                                        const memberNames = membersList.map(m => m.name).filter(Boolean);
+                                                                                        const score = parseInt(document.getElementById(`score-${sub.id}`)?.value || '0');
+                                                                                        const feedback = document.getElementById(`feedback-${sub.id}`)?.value?.trim() || '';
+                                                                                        if (score < 0 || score > 100) { alert('Score must be 0-100.'); return; }
+                                                                                        // Grade each member
+                                                                                        for (let i = 0; i < memberEmails.length; i++) {
+                                                                                            await supabase.from('manual_grades').insert({
+                                                                                                student_email: memberEmails[i],
+                                                                                                student_name: memberNames[i] || memberEmails[i],
+                                                                                                cohort: selectedCohortAdmin,
+                                                                                                track: selectedTrackAdmin,
+                                                                                                module_index: sub.module_index,
+                                                                                                score,
+                                                                                                feedback: feedback || `Peer project grade for ${sub.group_name}`
+                                                                                            });
+                                                                                        }
+                                                                                        alert(`✅ Graded ${sub.group_name}: ${score}/100 for ${memberEmails.length} member(s)`);
+                                                                                    }}
+                                                                                    style={{ padding: '0.5rem 1rem', background: '#22c55e', color: '#fff', border: '2px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '2px 2px 0 #000', height: 'fit-content' }}
+                                                                                >
+                                                                                    Grade Group
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+
                                         <RecentGradesList selectedCohort={selectedCohortAdmin} selectedTrack={selectedTrackAdmin} />
                                     </div>
                                 </div>

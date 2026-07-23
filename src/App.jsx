@@ -1780,31 +1780,10 @@ const Speakers = ({ dynamicSpeakers, speakersMode = 'live', comingSoonText = 'Ex
                                         <p className="speaker-role">{s.role}</p>
                                         <div className="speaker-expertise"><div className="dot" />{s.expertise}</div>
                                     </div>
-                                                </div>
-                                            );
-                                        })}
-                                        {/* Custom modules */}
-                                        {customModules.filter(m => m.track === selectedTrackAdmin).map((cm, i) => {
-                                            const modIdx = (TRACK_MODULES[selectedTrackAdmin]?.length || 0) + i;
-                                            const released = isModuleReleased(selectedCohortAdmin, selectedTrackAdmin, modIdx);
-                                            const releaseRecord = releasedModules.find(r => r.cohort === selectedCohortAdmin && r.track === selectedTrackAdmin && r.module_index === modIdx);
-                                            return (
-                                                <div key={cm.id} style={{ background: '#f0f9ff', border: `3px solid ${released ? '#059669' : '#93c5fd'}`, padding: '1.5rem', boxShadow: released ? '6px 6px 0 #059669' : '4px 4px 0 #93c5fd' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-                                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', margin: 0 }}>{cm.title} <span style={{ fontSize: '0.65rem', background: '#3b82f6', color: '#fff', padding: '0.15rem 0.4rem', borderRadius: '0.2rem', marginLeft: '0.3rem' }}>CUSTOM</span></h4>
-                                                        {released ? <CheckCircle size={20} color="#059669" /> : <Lock size={20} color="#9ca3af" />}
-                                                    </div>
-                                                    <div style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.5rem', color: released ? '#059669' : '#9ca3af' }}>
-                                                        {released ? '🟢 RELEASED' : '⚪ NOT RELEASED'} · {cm.lessons?.length || 0} lessons
-                                                    </div>
-                                                    {released && releaseRecord && (
-                                                        <div style={{ fontSize: '0.65rem', color: '#6b7280', marginBottom: '1rem', fontWeight: 600 }}>Released: {new Date(releaseRecord.released_at).toLocaleString()}</div>
-                                                    )}
-                                                    <button onClick={() => toggleModuleRelease(selectedCohortAdmin, selectedTrackAdmin, modIdx)} style={{ width: '100%', padding: '0.8rem', background: released ? '#dc2626' : '#059669', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '3px 3px 0 rgba(0,0,0,0.4)' }}>{released ? '🚫 Unrelease Module' : '✅ Release Module to Students'}</button>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 )}
             </div>
         </section>
@@ -2559,6 +2538,11 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [customModules, setCustomModules] = useState([]);
     const [newModuleForm, setNewModuleForm] = useState({ title: '', description: '', lessons: [] });
     const [newLessonInput, setNewLessonInput] = useState({ title: '', videoUrl: '', notes: '' });
+    const [peerGroups, setPeerGroups] = useState([]);
+    const [peerTaskDesc, setPeerTaskDesc] = useState('');
+    const [peerSubmitPrompt, setPeerSubmitPrompt] = useState('');
+    const [peerDeadline, setPeerDeadline] = useState('');
+    const [mergeLoading, setMergeLoading] = useState(false);
 
     useEffect(() => {
         fetchRegistrations();
@@ -2570,7 +2554,104 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         supabase.from('custom_modules').select('*').order('order_index').then(({ data }) => {
             if (data) setCustomModules(data);
         });
+        fetchPeerGroups();
     }, []);
+
+    const fetchPeerGroups = async () => {
+        const { data } = await supabase.from('peer_groups').select('*').order('group_number');
+        if (data) setPeerGroups(data);
+    };
+
+    const handleAutoMergePeers = async () => {
+        setMergeLoading(true);
+        try {
+            // Get all students for selected track from waitlist
+            const { data: students, error } = await supabase
+                .from('registrations')
+                .select('*')
+                .like('ticket_type', 'tech_waitlist_%')
+                .eq('company_name', selectedTrackAdmin);
+
+            if (error || !students || students.length === 0) {
+                alert('No students found for this track.');
+                setMergeLoading(false);
+                return;
+            }
+
+            // Filter to only admitted students (products JSON has admitted: true)
+            const admittedStudents = students.filter(s => {
+                try {
+                    const parsed = JSON.parse(s.products);
+                    return parsed && parsed.admitted === true;
+                } catch { return false; }
+            });
+
+            if (admittedStudents.length === 0) {
+                alert('No admitted students found for this track. Admit students first.');
+                setMergeLoading(false);
+                return;
+            }
+
+            // Delete existing groups for this cohort+track+module
+            const moduleIdx = parseInt(document.getElementById('merge-module-index')?.value || '0');
+            await supabase.from('peer_groups').delete()
+                .eq('cohort', selectedCohortAdmin)
+                .eq('track', selectedTrackAdmin)
+                .eq('module_index', moduleIdx);
+
+            // Shuffle students
+            const shuffled = [...admittedStudents].sort(() => Math.random() - 0.5);
+
+            // Create groups of 2
+            const groups = [];
+            let groupNum = 1;
+            const deadlineISO = peerDeadline ? new Date(peerDeadline).toISOString() : null;
+            for (let i = 0; i < shuffled.length; i += 2) {
+                if (i + 1 < shuffled.length) {
+                    // Pair
+                    groups.push({
+                        cohort: selectedCohortAdmin,
+                        track: selectedTrackAdmin,
+                        module_index: moduleIdx,
+                        group_number: groupNum,
+                        members: [
+                            { email: shuffled[i].email, name: shuffled[i].name, number: groupNum },
+                            { email: shuffled[i + 1].email, name: shuffled[i + 1].name, number: groupNum }
+                        ],
+                        is_unpaired: false,
+                        task_description: peerTaskDesc,
+                        submission_prompt: peerSubmitPrompt,
+                        deadline: deadlineISO
+                    });
+                    groupNum++;
+                } else {
+                    // Unpaired (odd one out)
+                    groups.push({
+                        cohort: selectedCohortAdmin,
+                        track: selectedTrackAdmin,
+                        module_index: moduleIdx,
+                        group_number: groupNum,
+                        members: [
+                            { email: shuffled[i].email, name: shuffled[i].name, number: null }
+                        ],
+                        is_unpaired: true,
+                        task_description: peerTaskDesc,
+                        submission_prompt: peerSubmitPrompt,
+                        deadline: deadlineISO
+                    });
+                }
+            }
+
+            const { error: insertError } = await supabase.from('peer_groups').insert(groups);
+            if (insertError) { alert('Error: ' + insertError.message); return; }
+
+            await fetchPeerGroups();
+            alert(`Merged ${shuffled.length} students into ${groups.length} group(s).`);
+        } catch (err) {
+            alert('Error merging: ' + err.message);
+        }
+        setMergeLoading(false);
+    };
 
     const fetchReleasedModules = async () => {
         const { data, error } = await supabase.from('module_releases').select('*').order('module_index', { ascending: true });
@@ -3793,6 +3874,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                         { id: 'release', label: '📚 Release Modules' },
                         { id: 'curriculum', label: '🔒 Curriculum Locks' },
                         { id: 'addmodule', label: '➕ Add Module' },
+                        { id: 'peers', label: '🤝 Merge Peers' },
                         { id: 'grade', label: '📝 Grade Submissions' },
                         { id: 'notify', label: '📣 Send Notification' },
                         { id: 'leaderboard', label: '🏆 Leaderboard' },
@@ -4166,6 +4248,167 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                         </div>
                                         <RecentGradesList selectedCohort={selectedCohortAdmin} selectedTrack={selectedTrackAdmin} />
                                     </div>
+                                </div>
+                            )}
+
+                            {/* ── MERGE PEERS ── */}
+                            {ftaTab === 'peers' && (
+                                <div>
+                                    <div style={{ background: '#fff', border: '3px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000', marginBottom: '2rem' }}>
+                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', margin: '0 0 0.5rem 0', textTransform: 'uppercase' }}>🤝 Merge Students Into Peer Groups</h3>
+                                        <p style={{ fontSize: '0.8rem', color: '#71717a', marginBottom: '1.5rem', fontWeight: 700 }}>Select a module, describe the task, and auto-pair students into groups of 2. If the count is odd, one student will be marked as "Not Peered".</p>
+
+                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                                            {COHORTS.map(c => (
+                                                <button key={c} onClick={() => setSelectedCohortAdmin(c)} style={{
+                                                    padding: '0.6rem 1.2rem', border: '3px solid #000', background: selectedCohortAdmin === c ? '#000' : '#fff',
+                                                    color: selectedCohortAdmin === c ? '#fff' : '#000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer',
+                                                    boxShadow: selectedCohortAdmin === c ? 'none' : '3px 3px 0 #000'
+                                                }}>{c}</button>
+                                            ))}
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                                            {TRACKS.map(t => (
+                                                <button key={t} onClick={() => setSelectedTrackAdmin(t)} style={{
+                                                    padding: '0.6rem 1.2rem', border: '3px solid #000', background: selectedTrackAdmin === t ? 'var(--accent-r)' : '#fff',
+                                                    color: selectedTrackAdmin === t ? '#fff' : '#000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer',
+                                                    boxShadow: selectedTrackAdmin === t ? 'none' : '3px 3px 0 #000'
+                                                }}>{t}</button>
+                                            ))}
+                                        </div>
+
+                                        <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem' }}>Module</label>
+                                                <select id="merge-module-index" style={{ border: '3px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%' }}>
+                                                    {(TRACK_MODULES[selectedTrackAdmin] || []).map(({ index, title }) => (
+                                                        <option key={index} value={index}>{title}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem' }}>Task Description (What they do together)</label>
+                                                <textarea value={peerTaskDesc} onChange={e => setPeerTaskDesc(e.target.value)} rows={3} placeholder="e.g. Discuss and solve 5 JavaScript challenges as a pair. One student codes, the other reviews." style={{ border: '3px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%', resize: 'vertical' }} />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem' }}>Submission Prompt (What they submit)</label>
+                                                <textarea value={peerSubmitPrompt} onChange={e => setPeerSubmitPrompt(e.target.value)} rows={3} placeholder="e.g. Submit a shared GitHub repo link with your paired solution and a short reflection on what you learned." style={{ border: '3px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%', resize: 'vertical' }} />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem' }}>Submission Deadline</label>
+                                                <input type="datetime-local" value={peerDeadline} onChange={e => setPeerDeadline(e.target.value)} style={{ border: '3px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%' }} />
+                                                <div style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.2rem', fontWeight: 700 }}>Students who miss this deadline receive a score of 0.</div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                                <button onClick={handleAutoMergePeers} disabled={mergeLoading} style={{ flex: 1, padding: '1rem', background: mergeLoading ? '#94a3b8' : 'var(--accent-r, #ef4444)', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.9rem', cursor: mergeLoading ? 'not-allowed' : 'pointer', boxShadow: '4px 4px 0 #000' }}>
+                                                    {mergeLoading ? 'Merging...' : '🔀 Auto-Merge Students'}
+                                                </button>
+                                                <button onClick={async () => {
+                                                    const moduleIdx = parseInt(document.getElementById('merge-module-index')?.value || '0');
+                                                    if (!confirm(`Scatter/destroy all peer groups for "${selectedTrackAdmin}" Module ${moduleIdx + 1} in ${selectedCohortAdmin}?`)) return;
+                                                    await supabase.from('peer_groups').delete()
+                                                        .eq('cohort', selectedCohortAdmin)
+                                                        .eq('track', selectedTrackAdmin)
+                                                        .eq('module_index', moduleIdx);
+                                                    await fetchPeerGroups();
+                                                    alert('Peer groups scattered.');
+                                                }} style={{ padding: '1rem', background: '#f59e0b', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.9rem', cursor: 'pointer', boxShadow: '4px 4px 0 #000', flexShrink: 0 }}>
+                                                    💥 Scatter Groups
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Existing peer groups */}
+                                    {peerGroups.length > 0 && (
+                                        <div style={{ background: '#fff', border: '3px solid #000', padding: '1.5rem', boxShadow: '6px 6px 0 #000' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.8rem' }}>
+                                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem', margin: 0, textTransform: 'uppercase' }}>📋 Merged Students ({peerGroups.filter(pg => pg.cohort === selectedCohortAdmin && pg.track === selectedTrackAdmin).reduce((acc, pg) => acc + pg.members.length, 0)} students in {peerGroups.filter(pg => pg.cohort === selectedCohortAdmin && pg.track === selectedTrackAdmin).length} groups)</h3>
+                                                <button onClick={async () => { if (confirm('Delete ALL peer groups?')) { await supabase.from('peer_groups').delete().neq('id', '00000000-0000-0000-0000-000000000000'); setPeerGroups([]); } }} style={{ padding: '0.4rem 0.8rem', background: '#ef4444', color: '#fff', border: '2px solid #000', fontWeight: 900, fontSize: '0.7rem', cursor: 'pointer', textTransform: 'uppercase' }}>🗑 Clear All</button>
+                                            </div>
+
+                                            {/* Filter by cohort + track */}
+                                            <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                                                {COHORTS.map(c => (
+                                                    <button key={c} onClick={() => setSelectedCohortAdmin(c)} style={{ padding: '0.4rem 0.8rem', border: '2px solid #000', background: selectedCohortAdmin === c ? '#000' : '#fff', color: selectedCohortAdmin === c ? '#fff' : '#000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', cursor: 'pointer' }}>{c}</button>
+                                                ))}
+                                            </div>
+
+                                            {/* Group by module → table per module */}
+                                            {[...new Set(peerGroups.filter(pg => pg.cohort === selectedCohortAdmin && pg.track === selectedTrackAdmin).map(pg => pg.module_index))].sort((a, b) => a - b).map(modIdx => {
+                                                const modGroups = peerGroups.filter(pg => pg.cohort === selectedCohortAdmin && pg.track === selectedTrackAdmin && pg.module_index === modIdx);
+                                                const modTitle = TRACK_MODULES[selectedTrackAdmin]?.find(m => m.index === modIdx)?.title || `Module ${modIdx + 1}`;
+                                                const paired = modGroups.filter(g => !g.is_unpaired);
+                                                const unpaired = modGroups.filter(g => g.is_unpaired);
+
+                                                return (
+                                                    <div key={modIdx} style={{ marginBottom: '2rem' }}>
+                                                        <div style={{ background: '#000', color: '#fff', padding: '0.7rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'Outfit' }}>
+                                                            <h4 style={{ fontWeight: 900, fontSize: '0.85rem', margin: 0, textTransform: 'uppercase' }}>📚 {modTitle}</h4>
+                                                            <div style={{ display: 'flex', gap: '1rem', fontSize: '0.7rem', fontWeight: 800 }}>
+                                                                <span>{paired.length} group{paired.length !== 1 ? 's' : ''}</span>
+                                                                {unpaired.length > 0 && <span style={{ color: '#ef4444' }}>{unpaired.length} not peered</span>}
+                                                                {modGroups[0]?.deadline && <span style={{ color: new Date(modGroups[0].deadline) < new Date() ? '#ef4444' : '#4ade80' }}>⏰ {new Date(modGroups[0].deadline).toLocaleString()}</span>}
+                                                            </div>
+                                                        </div>
+                                                        {modGroups[0]?.task_description && (
+                                                            <div style={{ fontSize: '0.75rem', color: '#444', padding: '0.6rem 1rem', background: '#f0f9ff', borderLeft: '3px solid #3b82f6', marginBottom: '0.5rem' }}>
+                                                                <strong>Task:</strong> {modGroups[0].task_description} | <strong>Submit:</strong> {modGroups[0].submission_prompt}
+                                                            </div>
+                                                        )}
+                                                        <div style={{ overflowX: 'auto' }}>
+                                                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #000' }}>
+                                                                <thead>
+                                                                    <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #000' }}>
+                                                                        <th style={{ padding: '0.6rem 0.8rem', textAlign: 'left', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', borderRight: '1px solid #e5e7eb' }}>#</th>
+                                                                        <th style={{ padding: '0.6rem 0.8rem', textAlign: 'left', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', borderRight: '1px solid #e5e7eb' }}>Student Name</th>
+                                                                        <th style={{ padding: '0.6rem 0.8rem', textAlign: 'left', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', borderRight: '1px solid #e5e7eb' }}>Email</th>
+                                                                        <th style={{ padding: '0.6rem 0.8rem', textAlign: 'left', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', borderRight: '1px solid #e5e7eb' }}>Group #</th>
+                                                                        <th style={{ padding: '0.6rem 0.8rem', textAlign: 'left', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', borderRight: '1px solid #e5e7eb' }}>Partner</th>
+                                                                        <th style={{ padding: '0.6rem 0.8rem', textAlign: 'left', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', borderRight: '1px solid #e5e7eb' }}>Partner Email</th>
+                                                                        <th style={{ padding: '0.6rem 0.8rem', textAlign: 'center', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase' }}>Del</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {modGroups.sort((a, b) => a.group_number - b.group_number).map((pg) => {
+                                                                        const rowBg = pg.is_unpaired ? '#fef2f2' : pg.members.indexOf(pg.members[0]) % 2 === 0 ? '#fff' : '#fafafa';
+                                                                        if (pg.is_unpaired) {
+                                                                            const m = pg.members[0];
+                                                                            return (
+                                                                                <tr key={pg.id + '-0'} style={{ borderBottom: '1px solid #e5e7eb', background: '#fef2f2' }}>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontWeight: 700, fontSize: '0.8rem', borderRight: '1px solid #e5e7eb', color: '#ef4444' }}>⚠️</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontWeight: 800, fontSize: '0.85rem', fontFamily: 'Outfit', borderRight: '1px solid #e5e7eb' }}>{m.name}</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontSize: '0.75rem', color: '#555', borderRight: '1px solid #e5e7eb' }}>{m.email}</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontSize: '0.8rem', fontWeight: 900, color: '#ef4444', borderRight: '1px solid #e5e7eb' }}>NOT PEERED</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontSize: '0.8rem', color: '#999', borderRight: '1px solid #e5e7eb' }}>—</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontSize: '0.75rem', color: '#999', borderRight: '1px solid #e5e7eb' }}>—</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', textAlign: 'center' }}><button onClick={async () => { await supabase.from('peer_groups').delete().eq('id', pg.id); await fetchPeerGroups(); }} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.2rem 0.5rem', cursor: 'pointer', fontWeight: 900, fontSize: '0.65rem' }}>✕</button></td>
+                                                                                </tr>
+                                                                            );
+                                                                        }
+                                                                        return pg.members.map((m, mi) => {
+                                                                            const partner = pg.members.find((_, idx) => idx !== mi);
+                                                                            return (
+                                                                                <tr key={pg.id + '-' + mi} style={{ borderBottom: '1px solid #e5e7eb', background: mi === 0 ? '#f0fdf4' : '#ecfdf5' }}>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontWeight: 700, fontSize: '0.8rem', borderRight: '1px solid #e5e7eb' }}>{mi === 0 ? pg.group_number : ''}</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontWeight: 800, fontSize: '0.85rem', fontFamily: 'Outfit', borderRight: '1px solid #e5e7eb' }}>{m.name}</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontSize: '0.75rem', color: '#555', borderRight: '1px solid #e5e7eb' }}>{m.email}</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontSize: '0.8rem', fontWeight: 900, color: '#22c55e', borderRight: '1px solid #e5e7eb' }}>Group {m.number}</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontSize: '0.8rem', fontWeight: 800, fontFamily: 'Outfit', borderRight: '1px solid #e5e7eb' }}>{partner?.name || '—'}</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', fontSize: '0.75rem', color: '#555', borderRight: '1px solid #e5e7eb' }}>{partner?.email || '—'}</td>
+                                                                                    <td style={{ padding: '0.6rem 0.8rem', textAlign: 'center' }}>{mi === 0 ? <button onClick={async () => { await supabase.from('peer_groups').delete().eq('id', pg.id); await fetchPeerGroups(); }} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.2rem 0.5rem', cursor: 'pointer', fontWeight: 900, fontSize: '0.65rem' }}>✕</button> : ''}</td>
+                                                                                </tr>
+                                                                            );
+                                                                        });
+                                                                    })}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -5574,6 +5817,7 @@ const AcademyDashboard = () => {
     const [customModules, setCustomModules] = useState([]);
     const [selectedScoreModule, setSelectedScoreModule] = useState(null);
     const [peerSubmissions, setPeerSubmissions] = useState([]);
+    const [showScoreModal, setShowScoreModal] = useState(false);
 
     // Fetch manual grades from Supabase
     useEffect(() => {
@@ -5600,7 +5844,48 @@ const AcademyDashboard = () => {
         }
     }, [studentSession]);
 
-    // Calculate total score from manual grades + exercise scores
+    // Fetch student's peer groups
+    const [myPeerGroups, setMyPeerGroups] = useState([]);
+    const [showPeerDetails, setShowPeerDetails] = useState(null);
+    const [peerSubmitText, setPeerSubmitText] = useState('');
+    const [peerSubmitLoading, setPeerSubmitLoading] = useState(false);
+    useEffect(() => {
+        if (studentSession && studentSession.email) {
+            supabase.from('peer_groups').select('*').then(({ data }) => {
+                if (data) {
+                    const myGroups = data.filter(g =>
+                        g.members.some(m => m.email === studentSession.email)
+                    );
+                    setMyPeerGroups(myGroups);
+                }
+            });
+        }
+    }, [studentSession]);
+
+    const handleSubmitPeerProject = async (group) => {
+        if (!peerSubmitText.trim()) { alert('Paste your project link or describe your submission.'); return; }
+        setPeerSubmitLoading(true);
+        try {
+            const { error } = await supabase.from('peer_submissions').insert({
+                cohort: group.cohort,
+                track: group.track,
+                module_index: group.module_index,
+                group_name: `Group ${group.group_number}`,
+                members: group.members,
+                submission_text: peerSubmitText.trim()
+            });
+            if (error) throw error;
+            setPeerSubmitText('');
+            const { data } = await supabase.from('peer_submissions').select('*').order('created_at', { ascending: false });
+            if (data) setPeerSubmissions(data);
+            alert('✅ Submission received! You will see your score within 24 hours after admin review.');
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+        setPeerSubmitLoading(false);
+    };
+
+    // Calculate total score from manual grades + exercise scores + deadline penalties
     const totalScore = React.useMemo(() => {
         let total = 0;
         let count = 0;
@@ -5612,40 +5897,51 @@ const AcademyDashboard = () => {
         Object.values(exerciseState).forEach(b => {
             if (b.earned) { total += b.earned; count++; }
         });
+        // Penalty: if student is in a peer group and deadline passed without submission, score=0 for that module
+        myPeerGroups.forEach(pg => {
+            if (pg.deadline && new Date(pg.deadline) < new Date() && !pg.is_unpaired) {
+                const hasSubmitted = peerSubmissions.some(s => s.module_index === pg.module_index && s.members?.some(m => m.email === studentSession?.email));
+                if (!hasSubmitted) {
+                    // Check if already graded for this module
+                    const alreadyGraded = manualGrades.some(g => g.module_index === pg.module_index);
+                    if (!alreadyGraded) {
+                        total += 0;
+                        count++;
+                    }
+                }
+            }
+        });
         if (count === 0) return 0;
         return Math.round(total / count);
-    }, [manualGrades, gradingResult]);
+    }, [manualGrades, gradingResult, myPeerGroups, peerSubmissions, studentSession]);
 
-    // Get per-module grade breakdown
+    // Get per-module grade breakdown (includes deadline penalty)
     const moduleGrades = React.useMemo(() => {
         const track = selectedCourse;
         const course = ACADEMY_COURSES[track];
         if (!course) return [];
-        const builtinModules = course.modules.map((mod, idx) => {
+        const getScoreForModule = (idx) => {
             const grade = manualGrades.find(g => g.module_index === idx && g.track === track);
-            return {
-                index: idx,
-                title: mod.title,
-                score: grade ? grade.score : null,
-                feedback: grade ? grade.feedback : null,
-                graded_at: grade ? grade.graded_at : null,
-                isCustom: false
-            };
+            if (grade) return { score: grade.score, feedback: grade.feedback, graded_at: grade.graded_at };
+            // Check peer group deadline penalty
+            const pg = myPeerGroups.find(g => g.module_index === idx && g.track === track);
+            if (pg && pg.deadline && new Date(pg.deadline) < new Date() && !pg.is_unpaired) {
+                const hasSubmitted = peerSubmissions.some(s => s.module_index === idx && s.members?.some(m => m.email === studentSession?.email));
+                if (!hasSubmitted) return { score: 0, feedback: 'Deadline passed — no submission', graded_at: pg.deadline };
+            }
+            return { score: null, feedback: null, graded_at: null };
+        };
+        const builtinModules = course.modules.map((mod, idx) => {
+            const result = getScoreForModule(idx);
+            return { index: idx, title: mod.title, ...result, isCustom: false };
         });
         const customMods = customModules.filter(m => m.track === track).map((cm, i) => {
             const idx = course.modules.length + i;
-            const grade = manualGrades.find(g => g.module_index === idx && g.track === track);
-            return {
-                index: idx,
-                title: cm.title,
-                score: grade ? grade.score : null,
-                feedback: grade ? grade.feedback : null,
-                graded_at: grade ? grade.graded_at : null,
-                isCustom: true
-            };
+            const result = getScoreForModule(idx);
+            return { index: idx, title: cm.title, ...result, isCustom: true };
         });
         return [...builtinModules, ...customMods];
-    }, [manualGrades, selectedCourse, customModules]);
+    }, [manualGrades, selectedCourse, customModules, myPeerGroups, peerSubmissions, studentSession]);
 
     // Peer posts states — loaded from Supabase, not localStorage
     const [peerPosts, setPeerPosts] = useState([]);
@@ -5869,6 +6165,7 @@ const AcademyDashboard = () => {
     // Scratchpad notes state
     const [noteText, setNoteText] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [showNotesModal, setShowNotesModal] = useState(false);
 
     // Load saved notes when lesson changes
     useEffect(() => {
@@ -6871,6 +7168,33 @@ const AcademyDashboard = () => {
                                 <span style={{ color: 'var(--accent-r)', fontWeight: 'bold', fontSize: '0.8rem', letterSpacing: '1px' }}>LEARNING PORTAL</span>
                             </div>
 
+                            {/* Score Circle */}
+                            <button
+                                onClick={() => setShowScoreModal(true)}
+                                style={{
+                                    width: '52px', height: '52px', borderRadius: '50%',
+                                    background: `conic-gradient(${totalScore >= 75 ? '#059669' : totalScore >= 50 ? '#f59e0b' : totalScore > 0 ? '#dc2626' : '#94a3b8'} ${totalScore * 3.6}deg, #e2e8f0 0deg)`,
+                                    border: '3px solid #000', boxShadow: '3px 3px 0 #000',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    cursor: 'pointer', flexShrink: 0, position: 'relative',
+                                    transition: 'transform 0.15s',
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.08)'}
+                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                                title="Click to view score breakdown"
+                            >
+                                <div style={{
+                                    width: '40px', height: '40px', borderRadius: '50%',
+                                    background: '#fff', display: 'flex', alignItems: 'center',
+                                    justifyContent: 'center', flexDirection: 'column',
+                                }}>
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 900, fontFamily: 'Outfit', color: totalScore >= 75 ? '#059669' : totalScore >= 50 ? '#f59e0b' : totalScore > 0 ? '#dc2626' : '#94a3b8', lineHeight: 1 }}>
+                                        {totalScore > 0 ? totalScore : '—'}
+                                    </span>
+                                    <span style={{ fontSize: '0.35rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.03em' }}>/100</span>
+                                </div>
+                            </button>
+
                             {/* Menu links bar */}
                             <div style={{ display: 'flex', gap: '0.4rem', background: '#f1f5f9', padding: '0.3rem', border: '3px solid #000', borderRadius: '0.8rem', boxShadow: '3px 3px 0 #000', marginLeft: '2rem' }}>
                                 {[
@@ -7001,6 +7325,31 @@ const AcademyDashboard = () => {
                             </div>
                         </div>
 
+                        {/* Mobile Score Circle */}
+                        <button
+                            className="fta-mobile-score-circle"
+                            onClick={() => setShowScoreModal(true)}
+                            style={{
+                                width: '48px', height: '48px', borderRadius: '50%',
+                                background: `conic-gradient(${totalScore >= 75 ? '#059669' : totalScore >= 50 ? '#f59e0b' : totalScore > 0 ? '#dc2626' : '#94a3b8'} ${totalScore * 3.6}deg, #e2e8f0 0deg)`,
+                                border: '3px solid #000', boxShadow: '3px 3px 0 #000',
+                                display: 'none', alignItems: 'center', justifyContent: 'center',
+                                cursor: 'pointer', flexShrink: 0, padding: 0,
+                            }}
+                            title="Click to view score breakdown"
+                        >
+                            <div style={{
+                                width: '36px', height: '36px', borderRadius: '50%',
+                                background: '#fff', display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', flexDirection: 'column',
+                            }}>
+                                <span style={{ fontSize: '0.8rem', fontWeight: 900, fontFamily: 'Outfit', color: totalScore >= 75 ? '#059669' : totalScore >= 50 ? '#f59e0b' : totalScore > 0 ? '#dc2626' : '#94a3b8', lineHeight: 1 }}>
+                                    {totalScore > 0 ? totalScore : '—'}
+                                </span>
+                                <span style={{ fontSize: '0.3rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>/100</span>
+                            </div>
+                        </button>
+
                     </div>
                 </div>
                 <p style={{ color: '#555', margin: 0, fontSize: '0.95rem', lineHeight: '1.5' }}>
@@ -7052,6 +7401,128 @@ const AcademyDashboard = () => {
                             <Menu size={20} />
                             📚 Course Modules Menu 🍔
                         </button>
+                    </div>
+                );
+            })()}
+
+            {/* My Peer Groups */}
+            {myPeerGroups.length > 0 && academyTab === 'curriculum' && (() => {
+                const currentModIdx = selectedModIdx;
+                const currentGroup = myPeerGroups.find(pg => pg.module_index === currentModIdx);
+                if (!currentGroup) return null;
+                const isUnpaired = currentGroup.is_unpaired;
+                const partner = currentGroup.members.find(m => m.email !== studentSession.email);
+                const myInfo = currentGroup.members.find(m => m.email === studentSession.email);
+                const deadlinePassed = currentGroup.deadline ? new Date(currentGroup.deadline) < new Date() : false;
+                const hasSubmitted = peerSubmissions.some(s => s.module_index === currentModIdx && s.members?.some(m => m.email === studentSession.email));
+                const mySubmission = peerSubmissions.find(s => s.module_index === currentModIdx && s.members?.some(m => m.email === studentSession.email));
+                const myGrade = manualGrades.find(g => g.module_index === currentModIdx && g.track === currentGroup.track);
+                const isExpanded = showPeerDetails === currentModIdx;
+
+                return (
+                    <div style={{
+                        background: isUnpaired ? '#fef2f2' : deadlinePassed && !hasSubmitted ? '#fef2f2' : '#f0fdf4',
+                        border: `3px solid ${isUnpaired ? '#ef4444' : deadlinePassed && !hasSubmitted ? '#ef4444' : '#22c55e'}`,
+                        padding: '1.2rem 1.5rem', marginBottom: '1.5rem',
+                        boxShadow: `4px 4px 0 ${isUnpaired ? '#ef4444' : deadlinePassed && !hasSubmitted ? '#ef4444' : '#22c55e'}`,
+                    }}>
+                        {/* Top row */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+                            <div style={{ flex: '1 1 auto' }}>
+                                <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem', margin: '0 0 0.3rem 0', textTransform: 'uppercase' }}>
+                                    {isUnpaired ? '⚠️ You are Not Peered' : deadlinePassed && !hasSubmitted ? '❌ Deadline Passed — Score: 0' : hasSubmitted ? '✅ Submitted — Awaiting Score' : `🤝 Your Peer Group — Group ${currentGroup.group_number}`}
+                                </h4>
+                                {!isUnpaired && !deadlinePassed && (
+                                    <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.8rem', fontWeight: 700 }}>
+                                        <span><strong>Partner:</strong> {partner?.name || 'Unknown'}</span>
+                                        <span><strong>Partner #:</strong> {partner?.number || '—'}</span>
+                                        <span><strong>You #:</strong> {myInfo?.number || currentGroup.group_number}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                {!isUnpaired && (
+                                    <button onClick={() => setShowPeerDetails(isExpanded ? null : currentModIdx)} style={{ padding: '0.5rem 1rem', background: '#000', color: '#fff', border: '2px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '3px 3px 0 var(--accent-r)' }}>
+                                        {isExpanded ? 'Hide Details' : '📋 More Details'}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Unpaired message */}
+                        {isUnpaired && (
+                            <p style={{ fontSize: '0.8rem', color: '#dc2626', fontWeight: 700, margin: 0 }}>The total number of students was odd. You will be paired in the next module release.</p>
+                        )}
+
+                        {/* Deadline expired message */}
+                        {deadlinePassed && !hasSubmitted && (
+                            <p style={{ fontSize: '0.8rem', color: '#dc2626', fontWeight: 700, margin: 0 }}>The submission deadline has passed and you did not submit. Your score for this module is <strong>0</strong>.</p>
+                        )}
+
+                        {/* Deadline countdown */}
+                        {!isUnpaired && !deadlinePassed && currentGroup.deadline && (
+                            <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#059669', marginBottom: '0.5rem' }}>
+                                ⏰ Deadline: {new Date(currentGroup.deadline).toLocaleString()} ({Math.max(0, Math.ceil((new Date(currentGroup.deadline) - new Date()) / 3600000))}h remaining)
+                            </div>
+                        )}
+
+                        {/* Submitted — awaiting score */}
+                        {hasSubmitted && (
+                            <div style={{ background: '#ecfdf5', border: '2px solid #22c55e', padding: '0.8rem 1rem', borderRadius: '0.4rem', marginBottom: '0.5rem' }}>
+                                <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#059669' }}>✅ Your project has been submitted!</div>
+                                {mySubmission && <div style={{ fontSize: '0.7rem', color: '#555', marginTop: '0.3rem' }}>{mySubmission.submission_text?.slice(0, 100)}{mySubmission.submission_text?.length > 100 ? '...' : ''}</div>}
+                                {myGrade ? (
+                                    <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: '#fff', border: '2px solid #000', display: 'inline-block' }}>
+                                        <span style={{ fontWeight: 900, fontSize: '0.8rem' }}>Your Score: </span>
+                                        <span style={{ fontWeight: 950, fontSize: '1.1rem', color: myGrade.score >= 70 ? '#059669' : myGrade.score >= 50 ? '#f59e0b' : '#ef4444' }}>{myGrade.score}/100</span>
+                                        {myGrade.feedback && <div style={{ fontSize: '0.7rem', color: '#555', marginTop: '0.2rem' }}>{myGrade.feedback}</div>}
+                                    </div>
+                                ) : (
+                                    <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', fontWeight: 800, color: '#f59e0b' }}>⏳ You will see your score within 24 hours after admin review.</div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Expanded details */}
+                        {isExpanded && !isUnpaired && (
+                            <div style={{ background: '#fff', border: '2px solid #e5e7eb', padding: '1rem', borderRadius: '0.4rem', marginBottom: '0.8rem' }}>
+                                <h5 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem', margin: '0 0 0.8rem 0', textTransform: 'uppercase' }}>🤝 Peer Project Guidelines</h5>
+                                <div style={{ fontSize: '0.8rem', lineHeight: '1.6', color: '#333' }}>
+                                    <p style={{ margin: '0 0 0.5rem 0' }}>You are required to work <strong>together with your partner</strong> to complete this project.</p>
+                                    <ul style={{ margin: '0 0 0.5rem 0', paddingLeft: '1.5rem' }}>
+                                        <li>Contact your partner via email: <strong>{partner?.email || 'N/A'}</strong></li>
+                                        <li>Discuss and divide the work based on your strengths</li>
+                                        <li>Collaborate on the solution — pair program if possible</li>
+                                        <li>Submit a single shared submission (link or document)</li>
+                                    </ul>
+                                </div>
+                                {currentGroup.task_description && (
+                                    <div style={{ marginTop: '0.6rem', padding: '0.6rem', background: '#f0f9ff', borderLeft: '3px solid #3b82f6', fontSize: '0.8rem' }}>
+                                        <strong>Task:</strong> {currentGroup.task_description}
+                                    </div>
+                                )}
+                                {currentGroup.submission_prompt && (
+                                    <div style={{ marginTop: '0.4rem', padding: '0.6rem', background: '#fefce8', borderLeft: '3px solid #f59e0b', fontSize: '0.8rem' }}>
+                                        <strong>What to Submit:</strong> {currentGroup.submission_prompt}
+                                    </div>
+                                )}
+
+                                {/* Submit form */}
+                                {!hasSubmitted && !deadlinePassed ? (
+                                    <div style={{ marginTop: '1rem', borderTop: '2px solid #eee', paddingTop: '1rem' }}>
+                                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem' }}>Paste your project link or submission</label>
+                                        <textarea value={peerSubmitText} onChange={e => setPeerSubmitText(e.target.value)} rows={3} placeholder="e.g. https://github.com/you-and-partner/project or describe what you built..." style={{ border: '2px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%', resize: 'vertical', boxSizing: 'border-box' }} />
+                                        <button onClick={() => handleSubmitPeerProject(currentGroup)} disabled={peerSubmitLoading} style={{ marginTop: '0.5rem', padding: '0.7rem 1.5rem', background: peerSubmitLoading ? '#94a3b8' : '#22c55e', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', cursor: peerSubmitLoading ? 'not-allowed' : 'pointer', boxShadow: '3px 3px 0 #000' }}>
+                                            {peerSubmitLoading ? 'Submitting...' : '🚀 Submit Project'}
+                                        </button>
+                                    </div>
+                                ) : hasSubmitted ? (
+                                    <div style={{ marginTop: '1rem', borderTop: '2px solid #eee', paddingTop: '1rem', fontSize: '0.8rem', color: '#059669', fontWeight: 800 }}>
+                                        ✅ You have already submitted your project.
+                                    </div>
+                                ) : null}
+                            </div>
+                        )}
                     </div>
                 );
             })()}
@@ -7287,80 +7758,316 @@ const AcademyDashboard = () => {
                                     </div>
                                 </div>
 
-                                {/* TABBED NOTES & SCRATCHPAD CONTAINER */}
-                                <div style={{ background: '#ffffff', border: '3px solid #000000', padding: '1.5rem', boxShadow: '8px 8px 0 #000000' }}>
-                                    <div style={{ display: 'flex', gap: '1rem', borderBottom: '2px solid #000', paddingBottom: '0.8rem', marginBottom: '1.5rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, textTransform: 'uppercase', fontFamily: 'Outfit', fontSize: '1rem', color: '#000' }}>
-                                            <FileText size={18} style={{ color: 'var(--accent-r)' }} />
-                                            Curator Notes & Scratchpad
+                                {/* NOTES & SCRATCHPAD BUTTON */}
+                                <button
+                                    onClick={() => setShowNotesModal(true)}
+                                    style={{
+                                        background: '#ffffff',
+                                        border: '3px solid #000000',
+                                        padding: '1rem 1.5rem',
+                                        boxShadow: '8px 8px 0 #000000',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.6rem',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        borderRadius: 0,
+                                        fontWeight: 900,
+                                        textTransform: 'uppercase',
+                                        fontFamily: 'Outfit',
+                                        fontSize: '1rem',
+                                        color: '#000',
+                                        transition: 'transform 0.15s, box-shadow 0.15s',
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translate(-2px, -2px)'; e.currentTarget.style.boxShadow = '10px 10px 0 #000000'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '8px 8px 0 #000000'; }}
+                                >
+                                    <FileText size={18} style={{ color: 'var(--accent-r)' }} />
+                                    Curator Notes & Scratchpad
+                                    <span style={{ marginLeft: 'auto', fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Click to open →</span>
+                                </button>
+
+                                {/* NOTES & SCRATCHPAD MODAL */}
+                                {showNotesModal && (
+                                    <div
+                                        style={{
+                                            position: 'fixed',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100vw',
+                                            height: '100vh',
+                                            background: 'rgba(0,0,0,0.6)',
+                                            zIndex: 9999,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            padding: '1.5rem',
+                                        }}
+                                        onClick={(e) => { if (e.target === e.currentTarget) setShowNotesModal(false); }}
+                                    >
+                                        <div style={{
+                                            background: '#ffffff',
+                                            border: '3px solid #000000',
+                                            padding: '1.5rem',
+                                            boxShadow: '8px 8px 0 #000000',
+                                            width: '100%',
+                                            maxWidth: '900px',
+                                            maxHeight: '90vh',
+                                            overflowY: 'auto',
+                                            position: 'relative',
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #000', paddingBottom: '0.8rem', marginBottom: '1.5rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, textTransform: 'uppercase', fontFamily: 'Outfit', fontSize: '1rem', color: '#000' }}>
+                                                    <FileText size={18} style={{ color: 'var(--accent-r)' }} />
+                                                    Curator Notes & Scratchpad
+                                                </div>
+                                                <button
+                                                    onClick={() => setShowNotesModal(false)}
+                                                    style={{
+                                                        background: '#f1f5f9',
+                                                        border: '2px solid #000',
+                                                        borderRadius: '0.4rem',
+                                                        width: '32px',
+                                                        height: '32px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        cursor: 'pointer',
+                                                        flexShrink: 0,
+                                                    }}
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }} className="notes-scratchpad-grid">
+                                                {/* Left Side: Curator Notes */}
+                                                <div style={{ background: '#f8fafc', border: '2px solid #000', padding: '1.2rem', borderRadius: '0.8rem' }}>
+                                                    <div style={{ fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.8rem', letterSpacing: '0.05em' }}>
+                                                        📌 Curator Study Notes
+                                                    </div>
+                                                    <div style={{ fontSize: '0.85rem', color: '#1e293b', lineHeight: '1.6', fontWeight: 650 }}>
+                                                        {selectedLesson.notes.split('\n').map((line, idx) => {
+                                                            if (line.startsWith('### ')) return <h4 key={idx} style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem', marginTop: idx > 0 ? '1rem' : 0, marginBottom: '0.4rem', color: '#0f172a' }}>{line.replace('### ', '')}</h4>;
+                                                            if (line.startsWith('• ')) return <li key={idx} style={{ marginLeft: '1rem', marginBottom: '0.2rem' }}>{line.replace('• ', '')}</li>;
+                                                            if (line.startsWith('const ') || line.includes('function') || line.includes('import')) {
+                                                                return <pre key={idx} style={{ background: '#0f172a', color: '#38bdf8', padding: '0.6rem', borderRadius: '0.4rem', fontSize: '0.75rem', overflowX: 'auto', margin: '0.4rem 0' }}>{line}</pre>;
+                                                            }
+                                                            return <p key={idx} style={{ margin: '0.4rem 0' }}>{line}</p>;
+                                                        })}
+                                                    </div>
+                                                </div>
+
+                                                {/* Right Side: Interactive Scratchpad */}
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <label style={{ fontSize: '0.75rem', fontWeight: 955, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
+                                                            📝 Your Personal Scratchpad
+                                                        </label>
+                                                        {isSaving && <span style={{ fontSize: '0.65rem', color: '#059669', fontWeight: 800 }}>Saved ✓</span>}
+                                                    </div>
+
+                                                    <textarea
+                                                        value={noteText}
+                                                        onChange={handleNoteChange}
+                                                        placeholder="Take notes while watching the lecture... (Auto-saves to browser storage)"
+                                                        style={{
+                                                            width: '100%',
+                                                            minHeight: '220px',
+                                                            padding: '1rem',
+                                                            border: '2px solid #000000',
+                                                            borderRadius: '0.8rem',
+                                                            outline: 'none',
+                                                            fontSize: '0.85rem',
+                                                            fontFamily: 'monospace',
+                                                            background: '#fffbeb',
+                                                            color: '#1e293b',
+                                                            lineHeight: '1.5',
+                                                            resize: 'vertical',
+                                                            boxSizing: 'border-box'
+                                                        }}
+                                                    />
+
+                                                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                                        <button
+                                                            onClick={handleClearNotes}
+                                                            style={{ background: '#f1f5f9', border: '2px solid #000', padding: '0.4rem 0.8rem', borderRadius: '0.4rem', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}
+                                                        >
+                                                            Clear Notes
+                                                        </button>
+                                                        <button
+                                                            onClick={handleDownloadNotes}
+                                                            style={{ background: '#000', color: '#fff', border: '2px solid #000', padding: '0.4rem 0.8rem', borderRadius: '0.4rem', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                        >
+                                                            <Download size={12} /> Save to TXT
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+                                )}
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }} className="notes-scratchpad-grid">
-                                        {/* Left Side: Curator Notes */}
-                                        <div style={{ background: '#f8fafc', border: '2px solid #000', padding: '1.2rem', borderRadius: '0.8rem' }}>
-                                            <div style={{ fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.8rem', letterSpacing: '0.05em' }}>
-                                                📌 Curator Study Notes
-                                            </div>
-                                            <div style={{ fontSize: '0.85rem', color: '#1e293b', lineHeight: '1.6', fontWeight: 650 }}>
-                                                {selectedLesson.notes.split('\n').map((line, idx) => {
-                                                    if (line.startsWith('### ')) return <h4 key={idx} style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem', marginTop: idx > 0 ? '1rem' : 0, marginBottom: '0.4rem', color: '#0f172a' }}>{line.replace('### ', '')}</h4>;
-                                                    if (line.startsWith('• ')) return <li key={idx} style={{ marginLeft: '1rem', marginBottom: '0.2rem' }}>{line.replace('• ', '')}</li>;
-                                                    if (line.startsWith('const ') || line.includes('function') || line.includes('import')) {
-                                                        return <pre key={idx} style={{ background: '#0f172a', color: '#38bdf8', padding: '0.6rem', borderRadius: '0.4rem', fontSize: '0.75rem', overflowX: 'auto', margin: '0.4rem 0' }}>{line}</pre>;
-                                                    }
-                                                    return <p key={idx} style={{ margin: '0.4rem 0' }}>{line}</p>;
-                                                })}
-                                            </div>
-                                        </div>
-
-                                        {/* Right Side: Interactive Scratchpad */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <label style={{ fontSize: '0.75rem', fontWeight: 955, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em' }}>
-                                                    📝 Your Personal Scratchpad
-                                                </label>
-                                                {isSaving && <span style={{ fontSize: '0.65rem', color: '#059669', fontWeight: 800 }}>Saved ✓</span>}
-                                            </div>
-
-                                            <textarea
-                                                value={noteText}
-                                                onChange={handleNoteChange}
-                                                placeholder="Take notes while watching the lecture... (Auto-saves to browser storage)"
-                                                style={{
-                                                    width: '100%',
-                                                    minHeight: '220px',
-                                                    padding: '1rem',
-                                                    border: '2px solid #000000',
-                                                    borderRadius: '0.8rem',
-                                                    outline: 'none',
-                                                    fontSize: '0.85rem',
-                                                    fontFamily: 'monospace',
-                                                    background: '#fffbeb',
-                                                    color: '#1e293b',
-                                                    lineHeight: '1.5',
-                                                    resize: 'vertical',
-                                                    boxSizing: 'border-box'
-                                                }}
-                                            />
-
-                                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                {/* SCORE BREAKDOWN MODAL */}
+                                {showScoreModal && (
+                                    <div
+                                        style={{
+                                            position: 'fixed', top: 0, left: 0,
+                                            width: '100vw', height: '100vh',
+                                            background: 'rgba(0,0,0,0.6)', zIndex: 9999,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            padding: '1.5rem',
+                                        }}
+                                        onClick={(e) => { if (e.target === e.currentTarget) setShowScoreModal(false); }}
+                                    >
+                                        <div style={{
+                                            background: '#ffffff', border: '3px solid #000000',
+                                            boxShadow: '8px 8px 0 #000000', width: '100%', maxWidth: '700px',
+                                            maxHeight: '90vh', overflowY: 'auto', padding: '2rem',
+                                        }}>
+                                            {/* Header */}
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #000', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <Award size={22} style={{ color: 'var(--accent-r)' }} />
+                                                    <h2 style={{ margin: 0, fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', textTransform: 'uppercase' }}>Score Breakdown</h2>
+                                                </div>
                                                 <button
-                                                    onClick={handleClearNotes}
-                                                    style={{ background: '#f1f5f9', border: '2px solid #000', padding: '0.4rem 0.8rem', borderRadius: '0.4rem', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}
+                                                    onClick={() => setShowScoreModal(false)}
+                                                    style={{
+                                                        background: '#f1f5f9', border: '2px solid #000',
+                                                        borderRadius: '0.4rem', width: '32px', height: '32px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        cursor: 'pointer', flexShrink: 0,
+                                                    }}
                                                 >
-                                                    Clear Notes
-                                                </button>
-                                                <button
-                                                    onClick={handleDownloadNotes}
-                                                    style={{ background: '#000', color: '#fff', border: '2px solid #000', padding: '0.4rem 0.8rem', borderRadius: '0.4rem', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                                                >
-                                                    <Download size={12} /> Save to TXT
+                                                    <X size={16} />
                                                 </button>
                                             </div>
+
+                                            {/* Total Score Circle */}
+                                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+                                                <div style={{
+                                                    width: '120px', height: '120px', borderRadius: '50%',
+                                                    background: `conic-gradient(${totalScore >= 75 ? '#059669' : totalScore >= 50 ? '#f59e0b' : totalScore > 0 ? '#dc2626' : '#94a3b8'} ${totalScore * 3.6}deg, #e2e8f0 0deg)`,
+                                                    border: '4px solid #000', boxShadow: '4px 4px 0 #000',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                }}>
+                                                    <div style={{
+                                                        width: '96px', height: '96px', borderRadius: '50%',
+                                                        background: '#fff', display: 'flex', alignItems: 'center',
+                                                        justifyContent: 'center', flexDirection: 'column',
+                                                    }}>
+                                                        <span style={{ fontSize: '2rem', fontWeight: 900, fontFamily: 'Outfit', color: totalScore >= 75 ? '#059669' : totalScore >= 50 ? '#f59e0b' : totalScore > 0 ? '#dc2626' : '#94a3b8', lineHeight: 1 }}>
+                                                            {totalScore > 0 ? totalScore : '—'}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>/100</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Stats Row */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.8rem', marginBottom: '1.5rem' }}>
+                                                {[
+                                                    { label: 'Modules Done', val: `${completedCount}/${releasedModuleIndices.length}`, color: '#000' },
+                                                    { label: 'Passed', val: `${passedCount}/${releasedModuleIndices.length}`, color: '#059669' },
+                                                    { label: 'Avg Score', val: avgScore > 0 ? `${avgScore}/100` : '—', color: avgScore >= 50 ? '#059669' : avgScore > 0 ? '#dc2626' : '#94a3b8' },
+                                                ].map((s, i) => (
+                                                    <div key={i} style={{ background: '#f8fafc', border: '2px solid #000', borderRadius: '0.5rem', padding: '0.6rem', textAlign: 'center', boxShadow: '2px 2px 0 #000' }}>
+                                                        <div style={{ fontSize: '0.55rem', fontWeight: 900, textTransform: 'uppercase', color: '#94a3b8', fontFamily: 'Outfit' }}>{s.label}</div>
+                                                        <div style={{ fontSize: '1rem', fontWeight: 900, color: s.color, fontFamily: 'Outfit' }}>{s.val}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* Per-Module Breakdown */}
+                                            <div style={{ marginBottom: '1.5rem' }}>
+                                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', color: '#000', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    📊 Per-Module Breakdown
+                                                </h3>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                    {moduleGrades.map((mod) => {
+                                                        const aiScore = localStorage.getItem(`fta-exercise-score-mod-${mod.index}`);
+                                                        const displayScore = mod.score !== null ? mod.score : (aiScore ? parseInt(aiScore) : null);
+                                                        const isPassed = displayScore !== null && displayScore >= 50;
+                                                        return (
+                                                            <div key={mod.index} style={{
+                                                                display: 'flex', alignItems: 'center', gap: '0.8rem',
+                                                                background: '#f8fafc', border: '2px solid #000',
+                                                                borderRadius: '0.5rem', padding: '0.7rem 1rem',
+                                                                boxShadow: '2px 2px 0 #000',
+                                                            }}>
+                                                                <div style={{
+                                                                    width: '36px', height: '36px', borderRadius: '50%',
+                                                                    background: displayScore !== null ? (isPassed ? '#dcfce7' : '#fee2e2') : '#f1f5f9',
+                                                                    border: '2px solid #000', display: 'flex',
+                                                                    alignItems: 'center', justifyContent: 'center',
+                                                                    fontWeight: 900, fontSize: '0.75rem', fontFamily: 'Outfit',
+                                                                    color: displayScore !== null ? (isPassed ? '#16a34a' : '#dc2626') : '#94a3b8',
+                                                                    flexShrink: 0,
+                                                                }}>
+                                                                    {displayScore !== null ? displayScore : '—'}
+                                                                </div>
+                                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                                    <div style={{ fontFamily: 'Outfit', fontWeight: 800, fontSize: '0.8rem', color: '#000', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                        Module {mod.index + 1}: {mod.title}
+                                                                    </div>
+                                                                    {mod.feedback && (
+                                                                        <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '0.15rem', lineHeight: '1.3' }}>
+                                                                            {mod.feedback.length > 80 ? mod.feedback.substring(0, 80) + '...' : mod.feedback}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                                                                    {isPassed && <CheckCircle size={14} style={{ color: '#16a34a' }} />}
+                                                                    {mod.score !== null && <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#6d28d9', background: '#f3e8ff', padding: '0.15rem 0.4rem', borderRadius: '0.3rem', border: '1px solid #6d28d9' }}>ADMIN</span>}
+                                                                    {mod.score === null && aiScore && <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#2563eb', background: '#dbeafe', padding: '0.15rem 0.4rem', borderRadius: '0.3rem', border: '1px solid #2563eb' }}>AI</span>}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
+                                            {/* Admin Manual Grades Section */}
+                                            {manualGrades.length > 0 && (
+                                                <div>
+                                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', color: '#6d28d9', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                        🎓 Admin Manual Grades
+                                                    </h3>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                        {manualGrades.map((grade, i) => (
+                                                            <div key={i} style={{
+                                                                background: '#faf5ff', border: '2px solid #6d28d9',
+                                                                borderRadius: '0.5rem', padding: '0.8rem 1rem',
+                                                                boxShadow: '2px 2px 0 #6d28d9',
+                                                            }}>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                                                                    <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', color: '#6d28d9' }}>
+                                                                        Module {grade.module_index + 1} — {grade.score}/100
+                                                                    </span>
+                                                                    <span style={{ fontSize: '0.55rem', color: '#94a3b8', fontWeight: 700 }}>
+                                                                        {new Date(grade.graded_at).toLocaleDateString()}
+                                                                    </span>
+                                                                </div>
+                                                                {grade.feedback && (
+                                                                    <div style={{ fontSize: '0.7rem', color: '#1e293b', lineHeight: '1.4', background: '#fff', padding: '0.5rem', borderRadius: '0.3rem', border: '1px solid #e9d5ff' }}>
+                                                                        {grade.feedback}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {manualGrades.length === 0 && (
+                                                <div style={{ textAlign: 'center', padding: '1rem', background: '#f8fafc', border: '2px dashed #94a3b8', borderRadius: '0.5rem' }}>
+                                                    <p style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, margin: 0 }}>No admin grades yet. Your grades will appear here once your instructor reviews your work.</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                </div>
+                                )}
 
                                 {/* CODING EXERCISE — ONLY APPEARS ON LAST LESSON OF MODULE */}
                                 {(() => {

@@ -648,6 +648,9 @@ button {
   .fta-desktop-navbar {
     display: flex !important;
   }
+  .fta-mobile-score-circle {
+    display: none !important;
+  }
 }
 
 @media (max-width: 900px) {
@@ -656,6 +659,9 @@ button {
   }
   .fta-desktop-navbar {
     display: none !important;
+  }
+  .fta-mobile-score-circle {
+    display: flex !important;
   }
 }
 

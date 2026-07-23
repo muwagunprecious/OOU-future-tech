@@ -2545,6 +2545,11 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [mergeLoading, setMergeLoading] = useState(false);
     const [adminPeerSubmissions, setAdminPeerSubmissions] = useState([]);
     const [expandedSubmission, setExpandedSubmission] = useState(null);
+    const [selectedCohortView, setSelectedCohortView] = useState('Cohort 1');
+    const [cohortStudents, setCohortStudents] = useState([]);
+    const [cohortStudentsLoading, setCohortStudentsLoading] = useState(false);
+    const [leaderboardData, setLeaderboardData] = useState([]);
+    const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
     useEffect(() => {
         fetchRegistrations();
@@ -2558,6 +2563,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         });
         fetchPeerGroups();
         fetchAdminPeerSubmissions();
+        fetchCohortStudents(selectedCohortView);
     }, []);
 
     const fetchPeerGroups = async () => {
@@ -2568,6 +2574,57 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const fetchAdminPeerSubmissions = async () => {
         const { data } = await supabase.from('peer_submissions').select('*').order('created_at', { ascending: false });
         if (data) setAdminPeerSubmissions(data);
+    };
+
+    const fetchCohortStudents = async (cohort) => {
+        setCohortStudentsLoading(true);
+        const { data } = await supabase.from('registrations').select('*').eq('cohort', cohort).like('ticket_type', 'tech_waitlist_%').order('created_at', { ascending: false });
+        setCohortStudents(data || []);
+        setCohortStudentsLoading(false);
+    };
+
+    const fetchLeaderboard = async (cohort) => {
+        setLeaderboardLoading(true);
+        // Get all students in this cohort
+        const { data: students } = await supabase.from('registrations').select('*').eq('cohort', cohort).like('ticket_type', 'tech_waitlist_%');
+        // Get all manual grades for this cohort
+        const { data: grades } = await supabase.from('manual_grades').select('*').eq('cohort', cohort);
+        // Get all peer submissions for this cohort
+        const { data: submissions } = await supabase.from('peer_submissions').select('*').eq('cohort', cohort);
+
+        const studentList = students || [];
+        const gradeList = grades || [];
+        const submissionList = submissions || [];
+
+        // Build leaderboard per student
+        const leaderboard = studentList.map(s => {
+            const studentGrades = gradeList.filter(g => g.student_email === s.email);
+            const studentSubmissions = submissionList.filter(sub => {
+                const members = Array.isArray(sub.members) ? sub.modules : [];
+                return members.some(m => m.email === s.email);
+            });
+
+            const totalScore = studentGrades.length > 0
+                ? Math.round(studentGrades.reduce((a, g) => a + g.score, 0) / studentGrades.length)
+                : 0;
+            const modulesGraded = studentGrades.length;
+            const passed = studentGrades.filter(g => g.score >= 50).length;
+            const track = s.company_name || '—';
+
+            return {
+                name: s.name,
+                email: s.email,
+                track,
+                cohort,
+                avg: totalScore,
+                modulesGraded,
+                passed,
+                submissions: studentSubmissions.length
+            };
+        }).sort((a, b) => b.passed - a.passed || b.avg - a.avg);
+
+        setLeaderboardData(leaderboard);
+        setLeaderboardLoading(false);
     };
 
     const handleAutoMergePeers = async () => {
@@ -3317,39 +3374,49 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                     <span style={{
                                                                         display: 'inline-flex',
                                                                         alignItems: 'center',
-                                                                        gap: '0.2rem',
+                                                                        gap: '0.3rem',
                                                                         background: '#dcfce7',
                                                                         color: '#15803d',
                                                                         border: '2px solid #000000',
                                                                         padding: '0.25rem 0.6rem',
                                                                         borderRadius: '0.4rem',
-                                                                        fontSize: '0.7rem',
+                                                                        fontSize: '0.65rem',
                                                                         fontWeight: 900
                                                                     }}>
-                                                                        ✅ Admitted
+                                                                        ✅ {w.cohort || 'Cohort 1'}
                                                                     </span>
                                                                 );
                                                             }
 
                                                             return (
-                                                                <button
-                                                                    onClick={async () => {
-                                                                        if (confirm(`Give Cohort One admission to ${w.name} (${w.email})?`)) {
-                                                                            try {
-                                                                                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                                    <select
+                                                                        id={`cohort-select-${w.id}`}
+                                                                        defaultValue={w.cohort || 'Cohort 1'}
+                                                                        style={{ border: '2px solid #000', padding: '0.3rem 0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.65rem', borderRadius: '0.3rem' }}
+                                                                    >
+                                                                        {COHORTS.map(c => <option key={c} value={c}>{c}</option>)}
+                                                                    </select>
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            const selectedCohort = document.getElementById(`cohort-select-${w.id}`)?.value || 'Cohort 1';
+                                                                            if (confirm(`Admit ${w.name} (${w.email}) to ${selectedCohort}?`)) {
+                                                                                try {
+                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-                                                                                // Save admission status to Supabase first
-                                                                                const { error: updateError } = await supabase
-                                                                                    .from('registrations')
-                                                                                    .update({
-                                                                                        products: JSON.stringify({
-                                                                                            level: trackLevel,
-                                                                                            admitted: true,
-                                                                                            password: '',
-                                                                                            avatar_url: ''
+                                                                                    // Save admission status + cohort to Supabase
+                                                                                    const { error: updateError } = await supabase
+                                                                                        .from('registrations')
+                                                                                        .update({
+                                                                                            products: JSON.stringify({
+                                                                                                level: trackLevel,
+                                                                                                admitted: true,
+                                                                                                password: '',
+                                                                                                avatar_url: ''
+                                                                                            }),
+                                                                                            cohort: selectedCohort
                                                                                         })
-                                                                                    })
-                                                                                    .eq('id', w.id);
+                                                                                        .eq('id', w.id);
 
                                                                                 if (updateError) throw updateError;
 
@@ -3406,6 +3473,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                 >
                                                                     🎓 Admit
                                                                 </button>
+                                                                </div>
                                                             );
                                                         })()}
 
@@ -3857,26 +3925,6 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                         alert('📣 Notification broadcast sent to all students!');
                     };
 
-                    // Build leaderboard from localStorage
-                    const moduleIndices = [0, 1, 2, 3];
-                    const waitlistRaw = JSON.parse(localStorage.getItem('fta-waitlist') || '[]');
-                    const leaderboard = waitlistRaw.map(s => {
-                        const isCurrentUser = (s.email === 'ooufuturetech@gmail.com');
-                        const scores = isCurrentUser 
-                            ? moduleIndices.map(modIdx => localStorage.getItem(`fta-exercise-score-mod-${modIdx}`)).filter(Boolean).map(Number)
-                            : moduleIndices.map(modIdx => {
-                                const seed = (s.name || s.email).charCodeAt(0) || 0;
-                                return (seed + modIdx * 13) % 45 + 55; // simulated scores in range 55-99
-                              });
-                        return { 
-                            name: s.name || s.email, 
-                            cohort: s.cohort || 'Cohort 1', 
-                            done: scores.length, 
-                            avg: scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0, 
-                            passed: scores.filter(sc=>sc>=50).length 
-                        };
-                    }).sort((a,b) => b.passed - a.passed || b.avg - a.avg);
-
                     const ftaTabs = [
                         { id: 'cohort', label: '👥 Student Assignment' },
                         { id: 'release', label: '📚 Release Modules' },
@@ -3965,6 +4013,66 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                 );
                                             })}
                                         </div>
+                                    </div>
+
+                                    {/* Students Per Cohort View */}
+                                    <div>
+                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', marginBottom: '1rem', textTransform: 'uppercase', color: '#000', borderBottom: '2px solid #000', paddingBottom: '0.3rem' }}>3. View Students Per Cohort</h4>
+                                        <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                                            {COHORTS.map(c => (
+                                                <button key={c} onClick={() => { setSelectedCohortView(c); fetchCohortStudents(c); }} style={{
+                                                    padding: '0.5rem 1rem', border: '3px solid #000', background: selectedCohortView === c ? '#000' : '#fff',
+                                                    color: selectedCohortView === c ? '#fff' : '#000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem',
+                                                    cursor: 'pointer', boxShadow: selectedCohortView === c ? 'none' : '3px 3px 0 #000', borderRadius: '0.5rem'
+                                                }}>{c}</button>
+                                            ))}
+                                            <button onClick={() => fetchCohortStudents(selectedCohortView)} style={{
+                                                padding: '0.5rem 1rem', border: '3px solid #000', background: '#f1f5f9',
+                                                fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', cursor: 'pointer',
+                                                boxShadow: '3px 3px 0 #000', borderRadius: '0.5rem'
+                                            }}>↻ Refresh</button>
+                                        </div>
+                                        {cohortStudentsLoading ? (
+                                            <div style={{ padding: '1.5rem', textAlign: 'center', color: '#888', fontWeight: 700 }}>Loading students...</div>
+                                        ) : cohortStudents.length === 0 ? (
+                                            <div style={{ padding: '1.5rem', textAlign: 'center', color: '#888', fontWeight: 700, background: '#f8fafc', border: '2px dashed #ccc', borderRadius: '0.5rem' }}>
+                                                No students assigned to {selectedCohortView} yet. Students are assigned a cohort when you admit them from the waitlist.
+                                            </div>
+                                        ) : (
+                                            <div style={{ background: '#fff', border: '3px solid #000', boxShadow: '4px 4px 0 #000', overflow: 'hidden' }}>
+                                                <div style={{ background: '#000', color: '#fff', padding: '0.7rem 1rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', justifyContent: 'space-between' }}>
+                                                    <span>{selectedCohortView} — {cohortStudents.length} Student{cohortStudents.length !== 1 ? 's' : ''}</span>
+                                                </div>
+                                                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                                    {cohortStudents.map((s, i) => {
+                                                        let isAdmitted = false;
+                                                        let level = '—';
+                                                        try {
+                                                            const parsed = JSON.parse(s.products);
+                                                            if (parsed) { isAdmitted = !!parsed.admitted; level = parsed.level || '—'; }
+                                                        } catch (e) {}
+                                                        const trackName = s.company_name || '—';
+                                                        return (
+                                                            <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.7rem 1rem', borderBottom: i < cohortStudents.length - 1 ? '1px solid #e5e7eb' : 'none', background: i % 2 === 0 ? '#fff' : '#f8fafc' }}>
+                                                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e0e7ff', border: '2px solid #6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.65rem', color: '#3730a3', flexShrink: 0 }}>
+                                                                    {i + 1}
+                                                                </div>
+                                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                                    <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem' }}>{s.name}</div>
+                                                                    <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{s.email}</div>
+                                                                </div>
+                                                                <span style={{ fontSize: '0.6rem', fontWeight: 800, background: '#dbeafe', color: '#1d4ed8', padding: '0.15rem 0.4rem', borderRadius: '0.3rem', border: '1px solid #3b82f6', flexShrink: 0 }}>
+                                                                    {trackName}
+                                                                </span>
+                                                                <span style={{ fontSize: '0.6rem', fontWeight: 800, background: '#f3e8ff', color: '#6d28d9', padding: '0.15rem 0.4rem', borderRadius: '0.3rem', border: '1px solid #6d28d9', flexShrink: 0 }}>
+                                                                    {level}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -4559,33 +4667,62 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                             {ftaTab === 'leaderboard' && (
                                 <div>
                                     <div style={{ background: '#fff', border: '3px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
-                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: '0 0 1.5rem 0', textTransform: 'uppercase' }}>🏆 Student Leaderboard</h3>
-                                        {leaderboard.length === 0 ? (
-                                            <div style={{ textAlign: 'center', padding: '3rem', color: '#71717a' }}>
-                                                <p style={{ fontWeight: 800 }}>No students have completed assignments yet. Check back after grading begins.</p>
+                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: '0 0 0.5rem 0', textTransform: 'uppercase' }}>🏆 Student Leaderboard</h3>
+                                        <p style={{ fontSize: '0.8rem', color: '#71717a', marginBottom: '1.5rem', fontWeight: 700 }}>View ranked student performance per cohort. Scores come from admin manual grades.</p>
+
+                                        {/* Cohort selector */}
+                                        <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                                            {COHORTS.map(c => (
+                                                <button key={c} onClick={() => { setSelectedCohortView(c); fetchLeaderboard(c); }} style={{
+                                                    padding: '0.5rem 1rem', border: '3px solid #000', background: selectedCohortView === c ? '#000' : '#fff',
+                                                    color: selectedCohortView === c ? '#fff' : '#000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem',
+                                                    cursor: 'pointer', boxShadow: selectedCohortView === c ? 'none' : '3px 3px 0 #000', borderRadius: '0.5rem'
+                                                }}>{c}</button>
+                                            ))}
+                                            <button onClick={() => fetchLeaderboard(selectedCohortView)} style={{
+                                                padding: '0.5rem 1rem', border: '3px solid #000', background: '#f1f5f9',
+                                                fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', cursor: 'pointer',
+                                                boxShadow: '3px 3px 0 #000', borderRadius: '0.5rem'
+                                            }}>↻ Refresh</button>
+                                        </div>
+
+                                        {leaderboardLoading ? (
+                                            <div style={{ textAlign: 'center', padding: '2rem', color: '#888', fontWeight: 700 }}>Loading leaderboard...</div>
+                                        ) : leaderboardData.length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '3rem', color: '#71717a', background: '#f8fafc', border: '2px dashed #ccc', borderRadius: '0.5rem' }}>
+                                                <p style={{ fontWeight: 800 }}>No students in {selectedCohortView} yet, or no grades recorded.</p>
                                             </div>
                                         ) : (
-                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                                <thead>
-                                                    <tr style={{ borderBottom: '3px solid #000' }}>
-                                                        {['#', 'Student', 'Cohort', 'Modules Done', 'Avg Score', 'Passed'].map(h => (
-                                                            <th key={h} style={{ textAlign: 'left', padding: '0.6rem 0.8rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', color: '#71717a' }}>{h}</th>
-                                                        ))}
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {leaderboard.slice(0, 20).map((s, i) => (
-                                                        <tr key={i} style={{ borderBottom: '1px solid #e5e7eb', background: i === 0 ? '#fefce8' : i === 1 ? '#f0fdf4' : i === 2 ? '#eff6ff' : '#fff' }}>
-                                                            <td style={{ padding: '0.8rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem' }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
-                                                            <td style={{ padding: '0.8rem', fontFamily: 'Outfit', fontWeight: 800, fontSize: '0.85rem' }}>{s.name}</td>
-                                                            <td style={{ padding: '0.8rem', fontSize: '0.8rem', fontWeight: 700, color: '#6d28d9' }}>{s.cohort}</td>
-                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900 }}>{s.done}/4</td>
-                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900, color: s.avg >= 50 ? '#059669' : '#dc2626' }}>{s.avg}/100</td>
-                                                            <td style={{ padding: '0.8rem', fontSize: '0.85rem', fontWeight: 900, color: '#059669' }}>{s.passed}/4</td>
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                    <thead>
+                                                        <tr style={{ borderBottom: '3px solid #000' }}>
+                                                            {['#', 'Student', 'Track', 'Avg Score', 'Modules Graded', 'Passed'].map(h => (
+                                                                <th key={h} style={{ textAlign: 'left', padding: '0.6rem 0.8rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', color: '#71717a' }}>{h}</th>
+                                                            ))}
                                                         </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
+                                                    </thead>
+                                                    <tbody>
+                                                        {leaderboardData.map((s, i) => (
+                                                            <tr key={s.email} style={{ borderBottom: '1px solid #e5e7eb', background: i === 0 ? '#fefce8' : i === 1 ? '#f0fdf4' : i === 2 ? '#eff6ff' : '#fff' }}>
+                                                                <td style={{ padding: '0.7rem 0.8rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem' }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
+                                                                <td style={{ padding: '0.7rem 0.8rem' }}>
+                                                                    <div style={{ fontFamily: 'Outfit', fontWeight: 800, fontSize: '0.85rem' }}>{s.name}</div>
+                                                                    <div style={{ fontSize: '0.6rem', color: '#94a3b8' }}>{s.email}</div>
+                                                                </td>
+                                                                <td style={{ padding: '0.7rem 0.8rem', fontSize: '0.7rem', fontWeight: 800, color: '#1d4ed8' }}>{s.track}</td>
+                                                                <td style={{ padding: '0.7rem 0.8rem' }}>
+                                                                    <span style={{ display: 'inline-block', minWidth: '50px', textAlign: 'center', padding: '0.2rem 0.5rem', borderRadius: '0.3rem', fontWeight: 900, fontSize: '0.8rem', background: s.avg >= 75 ? '#dcfce7' : s.avg >= 50 ? '#fef9c3' : s.avg > 0 ? '#fee2e2' : '#f1f5f9', color: s.avg >= 75 ? '#15803d' : s.avg >= 50 ? '#a16207' : s.avg > 0 ? '#dc2626' : '#94a3b8' }}>
+                                                                        {s.avg > 0 ? `${s.avg}/100` : '—'}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ padding: '0.7rem 0.8rem', fontSize: '0.85rem', fontWeight: 900 }}>{s.modulesGraded}</td>
+                                                                <td style={{ padding: '0.7rem 0.8rem', fontSize: '0.85rem', fontWeight: 900, color: '#059669' }}>{s.passed}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -5856,6 +5993,7 @@ const AcademyDashboard = () => {
                 name: admittedRecord.name,
                 email: admittedRecord.email,
                 course: admittedRecord.company_name || 'Frontend Engineering',
+                cohort: admittedRecord.cohort || 'Cohort 1',
                 avatar_url: avatarUrl
             };
 
@@ -5898,6 +6036,7 @@ const AcademyDashboard = () => {
                 name: admittedRecord.name,
                 email: admittedRecord.email,
                 course: admittedRecord.company_name || 'Frontend Engineering',
+                cohort: admittedRecord.cohort || 'Cohort 1',
                 avatar_url: avatarUrl
             };
 
@@ -5944,8 +6083,8 @@ const AcademyDashboard = () => {
     const [showProfileDropdownDesktop, setShowProfileDropdownDesktop] = useState(false);
     const [openReplyBoxes, setOpenReplyBoxes] = useState({});
 
-    // Cohort — assigned by admin, NOT student-selectable
-    const studentCohort = localStorage.getItem('fta-admin-assigned-cohort') || 'Cohort 1';
+    // Cohort — assigned by admin per student in database
+    const studentCohort = studentSession?.cohort || localStorage.getItem('fta-admin-assigned-cohort') || 'Cohort 1';
     const [releasedModuleIndices, setReleasedModuleIndices] = useState([]);
     const [releaseLoading, setReleaseLoading] = useState(true);
     const [assignmentText, setAssignmentText] = useState('');

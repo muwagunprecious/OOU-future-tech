@@ -3314,7 +3314,6 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                             style={{ width: '100%', padding: '0.9rem 1.2rem', border: '3px solid #000', marginBottom: '1.5rem', fontSize: '0.95rem', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', boxSizing: 'border-box' }}
                         />
 
-                        {/* Table */}
                         <div style={{ background: '#fff', border: '3px solid #000', boxShadow: '8px 8px 0 #000', overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
@@ -3324,8 +3323,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                         <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Track</th>
                                         <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Level</th>
                                         <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>WhatsApp</th>
-                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>ID</th>
-                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Date</th>
+                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Screening Test</th>
+                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Admission / Action</th>
                                         <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Del</th>
                                     </tr>
                                 </thead>
@@ -6181,91 +6180,7 @@ const AcademyDashboard = ({ portalDates }) => {
     const [recentSubmissionCount, setRecentSubmissionCount] = useState(0);
 
     // Sub-tab switching
-    const [academyTab, setAcademyTab] = useState('curriculum'); // 'curriculum' | 'tests' | 'peers' | 'notifications'
-    const [testModuleIdx, setTestModuleIdx] = useState(0);
-    const [testAnswers, setTestAnswers] = useState({});
-    const [testSubmitted, setTestSubmitted] = useState(false);
-    const [testScore, setTestScore] = useState(null);
-
-    // MCQ Test bank per module (per course)
-    const MODULE_TESTS = {
-        'Frontend Engineering': [
-            {
-                title: 'Module 1: Internet & Web Foundations',
-                questions: [
-                    { q: 'What does HTTP stand for?', options: ['HyperText Transfer Protocol', 'Highly Technical Transfer Protocol', 'Home Text Transfer Protocol', 'HyperText Terminal Process'], answer: 0 },
-                    { q: 'Which of these is a valid HTML tag?', options: ['<webpage>', '<body>', '<content>', '<internet>'], answer: 1 },
-                    { q: 'CSS stands for:', options: ['Computer Style Sheets', 'Cascading Style Sheets', 'Creative Style System', 'Coded Stylesheet'], answer: 1 },
-                    { q: 'Which HTML attribute is used to link an external CSS file?', options: ['src', 'link', 'href', 'style'], answer: 2 },
-                    { q: 'What port does HTTPS use by default?', options: ['80', '21', '443', '8080'], answer: 2 },
-                ]
-            },
-            {
-                title: 'Module 2: HTML & CSS Fundamentals',
-                questions: [
-                    { q: 'Which HTML element defines the largest heading?', options: ['<h6>', '<heading>', '<h1>', '<head>'], answer: 2 },
-                    { q: 'Which CSS property controls text size?', options: ['text-style', 'font-size', 'text-size', 'font-weight'], answer: 1 },
-                    { q: 'What does "div" stand for in HTML?', options: ['Division', 'Divider', 'Document Index Value', 'Display Inline View'], answer: 0 },
-                    { q: 'Which CSS value makes an element invisible but keeps its space?', options: ['display: none', 'opacity: 0', 'visibility: hidden', 'hidden: true'], answer: 2 },
-                    { q: 'The CSS box model includes margin, border, padding and:', options: ['Space', 'Content', 'Element', 'Layer'], answer: 1 },
-                ]
-            },
-            {
-                title: 'Module 3: JavaScript Essentials',
-                questions: [
-                    { q: 'Which keyword declares a constant in JavaScript?', options: ['var', 'let', 'const', 'def'], answer: 2 },
-                    { q: 'What does === check in JavaScript?', options: ['Assignment', 'Loose equality', 'Strict equality (value + type)', 'Greater than or equal'], answer: 2 },
-                    { q: 'Which method adds an item to the END of a JavaScript array?', options: ['.shift()', '.pop()', '.unshift()', '.push()'], answer: 3 },
-                    { q: 'What will console.log(typeof "hello") output?', options: ['string', 'text', 'word', 'object'], answer: 0 },
-                    { q: 'Arrow functions use which syntax?', options: ['=>', '->', '::', '<-'], answer: 0 },
-                ]
-            },
-            {
-                title: 'Module 4: React JS',
-                questions: [
-                    { q: 'React components return:', options: ['HTML files', 'JSON data', 'JSX elements', 'Plain text'], answer: 2 },
-                    { q: 'Which hook manages local state in React?', options: ['useEffect', 'useState', 'useContext', 'useRef'], answer: 1 },
-                    { q: 'What is props in React?', options: ['Database connection', 'Data passed to a child component', 'A CSS module', 'A React hook'], answer: 1 },
-                    { q: 'useEffect runs:', options: ['Before every render', 'After every render by default', 'Only on button click', 'Never automatically'], answer: 1 },
-                    { q: 'A React key prop helps React identify:', options: ['Styled components', 'Which items changed in a list', 'The page route', 'The root element'], answer: 1 },
-                ]
-            },
-        ],
-        'Product Design (UI/UX)': [
-            {
-                title: 'Module 1: Design Thinking',
-                questions: [
-                    { q: 'The first step in Design Thinking is:', options: ['Prototype', 'Test', 'Empathize', 'Define'], answer: 2 },
-                    { q: 'A user persona is:', options: ['A fictional user representing target audience', 'A real client', 'An app login profile', 'A design template'], answer: 0 },
-                    { q: 'HMW stands for:', options: ['How May We', 'How Might We', 'How Must We', 'How Many Ways'], answer: 1 },
-                    { q: 'Prototyping comes before which step?', options: ['Empathize', 'Define', 'Ideate', 'Test'], answer: 3 },
-                    { q: 'User research helps designers:', options: ['Build faster', 'Understand user needs and pain points', 'Skip testing', 'Avoid client meetings'], answer: 1 },
-                ]
-            },
-            {
-                title: 'Module 2: UI Design Principles',
-                questions: [
-                    { q: 'Visual hierarchy helps users:', options: ['Log in faster', 'Understand importance and order of content', 'Share the interface', 'Choose colors'], answer: 1 },
-                    { q: 'Whitespace in design is:', options: ['Wasted space', 'Empty space that improves readability', 'A background color', 'A grid error'], answer: 1 },
-                    { q: 'Contrast in UI design is used to:', options: ['Add animation', 'Ensure readability and visual emphasis', 'Fill backgrounds', 'Create shadows'], answer: 1 },
-                    { q: 'A style guide defines:', options: ['Backend logic', 'Typography, colors, and component usage', 'Server structure', 'Test cases'], answer: 1 },
-                    { q: 'F-pattern and Z-pattern describe:', options: ['Coding patterns', 'How users visually scan content', 'File structures', 'Animations'], answer: 1 },
-                ]
-            },
-        ],
-        'Grit & Growth Mindset': [
-            {
-                title: 'Module 1: Mindset Foundations',
-                questions: [
-                    { q: 'A growth mindset believes:', options: ['Intelligence is fixed at birth', 'Abilities can be developed through dedication', 'Only talented people succeed', 'Failure should be avoided'], answer: 1 },
-                    { q: "Angela Duckworth defines 'Grit' as:", options: ['Stubbornness', 'Passion and perseverance for long-term goals', 'Natural talent', 'Quick success'], answer: 1 },
-                    { q: 'Which statement reflects a growth mindset?', options: ["I'm not good at this", "I can't do this yet", 'This is too hard for me', 'I will never be good at this'], answer: 1 },
-                    { q: 'Deliberate practice means:', options: ['Practising randomly', 'Practising with focused effort and feedback', 'Doing what you already know', 'Avoiding mistakes'], answer: 1 },
-                    { q: 'WOOP stands for:', options: ['Wish, Outcome, Obstacle, Plan', 'Work, Organize, Optimize, Perform', 'Win, Own, Overcome, Push', 'Want, Order, Offer, Provide'], answer: 0 },
-                ]
-            },
-        ]
-    };
+    const [academyTab, setAcademyTab] = useState('curriculum'); // 'curriculum' | 'peers' | 'notifications'
 
     // Portal countdown state (always declared, only used when locked)
     const myPortalDate = portalDates?.[studentCohort] || '';
@@ -7570,7 +7485,6 @@ const AcademyDashboard = ({ portalDates }) => {
 
                                         {[
                                             { icon: '🎓', label: 'Curriculum', sub: 'Videos & Lessons', tab: 'curriculum' },
-                                            { icon: '🧪', label: 'Module Tests', sub: 'MCQ Quizzes', tab: 'tests' },
                                             { icon: '👥', label: 'Peer Hub', sub: 'Bug Board & Help', tab: 'peers' },
                                             { icon: '🔔', label: 'Notifications', sub: `${unreadCount} unread`, tab: 'notifications' },
                                         ].map(item => (
@@ -7704,7 +7618,6 @@ const AcademyDashboard = ({ portalDates }) => {
                             <div style={{ display: 'flex', gap: '0.4rem', background: '#f1f5f9', padding: '0.3rem', border: '3px solid #000', borderRadius: '0.8rem', boxShadow: '3px 3px 0 #000', marginLeft: '2rem' }}>
                                 {[
                                     { icon: '📚', label: 'Curriculum', tab: 'curriculum' },
-                                    { icon: '🧪', label: 'Tests', tab: 'tests' },
                                     { icon: '👥', label: 'Peer Hub', tab: 'peers' },
                                     { icon: '🔔', label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, tab: 'notifications' },
                                 ].map(item => (
@@ -9242,214 +9155,9 @@ const AcademyDashboard = ({ portalDates }) => {
                     );
                 })()}
 
-                {/* 🧪 MODULE TESTS VIEW */}
-                {academyTab === 'tests' && (() => {
-                    const courseTests = MODULE_TESTS[selectedCourse] || MODULE_TESTS['Frontend Engineering'];
-                    const currentTest = courseTests[testModuleIdx] || courseTests[0];
-                    const savedKey = `fta-test-score-${selectedCourse}-mod-${testModuleIdx}`;
-                    const savedScore = testScore !== null ? testScore : (localStorage.getItem(savedKey) ? parseInt(localStorage.getItem(savedKey)) : null);
-
-                    const handleTestSubmit = () => {
-                        let correct = 0;
-                        currentTest.questions.forEach((q, i) => {
-                            if (testAnswers[i] === q.answer) correct++;
-                        });
-                        const score = Math.round((correct / currentTest.questions.length) * 100);
-                        setTestScore(score);
-                        setTestSubmitted(true);
-                        localStorage.setItem(savedKey, score.toString());
-                    };
-
-                    const handleRetake = () => {
-                        setTestAnswers({});
-                        setTestSubmitted(false);
-                        setTestScore(null);
-                    };
-
-                    const handleModuleSelect = (idx) => {
-                        setTestModuleIdx(idx);
-                        setTestAnswers({});
-                        setTestSubmitted(false);
-                        setTestScore(null);
-                    };
-
-                    const allAnswered = Object.keys(testAnswers).length === currentTest.questions.length;
-
-                    return (
-                        <div style={{ maxWidth: '860px', margin: '0 auto', width: '100%', animation: 'fadeIn 0.3s ease-out' }}>
-                            {/* Header */}
-                            <div style={{ borderBottom: '3px solid #000', paddingBottom: '0.5rem', marginBottom: '2rem' }}>
-                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0, textTransform: 'uppercase' }}>🧪 Module Tests</h3>
-                                <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#71717a', margin: '0.2rem 0 0 0' }}>Multiple-choice quizzes to test your knowledge for each module</p>
-                            </div>
-
-                            {/* Module Selector */}
-                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-                                {courseTests.map((mod, idx) => {
-                                    const ms = localStorage.getItem(`fta-test-score-${selectedCourse}-mod-${idx}`);
-                                    const msVal = ms ? parseInt(ms) : null;
-                                    return (
-                                        <button
-                                            key={idx}
-                                            onClick={() => handleModuleSelect(idx)}
-                                            style={{
-                                                padding: '0.5rem 1rem',
-                                                background: testModuleIdx === idx ? '#000' : '#f1f5f9',
-                                                color: testModuleIdx === idx ? '#fff' : '#000',
-                                                border: '2px solid #000',
-                                                fontFamily: 'Outfit',
-                                                fontWeight: 900,
-                                                fontSize: '0.75rem',
-                                                cursor: 'pointer',
-                                                borderRadius: '0.4rem',
-                                                boxShadow: testModuleIdx === idx ? '3px 3px 0 var(--accent-r)' : '2px 2px 0 #000',
-                                                display: 'flex', alignItems: 'center', gap: '0.4rem'
-                                            }}
-                                        >
-                                            Module {idx + 1}
-                                            {msVal !== null && (
-                                                <span style={{
-                                                    background: msVal >= 75 ? '#22c55e' : msVal >= 50 ? '#f59e0b' : '#ef4444',
-                                                    color: '#fff', padding: '0.1rem 0.4rem', borderRadius: '1rem',
-                                                    fontSize: '0.6rem', fontWeight: 900
-                                                }}>{msVal}%</span>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            {/* Quiz Card */}
-                            <div style={{ background: '#fff', border: '3px solid #000', boxShadow: '8px 8px 0 #000', overflow: 'hidden' }}>
-                                {/* Quiz Header */}
-                                <div style={{ background: '#000', color: '#fff', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                    <div>
-                                        <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase' }}>{currentTest.title}</div>
-                                        <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '0.2rem' }}>{currentTest.questions.length} questions · Passing score: 75%</div>
-                                    </div>
-                                    {savedScore !== null && !testSubmitted && (
-                                        <div style={{ background: savedScore >= 75 ? '#22c55e' : '#ef4444', color: '#fff', padding: '0.3rem 0.8rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 900 }}>
-                                            Last score: {savedScore}%
-                                        </div>
-                                    )}
-                                </div>
-
-                                {testSubmitted ? (
-                                    /* Results View */
-                                    <div style={{ padding: '2rem', textAlign: 'center' }}>
-                                        <div style={{
-                                            width: '120px', height: '120px', borderRadius: '50%',
-                                            background: `conic-gradient(${testScore >= 75 ? '#22c55e' : testScore >= 50 ? '#f59e0b' : '#ef4444'} ${testScore * 3.6}deg, #e5e7eb 0deg)`,
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            margin: '0 auto 1.5rem auto', border: '4px solid #000', boxShadow: '4px 4px 0 #000'
-                                        }}>
-                                            <div style={{ width: '90px', height: '90px', borderRadius: '50%', background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                                <span style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.8rem', color: testScore >= 75 ? '#22c55e' : testScore >= 50 ? '#f59e0b' : '#ef4444' }}>{testScore}%</span>
-                                            </div>
-                                        </div>
-                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.4rem', margin: '0 0 0.5rem 0' }}>
-                                            {testScore >= 75 ? '🎉 Excellent Work!' : testScore >= 50 ? '👍 Good Effort!' : '📚 Keep Studying!'}
-                                        </h3>
-                                        <p style={{ color: '#475569', fontSize: '0.9rem', fontWeight: 700, margin: '0 0 2rem 0' }}>
-                                            {testScore >= 75 ? 'You passed this module test! Move on to the next one.' : testScore >= 50 ? 'Almost there! Review the module videos and try again.' : 'Review the lesson materials and retake the test when ready.'}
-                                        </p>
-
-                                        {/* Answer Review */}
-                                        <div style={{ textAlign: 'left', marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            {currentTest.questions.map((q, i) => {
-                                                const chosen = testAnswers[i];
-                                                const isCorrect = chosen === q.answer;
-                                                return (
-                                                    <div key={i} style={{ background: isCorrect ? '#f0fdf4' : '#fff7ed', border: `2px solid ${isCorrect ? '#22c55e' : '#f97316'}`, borderRadius: '0.5rem', padding: '1rem' }}>
-                                                        <div style={{ fontWeight: 900, fontSize: '0.85rem', marginBottom: '0.6rem', color: '#000' }}>{i + 1}. {q.q}</div>
-                                                        {q.options.map((opt, oi) => (
-                                                            <div key={oi} style={{
-                                                                padding: '0.3rem 0.6rem', marginBottom: '0.2rem', borderRadius: '0.3rem', fontSize: '0.8rem', fontWeight: 700,
-                                                                background: oi === q.answer ? '#dcfce7' : oi === chosen && !isCorrect ? '#fee2e2' : 'transparent',
-                                                                color: oi === q.answer ? '#16a34a' : oi === chosen && !isCorrect ? '#dc2626' : '#475569'
-                                                            }}>
-                                                                {oi === q.answer ? '✅ ' : oi === chosen && !isCorrect ? '❌ ' : '○ '}{opt}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-
-                                        <button
-                                            onClick={handleRetake}
-                                            style={{ padding: '0.8rem 2rem', background: 'var(--accent-r)', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '4px 4px 0 #000' }}
-                                        >
-                                            🔄 Retake Test
-                                        </button>
-                                    </div>
-                                ) : (
-                                    /* Questions View */
-                                    <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                        {currentTest.questions.map((q, i) => (
-                                            <div key={i} style={{ border: '2px solid #e2e8f0', borderRadius: '0.6rem', padding: '1.2rem', background: testAnswers[i] !== undefined ? '#f8fafc' : '#fff', transition: 'background 0.2s' }}>
-                                                <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.95rem', marginBottom: '0.8rem', color: '#000' }}>
-                                                    <span style={{ background: 'var(--accent-r)', color: '#fff', padding: '0.1rem 0.5rem', borderRadius: '0.3rem', fontSize: '0.75rem', marginRight: '0.5rem', fontWeight: 900 }}>Q{i + 1}</span>
-                                                    {q.q}
-                                                </div>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                    {q.options.map((opt, oi) => (
-                                                        <button
-                                                            key={oi}
-                                                            onClick={() => setTestAnswers(prev => ({ ...prev, [i]: oi }))}
-                                                            style={{
-                                                                padding: '0.65rem 1rem',
-                                                                border: testAnswers[i] === oi ? '3px solid #000' : '2px solid #d1d5db',
-                                                                borderRadius: '0.4rem',
-                                                                background: testAnswers[i] === oi ? '#000' : '#fff',
-                                                                color: testAnswers[i] === oi ? '#fff' : '#374151',
-                                                                fontWeight: testAnswers[i] === oi ? 900 : 700,
-                                                                fontSize: '0.85rem',
-                                                                cursor: 'pointer',
-                                                                textAlign: 'left',
-                                                                transition: 'all 0.15s',
-                                                                boxShadow: testAnswers[i] === oi ? '3px 3px 0 var(--accent-r)' : 'none'
-                                                            }}
-                                                        >
-                                                            <span style={{ marginRight: '0.5rem', fontSize: '0.75rem' }}>{['A', 'B', 'C', 'D'][oi]}.</span> {opt}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
-
-                                        <div style={{ borderTop: '2px solid #000', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                                            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b' }}>
-                                                {Object.keys(testAnswers).length} / {currentTest.questions.length} answered
-                                            </span>
-                                            <button
-                                                onClick={handleTestSubmit}
-                                                disabled={!allAnswered}
-                                                style={{
-                                                    padding: '0.8rem 2.5rem',
-                                                    background: allAnswered ? 'var(--accent-r)' : '#94a3b8',
-                                                    color: '#fff',
-                                                    border: '3px solid #000',
-                                                    fontFamily: 'Outfit',
-                                                    fontWeight: 900,
-                                                    fontSize: '0.95rem',
-                                                    textTransform: 'uppercase',
-                                                    cursor: allAnswered ? 'pointer' : 'not-allowed',
-                                                    boxShadow: allAnswered ? '4px 4px 0 #000' : 'none',
-                                                    transition: 'all 0.15s'
-                                                }}
-                                            >
-                                                📝 Submit Test
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })()}
 
                 {/* 🔔 NOTIFICATIONS VIEW */}
+
                 {academyTab === 'notifications' && (() => {
                     const activeNotes = notifications.length > 0 ? notifications : [
                         {
@@ -9801,6 +9509,624 @@ const AcademyDashboard = ({ portalDates }) => {
                     </div>
                 </div>
             )}
+        </div>
+    );
+};
+
+/* ───────────────────────────────────────────
+   SCREENING TEST PAGE (FUTURE TECH ACADEMY - FTA)
+   ─────────────────────────────────────────── */
+
+const SCREENING_QUESTIONS = {
+    'Frontend Engineering': [
+        {
+            q: 'You visit a website and the words are all over the place, making it difficult to know what to read first. What would make the page easier to understand?',
+            options: [
+                'Add more colors to every section',
+                'Organize the information clearly and create a clear reading order',
+                'Make every word the same size',
+                'Add more information to fill empty spaces'
+            ],
+            answer: 1
+        },
+        {
+            q: 'Imagine you are ordering food online. You click "Place Order," but nothing appears to happen. What would you expect the website to do?',
+            options: [
+                'Change the entire page without explanation',
+                'Give you some indication that your order is being processed',
+                'Close the website immediately',
+                'Ask you to start the order again without explanation'
+            ],
+            answer: 1
+        },
+        {
+            q: 'A friend visits a website on their phone, but everything looks too large and they have to constantly zoom in and out. What is the likely problem?',
+            options: [
+                'The website was not designed to adjust properly to different screen sizes',
+                'The website has too many pictures',
+                'The website has too many words',
+                'The phone needs a new operating system'
+            ],
+            answer: 0
+        },
+        {
+            q: 'You are filling out a registration form and accidentally leave your phone number empty. What would be most helpful?',
+            options: [
+                'The form should clearly tell you what information is missing',
+                'The form should delete everything you entered',
+                'The form should submit anyway',
+                'The form should close without explanation'
+            ],
+            answer: 0
+        },
+        {
+            q: 'You are given a long list of 100 items and asked to find one specific item. Which approach would make the task easier?',
+            options: [
+                'Make the list longer',
+                'Add a way to search or filter the items',
+                'Remove all labels from the items',
+                'Put everything on one line'
+            ],
+            answer: 1
+        },
+        {
+            q: 'A website takes several seconds to respond after you click something. What would help you understand that your action was received?',
+            options: [
+                'Nothing should change until the process finishes',
+                'A loading indicator or message showing that something is happening',
+                'The website should immediately close',
+                'The button should disappear permanently'
+            ],
+            answer: 1
+        },
+        {
+            q: 'You are designing a page for people who have never used it before. What is the best approach?',
+            options: [
+                'Assume they will figure everything out themselves',
+                'Make important actions and instructions clear and easy to understand',
+                'Hide the instructions to keep the page clean',
+                'Use complicated words to make the page look professional'
+            ],
+            answer: 1
+        },
+        {
+            q: 'You change something on a website and later realize the change caused another part to stop working. What would be useful when working on a project with many changes?',
+            options: [
+                'A way to keep track of previous changes',
+                'Deleting the entire project',
+                'Making changes without recording them',
+                'Starting from scratch every time'
+            ],
+            answer: 0
+        },
+        {
+            q: 'You are creating a shopping website. A customer clicks "Buy Now" several times because they are unsure whether the first click worked. What could prevent this?',
+            options: [
+                'Give clear feedback after the first click',
+                'Remove the button completely',
+                'Add five more buttons',
+                'Make the button smaller'
+            ],
+            answer: 0
+        },
+        {
+            q: 'You are given a problem you have never encountered before. What is the best first step?',
+            options: [
+                'Randomly change things until something works',
+                'Understand the problem, break it into smaller parts, and investigate possible solutions',
+                'Immediately give up because you have never seen it before',
+                'Copy someone else\'s solution without understanding it'
+            ],
+            answer: 1
+        }
+    ],
+    'Product Design (UI/UX)': [
+        {
+            q: 'You enter a new supermarket for the first time. You cannot find where to pay because there are no signs. What is the main problem?',
+            options: [
+                'The supermarket has too many products',
+                'The environment does not clearly guide people to where they need to go',
+                'The supermarket needs more colors',
+                'The products are too expensive'
+            ],
+            answer: 1
+        },
+        {
+            q: 'Imagine you are creating a new school cafeteria. Before deciding where to put everything, what would be most useful to understand first?',
+            options: [
+                'What students need and how they normally use the cafeteria',
+                'What color the designer personally likes',
+                'What font is currently popular',
+                'How many decorations can fit inside'
+            ],
+            answer: 0
+        },
+        {
+            q: 'A person is trying to withdraw money from an ATM but keeps pressing the wrong button. What should you investigate first?',
+            options: [
+                'Why the person is having difficulty understanding the available options',
+                'Whether the ATM should have more animations',
+                'Whether the ATM should use more colors',
+                'Whether the ATM should play music'
+            ],
+            answer: 0
+        },
+        {
+            q: 'You want to build a new app that helps students find accommodation. What is the best thing to do before designing the final app?',
+            options: [
+                'Immediately choose colors and start decorating the screens',
+                'Understand how students currently search for accommodation and what problems they face',
+                'Add as many features as possible',
+                'Copy another accommodation app exactly'
+            ],
+            answer: 1
+        },
+        {
+            q: 'A restaurant gives customers a menu with 200 food options, but most customers struggle to decide what to order. What could improve the experience?',
+            options: [
+                'Add another 100 options',
+                'Organize the options into clear categories and make popular choices easy to find',
+                'Remove all food names',
+                'Make every option look exactly the same'
+            ],
+            answer: 1
+        },
+        {
+            q: 'You design a new process for booking a bus. You believe it is easy, but three people try it and all get confused at the same step. What should you do?',
+            options: [
+                'Tell them they are using it incorrectly',
+                'Investigate the confusing step and improve the process based on their feedback',
+                'Add more steps to make it clearer',
+                'Ignore their feedback because you designed it'
+            ],
+            answer: 1
+        },
+        {
+            q: 'A hospital has two doors. One leads to the emergency room and the other leads to the reception. Both doors look exactly the same. What is the biggest issue?',
+            options: [
+                'People may have difficulty knowing which door to use',
+                'The hospital needs more doors',
+                'Both doors should be painted different colors randomly',
+                'The doors should be removed'
+            ],
+            answer: 0
+        },
+        {
+            q: 'You are designing a school portal. Students frequently ask, "Where do I check my results?" What does this suggest?',
+            options: [
+                'The students should have to ask more questions',
+                'The location of the results should be made easier to find',
+                'The portal needs more complicated features',
+                'The results should be removed'
+            ],
+            answer: 1
+        },
+        {
+            q: 'You are asked to improve a product that people already use. What is the most useful approach?',
+            options: [
+                'Change everything immediately',
+                'Understand what currently works and what causes problems before making changes',
+                'Add features based only on personal preference',
+                'Make the product look completely different regardless of user needs'
+            ],
+            answer: 1
+        },
+        {
+            q: 'Two people are given the same task using a new service. One completes it easily while the other gets confused. What would be useful to learn?',
+            options: [
+                'Only which person you personally prefer',
+                'What each person did and where the confused person encountered difficulty',
+                'Nothing, because one person succeeded',
+                'Whether the confused person likes the service\'s colors'
+            ],
+            answer: 1
+        }
+    ]
+};
+
+const TIMER_PER_QUESTION = 25; // seconds
+
+const ScreeningTest = () => {
+    const [step, setStep] = useState('email'); // 'email' | 'taking' | 'done' | 'blocked'
+    const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [checking, setChecking] = useState(false);
+    const [registrationData, setRegistrationData] = useState(null);
+
+    // Test state
+    const [currentQ, setCurrentQ] = useState(0);
+    const [answers, setAnswers] = useState({});
+    const [selectedOption, setSelectedOption] = useState(null);
+    const [timeLeft, setTimeLeft] = useState(TIMER_PER_QUESTION);
+    const [finalScore, setFinalScore] = useState(null);
+    const [blockedReason, setBlockedReason] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
+    const questions = registrationData
+        ? (SCREENING_QUESTIONS[registrationData.track] || SCREENING_QUESTIONS['Frontend Engineering'])
+        : [];
+
+    // ── TIMER ─────────────────────────────────────────────────────────────────
+    useEffect(() => {
+        if (step !== 'taking') return;
+        setTimeLeft(TIMER_PER_QUESTION);
+        const interval = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    // Auto-advance: record no answer (null) and go next
+                    setAnswers(a => ({ ...a, [currentQ]: selectedOption }));
+                    setSelectedOption(null);
+                    setCurrentQ(q => {
+                        const next = q + 1;
+                        if (next >= questions.length) {
+                            clearInterval(interval);
+                            return q; // will be handled by useEffect below
+                        }
+                        return next;
+                    });
+                    return TIMER_PER_QUESTION;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [step, currentQ]);
+
+    // Detect when all questions answered by auto-advance
+    useEffect(() => {
+        if (step !== 'taking') return;
+        if (currentQ >= questions.length && questions.length > 0) {
+            handleSubmitTest();
+        }
+    }, [currentQ, step]);
+
+    // ── EMAIL CHECK ───────────────────────────────────────────────────────────
+    const handleEmailCheck = async () => {
+        const trimmed = email.trim().toLowerCase();
+        if (!trimmed || !trimmed.includes('@')) {
+            setEmailError('Please enter a valid email address.');
+            return;
+        }
+        setChecking(true);
+        setEmailError('');
+
+        // Look for email in registrations (tech waitlist entries)
+        const { data, error } = await supabase
+            .from('registrations')
+            .select('*')
+            .eq('email', trimmed)
+            .maybeSingle();
+
+        setChecking(false);
+
+        if (error || !data) {
+            setBlockedReason('Your email is not on our waitlist. Please join the Academy Waitlist first before taking this test.');
+            setStep('blocked');
+            return;
+        }
+
+        const products = data.products || {};
+        const track = data.track || products.track || 'Frontend Engineering';
+
+        // Already admitted?
+        if (products.admitted === true) {
+            setBlockedReason('You have already been admitted to the Academy. This screening test is no longer applicable to you. Please log into the LMS with your email.');
+            setStep('blocked');
+            return;
+        }
+
+        // Already completed test?
+        if (products.test_done === true) {
+            const score = products.test_score ?? '—';
+            setBlockedReason(`You have already completed this screening test (Score: ${score}/100). Each applicant can only take the test once.`);
+            setStep('blocked');
+            return;
+        }
+
+        setRegistrationData({ ...data, track });
+        setStep('taking');
+        setCurrentQ(0);
+        setAnswers({});
+        setSelectedOption(null);
+        setTimeLeft(TIMER_PER_QUESTION);
+    };
+
+    // ── NEXT QUESTION ────────────────────────────────────────────────────────
+    const handleNext = () => {
+        setAnswers(prev => ({ ...prev, [currentQ]: selectedOption }));
+        setSelectedOption(null);
+        if (currentQ + 1 >= questions.length) {
+            handleSubmitTest({ ...answers, [currentQ]: selectedOption });
+        } else {
+            setCurrentQ(q => q + 1);
+        }
+    };
+
+    // ── SUBMIT ───────────────────────────────────────────────────────────────
+    const handleSubmitTest = async (finalAnswers) => {
+        const ans = finalAnswers || { ...answers, [currentQ]: selectedOption };
+        let correct = 0;
+        questions.forEach((q, i) => {
+            if (ans[i] === q.answer) correct++;
+        });
+        const score = Math.round((correct / questions.length) * 100);
+        setFinalScore(score);
+        setSubmitting(true);
+
+        // Save to Supabase — update the registrant's products JSON
+        try {
+            const existingProducts = registrationData.products || {};
+            const updatedProducts = {
+                ...existingProducts,
+                test_done: true,
+                test_score: score,
+                test_date: new Date().toISOString(),
+                test_track: registrationData.track
+            };
+            await supabase
+                .from('registrations')
+                .update({ products: updatedProducts })
+                .eq('email', registrationData.email);
+        } catch (e) {
+            console.warn('Could not save test result:', e);
+        }
+
+        setSubmitting(false);
+        setStep('done');
+    };
+
+    const timerPct = (timeLeft / TIMER_PER_QUESTION) * 100;
+    const timerColor = timeLeft > 15 ? '#22c55e' : timeLeft > 8 ? '#f59e0b' : '#ef4444';
+
+    // ── RENDER ────────────────────────────────────────────────────────────────
+    return (
+        <div style={{
+            minHeight: '100vh', background: '#f8fafc',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '2rem 1rem', fontFamily: 'Outfit, sans-serif'
+        }}>
+            <div style={{ width: '100%', maxWidth: '680px' }}>
+
+                {/* Header Logo */}
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: '#000', color: '#fff', padding: '0.6rem 1.4rem', border: '3px solid #000', boxShadow: '4px 4px 0 var(--accent-r, #e63946)' }}>
+                        <span style={{ fontSize: '1.3rem' }}>🎓</span>
+                        <span style={{ fontWeight: 950, fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Future Tech Academy</span>
+                    </div>
+                    <div style={{ marginTop: '0.6rem', fontSize: '0.8rem', color: '#64748b', fontWeight: 700 }}>Screening Test Portal</div>
+                </div>
+
+                {/* ── STEP: EMAIL GATE ── */}
+                {step === 'email' && (
+                    <div style={{ background: '#fff', border: '4px solid #000', padding: '2.5rem', boxShadow: '8px 8px 0 #000' }}>
+                        <h1 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.6rem', margin: '0 0 0.5rem 0', textTransform: 'uppercase' }}>
+                            🧪 Aptitude Screening Test
+                        </h1>
+                        <p style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 700, margin: '0 0 2rem 0', lineHeight: 1.6 }}>
+                            This test is for registered FTA waitlist applicants only. Enter your registered email to begin. <strong>You can only take this test once.</strong>
+                        </p>
+
+                        <div style={{ marginBottom: '0.8rem' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                                Registered Email Address
+                            </label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={e => { setEmail(e.target.value); setEmailError(''); }}
+                                onKeyDown={e => e.key === 'Enter' && handleEmailCheck()}
+                                placeholder="your@email.com"
+                                style={{
+                                    width: '100%', padding: '0.9rem 1rem',
+                                    border: emailError ? '3px solid #ef4444' : '3px solid #000',
+                                    fontFamily: 'Outfit', fontWeight: 700, fontSize: '1rem',
+                                    outline: 'none', boxSizing: 'border-box'
+                                }}
+                            />
+                            {emailError && <div style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 800, marginTop: '0.4rem' }}>{emailError}</div>}
+                        </div>
+
+                        <div style={{ background: '#fffbeb', border: '2px solid #f59e0b', padding: '0.8rem 1rem', borderRadius: '0.4rem', marginBottom: '1.5rem', fontSize: '0.78rem', fontWeight: 700, color: '#92400e' }}>
+                            ⚠️ Rules: 10 questions · 25 seconds per question · Auto-advances when time runs out · One attempt only
+                        </div>
+
+                        <button
+                            onClick={handleEmailCheck}
+                            disabled={checking}
+                            style={{
+                                width: '100%', padding: '1rem',
+                                background: checking ? '#94a3b8' : '#000',
+                                color: '#fff', border: '3px solid #000',
+                                fontFamily: 'Outfit', fontWeight: 950, fontSize: '1rem',
+                                textTransform: 'uppercase', cursor: checking ? 'not-allowed' : 'pointer',
+                                boxShadow: checking ? 'none' : '5px 5px 0 #e63946', transition: 'all 0.15s'
+                            }}
+                        >
+                            {checking ? '⏳ Verifying...' : '🚀 Begin Screening Test'}
+                        </button>
+                    </div>
+                )}
+
+                {/* ── STEP: BLOCKED ── */}
+                {step === 'blocked' && (
+                    <div style={{ background: '#fff', border: '4px solid #ef4444', padding: '2.5rem', boxShadow: '8px 8px 0 #ef4444', textAlign: 'center' }}>
+                        <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🚫</div>
+                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.4rem', margin: '0 0 1rem 0', color: '#ef4444', textTransform: 'uppercase' }}>
+                            Access Denied
+                        </h2>
+                        <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#334155', lineHeight: 1.7, margin: '0 0 2rem 0' }}>
+                            {blockedReason}
+                        </p>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <button
+                                onClick={() => { setStep('email'); setEmail(''); setBlockedReason(''); }}
+                                style={{ padding: '0.7rem 1.5rem', background: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '3px 3px 0 #000' }}
+                            >
+                                ← Try Different Email
+                            </button>
+                            <a href="/waitlist" style={{ padding: '0.7rem 1.5rem', background: '#000', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '3px 3px 0 #e63946', textDecoration: 'none', display: 'inline-block' }}>
+                                Join Waitlist →
+                            </a>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── STEP: TAKING TEST ── */}
+                {step === 'taking' && questions.length > 0 && currentQ < questions.length && (
+                    <div style={{ background: '#fff', border: '4px solid #000', boxShadow: '8px 8px 0 #000', overflow: 'hidden' }}>
+
+                        {/* Progress Bar */}
+                        <div style={{ background: '#f1f5f9', height: '6px' }}>
+                            <div style={{ height: '100%', background: '#000', width: `${((currentQ) / questions.length) * 100}%`, transition: 'width 0.4s ease' }} />
+                        </div>
+
+                        {/* Header */}
+                        <div style={{ background: '#000', color: '#fff', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af' }}>
+                                    {registrationData?.track} · Screening Test
+                                </div>
+                                <div style={{ fontWeight: 700, fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                                    Question {currentQ + 1} of {questions.length}
+                                </div>
+                            </div>
+
+                            {/* Timer */}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem' }}>
+                                <div style={{ position: 'relative', width: '52px', height: '52px' }}>
+                                    <svg width="52" height="52" style={{ transform: 'rotate(-90deg)' }}>
+                                        <circle cx="26" cy="26" r="22" fill="none" stroke="#333" strokeWidth="4" />
+                                        <circle
+                                            cx="26" cy="26" r="22" fill="none"
+                                            stroke={timerColor} strokeWidth="4"
+                                            strokeDasharray={`${2 * Math.PI * 22}`}
+                                            strokeDashoffset={`${2 * Math.PI * 22 * (1 - timerPct / 100)}`}
+                                            style={{ transition: 'stroke-dashoffset 0.9s linear, stroke 0.3s' }}
+                                        />
+                                    </svg>
+                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Outfit', fontWeight: 950, fontSize: '1rem', color: timerColor }}>
+                                        {timeLeft}
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: '0.55rem', color: '#9ca3af', fontWeight: 700, textTransform: 'uppercase' }}>secs</div>
+                            </div>
+                        </div>
+
+                        {/* Question */}
+                        <div style={{ padding: '1.8rem 1.5rem 1.2rem 1.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', marginBottom: '1.5rem' }}>
+                                <span style={{ background: '#e63946', color: '#fff', padding: '0.2rem 0.6rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', flexShrink: 0, marginTop: '0.1rem' }}>
+                                    Q{currentQ + 1}
+                                </span>
+                                <p style={{ fontFamily: 'Outfit', fontWeight: 800, fontSize: '1.05rem', margin: 0, lineHeight: 1.5, color: '#0f172a' }}>
+                                    {questions[currentQ].q}
+                                </p>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+                                {questions[currentQ].options.map((opt, oi) => (
+                                    <button
+                                        key={oi}
+                                        onClick={() => setSelectedOption(oi)}
+                                        style={{
+                                            padding: '0.8rem 1.1rem',
+                                            border: selectedOption === oi ? '3px solid #000' : '2px solid #cbd5e1',
+                                            borderRadius: '0.4rem',
+                                            background: selectedOption === oi ? '#000' : '#fff',
+                                            color: selectedOption === oi ? '#fff' : '#1e293b',
+                                            fontWeight: selectedOption === oi ? 900 : 700,
+                                            fontFamily: 'Outfit',
+                                            fontSize: '0.9rem',
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            transition: 'all 0.12s',
+                                            boxShadow: selectedOption === oi ? '3px 3px 0 #e63946' : 'none',
+                                            display: 'flex', alignItems: 'center', gap: '0.7rem'
+                                        }}
+                                    >
+                                        <span style={{
+                                            width: '24px', height: '24px', borderRadius: '50%', border: '2px solid',
+                                            borderColor: selectedOption === oi ? '#fff' : '#94a3b8',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontWeight: 900, fontSize: '0.7rem', flexShrink: 0,
+                                            color: selectedOption === oi ? '#fff' : '#64748b'
+                                        }}>
+                                            {['A', 'B', 'C', 'D'][oi]}
+                                        </span>
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div style={{ padding: '1rem 1.5rem', borderTop: '2px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700 }}>
+                                {selectedOption !== null ? '✅ Answer selected' : '⏳ Select an answer or wait for auto-advance'}
+                            </div>
+                            <button
+                                onClick={handleNext}
+                                disabled={selectedOption === null}
+                                style={{
+                                    padding: '0.7rem 1.6rem',
+                                    background: selectedOption !== null ? '#e63946' : '#94a3b8',
+                                    color: '#fff', border: '3px solid #000',
+                                    fontFamily: 'Outfit', fontWeight: 950, fontSize: '0.85rem',
+                                    textTransform: 'uppercase', cursor: selectedOption !== null ? 'pointer' : 'not-allowed',
+                                    boxShadow: selectedOption !== null ? '3px 3px 0 #000' : 'none',
+                                    transition: 'all 0.12s'
+                                }}
+                            >
+                                {currentQ + 1 === questions.length ? '📝 Submit' : 'Next →'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── STEP: DONE ── */}
+                {step === 'done' && (
+                    <div style={{ background: '#fff', border: '4px solid #000', padding: '2.5rem', boxShadow: '8px 8px 0 #000', textAlign: 'center' }}>
+                        {submitting ? (
+                            <div style={{ padding: '3rem', color: '#64748b', fontWeight: 700 }}>⏳ Saving your results...</div>
+                        ) : (
+                            <>
+                                {/* Score Circle */}
+                                <div style={{
+                                    width: '140px', height: '140px', borderRadius: '50%',
+                                    background: `conic-gradient(${finalScore >= 70 ? '#22c55e' : finalScore >= 50 ? '#f59e0b' : '#ef4444'} ${finalScore * 3.6}deg, #e5e7eb 0deg)`,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    margin: '0 auto 1.5rem auto', border: '5px solid #000', boxShadow: '5px 5px 0 #000'
+                                }}>
+                                    <div style={{ width: '106px', height: '106px', borderRadius: '50%', background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                        <span style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '2rem', color: finalScore >= 70 ? '#22c55e' : finalScore >= 50 ? '#f59e0b' : '#ef4444' }}>
+                                            {finalScore}%
+                                        </span>
+                                        <span style={{ fontSize: '0.55rem', fontWeight: 800, color: '#888', textTransform: 'uppercase' }}>Your Score</span>
+                                    </div>
+                                </div>
+
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.5rem', margin: '0 0 0.5rem 0', textTransform: 'uppercase' }}>
+                                    {finalScore >= 70 ? '🎉 Well Done!' : finalScore >= 50 ? '👍 Good Attempt!' : '📚 Test Complete'}
+                                </h2>
+                                <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#475569', lineHeight: 1.7, margin: '0 0 0.5rem 0' }}>
+                                    You scored <strong>{finalScore}/100</strong> on the <strong>{registrationData?.track}</strong> Screening Test.
+                                </p>
+                                <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', margin: '0 0 2rem 0' }}>
+                                    Your results have been recorded. Our team will review all applications and contact admitted candidates via email with next steps.
+                                </p>
+
+                                <div style={{ background: '#f0fdf4', border: '2px solid #22c55e', padding: '1rem', borderRadius: '0.5rem', marginBottom: '2rem', fontSize: '0.82rem', color: '#166534', fontWeight: 700 }}>
+                                    ✅ Test submitted successfully. You will receive an email if you are admitted to Cohort 1.
+                                </div>
+
+                                <a href="/" style={{ display: 'inline-block', padding: '0.8rem 2rem', background: '#000', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', textTransform: 'uppercase', textDecoration: 'none', boxShadow: '4px 4px 0 #e63946' }}>
+                                    ← Back to Homepage
+                                </a>
+                            </>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
@@ -10788,6 +11114,9 @@ export default function App() {
         } else if (path === '/academy' || path === '/academy/') {
             setView('academy');
             setShowOnboardingPopup(false);
+        } else if (path === '/test' || path === '/test/') {
+            setView('test');
+            setShowOnboardingPopup(false);
         } else {
             setView('site');
             setShowOnboardingPopup(true);
@@ -11016,6 +11345,31 @@ export default function App() {
                         </button>
                     </div>
                     <AcademyDashboard portalDates={portalDates} />
+                </div>
+            ) : view === 'test' ? (
+                <div style={{ paddingTop: '8rem' }}>
+                    <div className="container" style={{ marginBottom: '2rem' }}>
+                        <button
+                            onClick={() => {
+                                setView('site');
+                                window.history.pushState({}, '', '/');
+                            }}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontWeight: 900,
+                                fontSize: '1rem',
+                                color: 'var(--accent-r)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
+                        </button>
+                    </div>
+                    <ScreeningTest />
                 </div>
             ) : view === 'verify' ? (
                 <VerificationPortal onBack={() => setView('site')} />

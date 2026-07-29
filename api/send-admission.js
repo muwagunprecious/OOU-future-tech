@@ -40,8 +40,10 @@ export default async function handler(req, res) {
     const lmsLink = `${req.headers.origin || 'https://oou-future-tech.vercel.app'}/academy`;
     console.log(`📧 Attempting to send admission email to: ${email}`);
 
+    const senderEmail = (process.env.EMAIL_USER || 'ooufuturetech@gmail.com').trim();
+
     const mailOptions = {
-        from: `"OOU Future Tech Academy" <${process.env.EMAIL_USER}>`,
+        from: `"OOU Future Tech Academy" <${senderEmail}>`,
         to: email,
         subject: `Future Tech Academy Cohort One Admission - Congratulations!`,
         html: `
@@ -115,9 +117,13 @@ export default async function handler(req, res) {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
-        console.log(`✅ Admission email sent successfully to ${email}`);
-        return res.status(200).json({ message: 'Admission email sent successfully' });
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`✅ Admission email sent successfully to ${email}. MessageID: ${info.messageId}`);
+        return res.status(200).json({
+            message: 'Admission email sent successfully',
+            messageId: info.messageId,
+            accepted: info.accepted
+        });
     } catch (error) {
         console.error('❌ Admission Email Error:', error);
         return res.status(500).json({

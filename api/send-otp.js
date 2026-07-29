@@ -35,8 +35,10 @@ export default async function handler(req, res) {
         }
     });
 
+    const senderEmail = (process.env.EMAIL_USER || 'ooufuturetech@gmail.com').trim();
+
     const mailOptions = {
-        from: `"OOU Future Tech Academy" <${process.env.EMAIL_USER}>`,
+        from: `"OOU Future Tech Academy" <${senderEmail}>`,
         to: email,
         subject: `Password Reset Verification Code - Future Tech Academy`,
         html: `
@@ -71,8 +73,8 @@ export default async function handler(req, res) {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
-        return res.status(200).json({ message: 'OTP sent successfully' });
+        const info = await transporter.sendMail(mailOptions);
+        return res.status(200).json({ message: 'OTP sent successfully', messageId: info.messageId, accepted: info.accepted });
     } catch (error) {
         console.error('❌ Send OTP Error:', error);
         return res.status(200).json({ message: 'OTP processed (email failed)', error: error.message });

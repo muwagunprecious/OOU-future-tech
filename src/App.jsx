@@ -3469,24 +3469,22 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                             if (confirm(`Re-send admission email to ${w.name} (${w.email})?`)) {
                                                                                 try {
                                                                                     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                                                                                    if (!isLocal) {
-                                                                                        const response = await fetch('/api/send-admission', {
-                                                                                            method: 'POST',
-                                                                                            headers: { 'Content-Type': 'application/json' },
-                                                                                            body: JSON.stringify({
-                                                                                                email: w.email,
-                                                                                                name: w.name,
-                                                                                                course: w.company_name || 'Frontend Engineering',
-                                                                                                portalOpenDate: portalDates?.[w.cohort || 'Cohort 1'] || ''
-                                                                                            })
-                                                                                        });
-                                                                                        if (response.ok) {
-                                                                                            alert(`✅ Admission email re-sent to ${w.name}!`);
-                                                                                        } else {
-                                                                                            alert(`⚠️ Failed to send email. Ensure EMAIL_USER/EMAIL_PASS are configured on Vercel.`);
-                                                                                        }
+                                                                                    const targetUrl = isLocal ? `https://oou-future-tech.vercel.app/api/send-admission` : '/api/send-admission';
+                                                                                    const response = await fetch(targetUrl, {
+                                                                                        method: 'POST',
+                                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                                        body: JSON.stringify({
+                                                                                            email: w.email,
+                                                                                            name: w.name,
+                                                                                            course: w.company_name || 'Frontend Engineering',
+                                                                                            portalOpenDate: portalDates?.[w.cohort || 'Cohort 1'] || ''
+                                                                                        })
+                                                                                    });
+                                                                                    if (response.ok) {
+                                                                                        alert(`✅ Admission email re-sent to ${w.name}!`);
                                                                                     } else {
-                                                                                        alert(`(Running locally - email simulation) Admission email sent to ${w.email}!`);
+                                                                                        const errData = await response.json().catch(() => ({}));
+                                                                                        alert(`⚠️ Email failed: ${errData.error || 'Check Vercel EMAIL_USER & EMAIL_PASS'}`);
                                                                                     }
                                                                                 } catch (e) {
                                                                                     alert(`Error sending email: ${e.message}`);
@@ -3519,20 +3517,20 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                             if (confirm(`Re-send Cohort 2 update / rejection email to ${w.name} (${w.email})?`)) {
                                                                                 try {
                                                                                     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                                                                                    if (!isLocal) {
-                                                                                        const response = await fetch('/api/send-rejection', {
-                                                                                            method: 'POST',
-                                                                                            headers: { 'Content-Type': 'application/json' },
-                                                                                            body: JSON.stringify({
-                                                                                                email: w.email,
-                                                                                                name: w.name,
-                                                                                                course: w.company_name || 'Frontend Engineering'
-                                                                                            })
-                                                                                        });
-                                                                                        if (response.ok) alert(`✅ Rejection / Cohort 2 email re-sent to ${w.name}!`);
-                                                                                        else alert(`⚠️ Email failed to send. Check Vercel email credentials.`);
-                                                                                    } else {
-                                                                                        alert(`(Running locally - email simulation) Rejection email sent to ${w.email}!`);
+                                                                                    const targetUrl = isLocal ? `https://oou-future-tech.vercel.app/api/send-rejection` : '/api/send-rejection';
+                                                                                    const response = await fetch(targetUrl, {
+                                                                                        method: 'POST',
+                                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                                        body: JSON.stringify({
+                                                                                            email: w.email,
+                                                                                            name: w.name,
+                                                                                            course: w.company_name || 'Frontend Engineering'
+                                                                                        })
+                                                                                    });
+                                                                                    if (response.ok) alert(`✅ Rejection / Cohort 2 email re-sent to ${w.name}!`);
+                                                                                    else {
+                                                                                        const errData = await response.json().catch(() => ({}));
+                                                                                        alert(`⚠️ Email failed: ${errData.error || 'Check Vercel EMAIL_USER & EMAIL_PASS'}`);
                                                                                     }
                                                                                 } catch (e) {
                                                                                     alert(`Error: ${e.message}`);
@@ -3558,8 +3556,6 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                             const selectedCohort = document.getElementById(`cohort-select-${w.id}`)?.value || 'Cohort 1';
                                                                             if (confirm(`Admit ${w.name} (${w.email}) to ${selectedCohort} and send admission email?`)) {
                                                                                 try {
-                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
                                                                                     const updatedProducts = JSON.stringify({
                                                                                         ...parsedProducts,
                                                                                         level: parsedProducts.level || 'Beginner',
@@ -3579,30 +3575,29 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
 
                                                                                     if (updateError) throw updateError;
 
+                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                                                                                    const targetUrl = isLocal ? `https://oou-future-tech.vercel.app/api/send-admission` : '/api/send-admission';
                                                                                     let emailSent = false;
-                                                                                    if (!isLocal) {
-                                                                                        try {
-                                                                                            const response = await fetch('/api/send-admission', {
-                                                                                                method: 'POST',
-                                                                                                headers: { 'Content-Type': 'application/json' },
-                                                                                                body: JSON.stringify({
-                                                                                                    email: w.email,
-                                                                                                    name: w.name,
-                                                                                                    course: w.company_name || 'Frontend Engineering',
-                                                                                                    portalOpenDate: portalDates?.[selectedCohort] || ''
-                                                                                                })
-                                                                                            });
-                                                                                            if (response.ok) emailSent = true;
-                                                                                        } catch (emailErr) {
-                                                                                            console.warn('Email request failed:', emailErr);
-                                                                                        }
-                                                                                        if (emailSent) {
-                                                                                            alert(`✅ Admission granted & email sent to ${w.name}!`);
-                                                                                        } else {
-                                                                                            alert(`✅ ${w.name} marked as admitted.\n\n⚠️ Email failed to send. Check EMAIL_USER and EMAIL_PASS environment variables.`);
-                                                                                        }
+                                                                                    try {
+                                                                                        const response = await fetch(targetUrl, {
+                                                                                            method: 'POST',
+                                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                                            body: JSON.stringify({
+                                                                                                email: w.email,
+                                                                                                name: w.name,
+                                                                                                course: w.company_name || 'Frontend Engineering',
+                                                                                                portalOpenDate: portalDates?.[selectedCohort] || ''
+                                                                                            })
+                                                                                        });
+                                                                                        if (response.ok) emailSent = true;
+                                                                                    } catch (emailErr) {
+                                                                                        console.warn('Email request failed:', emailErr);
+                                                                                    }
+
+                                                                                    if (emailSent) {
+                                                                                        alert(`✅ Admission granted & email sent to ${w.name}!`);
                                                                                     } else {
-                                                                                        alert(`✅ ${w.name} marked as admitted in database.\n\n(Email simulation - running locally.)`);
+                                                                                        alert(`✅ ${w.name} marked as admitted.\n\n⚠️ Email failed to send. Check EMAIL_USER and EMAIL_PASS environment variables.`);
                                                                                     }
 
                                                                                     fetchWaitlist();
@@ -3631,8 +3626,6 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                         onClick={async () => {
                                                                             if (confirm(`Send rejection/deferral email to ${w.name} (${w.email}) informing them about Cohort 2?`)) {
                                                                                 try {
-                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
                                                                                     const updatedProducts = JSON.stringify({
                                                                                         ...parsedProducts,
                                                                                         admitted: false,
@@ -3646,29 +3639,28 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
 
                                                                                     if (updateError) throw updateError;
 
+                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                                                                                    const targetUrl = isLocal ? `https://oou-future-tech.vercel.app/api/send-rejection` : '/api/send-rejection';
                                                                                     let emailSent = false;
-                                                                                    if (!isLocal) {
-                                                                                        try {
-                                                                                            const response = await fetch('/api/send-rejection', {
-                                                                                                method: 'POST',
-                                                                                                headers: { 'Content-Type': 'application/json' },
-                                                                                                body: JSON.stringify({
-                                                                                                    email: w.email,
-                                                                                                    name: w.name,
-                                                                                                    course: w.company_name || 'Frontend Engineering'
-                                                                                                })
-                                                                                            });
-                                                                                            if (response.ok) emailSent = true;
-                                                                                        } catch (emailErr) {
-                                                                                            console.warn('Rejection email request failed:', emailErr);
-                                                                                        }
-                                                                                        if (emailSent) {
-                                                                                            alert(`✅ Rejection email sent to ${w.name}!`);
-                                                                                        } else {
-                                                                                            alert(`✅ ${w.name} marked as deferred/rejected.\n\n⚠️ Email failed to send. Check EMAIL_USER and EMAIL_PASS on Vercel.`);
-                                                                                        }
+                                                                                    try {
+                                                                                        const response = await fetch(targetUrl, {
+                                                                                            method: 'POST',
+                                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                                            body: JSON.stringify({
+                                                                                                email: w.email,
+                                                                                                name: w.name,
+                                                                                                course: w.company_name || 'Frontend Engineering'
+                                                                                            })
+                                                                                        });
+                                                                                        if (response.ok) emailSent = true;
+                                                                                    } catch (emailErr) {
+                                                                                        console.warn('Rejection email request failed:', emailErr);
+                                                                                    }
+
+                                                                                    if (emailSent) {
+                                                                                        alert(`✅ Rejection email sent to ${w.name}!`);
                                                                                     } else {
-                                                                                        alert(`✅ ${w.name} marked as deferred/rejected.\n\n(Email simulation - running locally.)`);
+                                                                                        alert(`✅ ${w.name} marked as deferred/rejected.\n\n⚠️ Email failed to send. Check EMAIL_USER and EMAIL_PASS on Vercel.`);
                                                                                     }
 
                                                                                     fetchWaitlist();
@@ -6190,21 +6182,20 @@ const AcademyDashboard = ({ portalDates }) => {
             setOtpInput('');
 
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const targetUrl = isLocal ? `https://oou-future-tech.vercel.app/api/send-otp` : '/api/send-otp';
 
-            if (!isLocal) {
-                try {
-                    await fetch('/api/send-otp', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            email: admittedRecord.email,
-                            name: admittedRecord.name,
-                            otp: code
-                        })
-                    });
-                } catch (err) {
-                    console.warn('OTP email fetch error:', err);
-                }
+            try {
+                await fetch(targetUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: admittedRecord.email,
+                        name: admittedRecord.name,
+                        otp: code
+                    })
+                });
+            } catch (err) {
+                console.warn('OTP email fetch error:', err);
             }
 
             setOtpNotice(`A 6-digit verification code has been sent to ${admittedRecord.email}.`);

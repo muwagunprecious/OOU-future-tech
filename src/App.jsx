@@ -3315,6 +3315,15 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                             return p && p.admitted;
                                         } catch (e) { return false; }
                                     }).length
+                                },
+                                {
+                                    id: 'rejected', label: '❌ Deferred / Rejected',
+                                    count: waitlist.filter(w => {
+                                        try {
+                                            const p = typeof w.products === 'string' ? JSON.parse(w.products) : w.products;
+                                            return p && p.rejected;
+                                        } catch (e) { return false; }
+                                    }).length
                                 }
                             ].map(f => (
                                 <button
@@ -3375,6 +3384,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                 return matchesSearch && !!p.test_done;
                                             } else if (waitlistFilter === 'admitted') {
                                                 return matchesSearch && !!p.admitted;
+                                            } else if (waitlistFilter === 'rejected') {
+                                                return matchesSearch && !!p.rejected;
                                             }
                                             return matchesSearch;
                                         })
@@ -3382,6 +3393,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                             let parsedProducts = {};
                                             try { parsedProducts = typeof w.products === 'string' ? JSON.parse(w.products) : (w.products || {}); } catch (e) { }
                                             const isAdmitted = !!parsedProducts.admitted;
+                                            const isRejected = !!parsedProducts.rejected;
                                             const testDone = !!parsedProducts.test_done;
                                             const testScore = parsedProducts.test_score;
 
@@ -3486,8 +3498,54 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                         📧 Re-send Email
                                                                     </button>
                                                                 </>
+                                                            ) : isRejected ? (
+                                                                <>
+                                                                    <span style={{
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '0.3rem',
+                                                                        background: '#fee2e2',
+                                                                        color: '#b91c1c',
+                                                                        border: '2px solid #000000',
+                                                                        padding: '0.25rem 0.6rem',
+                                                                        borderRadius: '0.4rem',
+                                                                        fontSize: '0.65rem',
+                                                                        fontWeight: 900
+                                                                    }}>
+                                                                        ❌ Cohort 2 Priority
+                                                                    </span>
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            if (confirm(`Re-send Cohort 2 update / rejection email to ${w.name} (${w.email})?`)) {
+                                                                                try {
+                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                                                                                    if (!isLocal) {
+                                                                                        const response = await fetch('/api/send-rejection', {
+                                                                                            method: 'POST',
+                                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                                            body: JSON.stringify({
+                                                                                                email: w.email,
+                                                                                                name: w.name,
+                                                                                                course: w.company_name || 'Frontend Engineering'
+                                                                                            })
+                                                                                        });
+                                                                                        if (response.ok) alert(`✅ Rejection / Cohort 2 email re-sent to ${w.name}!`);
+                                                                                        else alert(`⚠️ Email failed to send. Check Vercel email credentials.`);
+                                                                                    } else {
+                                                                                        alert(`(Running locally - email simulation) Rejection email sent to ${w.email}!`);
+                                                                                    }
+                                                                                } catch (e) {
+                                                                                    alert(`Error: ${e.message}`);
+                                                                                }
+                                                                            }
+                                                                        }}
+                                                                        style={{ background: '#fff', border: '1.5px solid #000', padding: '0.25rem 0.5rem', borderRadius: '0.3rem', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer' }}
+                                                                    >
+                                                                        ✉️ Re-send Rejection
+                                                                    </button>
+                                                                </>
                                                             ) : (
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                                                                     <select
                                                                         id={`cohort-select-${w.id}`}
                                                                         defaultValue={w.cohort || 'Cohort 1'}
@@ -3506,6 +3564,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                                         ...parsedProducts,
                                                                                         level: parsedProducts.level || 'Beginner',
                                                                                         admitted: true,
+                                                                                        rejected: false,
                                                                                         password: parsedProducts.password || '',
                                                                                         avatar_url: parsedProducts.avatar_url || ''
                                                                                     });
@@ -3566,7 +3625,73 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                             textTransform: 'uppercase'
                                                                         }}
                                                                     >
-                                                                        🎓 Admit & Send Email
+                                                                        🎓 Admit & Email
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            if (confirm(`Send rejection/deferral email to ${w.name} (${w.email}) informing them about Cohort 2?`)) {
+                                                                                try {
+                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+                                                                                    const updatedProducts = JSON.stringify({
+                                                                                        ...parsedProducts,
+                                                                                        admitted: false,
+                                                                                        rejected: true
+                                                                                    });
+
+                                                                                    const { error: updateError } = await supabase
+                                                                                        .from('registrations')
+                                                                                        .update({ products: updatedProducts })
+                                                                                        .eq('id', w.id);
+
+                                                                                    if (updateError) throw updateError;
+
+                                                                                    let emailSent = false;
+                                                                                    if (!isLocal) {
+                                                                                        try {
+                                                                                            const response = await fetch('/api/send-rejection', {
+                                                                                                method: 'POST',
+                                                                                                headers: { 'Content-Type': 'application/json' },
+                                                                                                body: JSON.stringify({
+                                                                                                    email: w.email,
+                                                                                                    name: w.name,
+                                                                                                    course: w.company_name || 'Frontend Engineering'
+                                                                                                })
+                                                                                            });
+                                                                                            if (response.ok) emailSent = true;
+                                                                                        } catch (emailErr) {
+                                                                                            console.warn('Rejection email request failed:', emailErr);
+                                                                                        }
+                                                                                        if (emailSent) {
+                                                                                            alert(`✅ Rejection email sent to ${w.name}!`);
+                                                                                        } else {
+                                                                                            alert(`✅ ${w.name} marked as deferred/rejected.\n\n⚠️ Email failed to send. Check EMAIL_USER and EMAIL_PASS on Vercel.`);
+                                                                                        }
+                                                                                    } else {
+                                                                                        alert(`✅ ${w.name} marked as deferred/rejected.\n\n(Email simulation - running locally.)`);
+                                                                                    }
+
+                                                                                    fetchWaitlist();
+                                                                                } catch (err) {
+                                                                                    console.error('Error sending rejection:', err);
+                                                                                    alert(`Error: ${err.message}`);
+                                                                                }
+                                                                            }
+                                                                        }}
+                                                                        style={{
+                                                                            background: '#ef4444',
+                                                                            color: '#ffffff',
+                                                                            border: '2px solid #000000',
+                                                                            padding: '0.35rem 0.7rem',
+                                                                            borderRadius: '0.4rem',
+                                                                            fontSize: '0.7rem',
+                                                                            fontWeight: 900,
+                                                                            cursor: 'pointer',
+                                                                            boxShadow: '2px 2px 0 #000000',
+                                                                            textTransform: 'uppercase'
+                                                                        }}
+                                                                    >
+                                                                        🚫 Reject & Email
                                                                     </button>
                                                                 </div>
                                                             )}

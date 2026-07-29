@@ -14,6 +14,10 @@
       "destination": "/api/send-otp.js"
     },
     {
+      "source": "/api/send-rejection",
+      "destination": "/api/send-rejection.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
@@ -28,6 +32,10 @@
       "maxDuration": 30
     },
     "api/send-otp.js": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/send-rejection.js": {
       "memory": 512,
       "maxDuration": 30
     }

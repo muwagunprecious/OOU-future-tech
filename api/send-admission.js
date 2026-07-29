@@ -5,7 +5,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { email, name, course } = req.body;
+    const { email, name, course, portalOpenDate } = req.body;
 
     if (!email || !name || !course) {
         console.error('❌ Missing required fields:', { email, name, course });
@@ -70,6 +70,10 @@ export default async function handler(req, res) {
                             <td><strong>Platform:</strong></td>
                             <td>Future Tech Academy LMS</td>
                         </tr>
+                        ${portalOpenDate ? `<tr>
+                            <td style="padding-bottom: 8px;"><strong>Portal Opens:</strong></td>
+                            <td style="padding-bottom: 8px; font-weight: bold; color: #E63946;">${new Date(portalOpenDate).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                        </tr>` : ''}
                     </table>
                 </div>
 
@@ -84,7 +88,7 @@ export default async function handler(req, res) {
                 </div>
 
                 <p style="font-size: 13px; color: #666666; line-height: 1.5; font-style: italic; background: #fffbeb; border: 1.5px solid #d97706; padding: 12px; border-radius: 8px;">
-                    💡 <strong>Admissions Note:</strong> If this is your first time accessing the academy, you will be prompted to choose a password, confirm it, and upload a profile picture. Returning users can log in using their email and chosen password.
+                    💡 <strong>Admissions Note:</strong> If this is your first time accessing the academy, you will be prompted to choose a password, confirm it, and upload a profile picture. Returning users can log in using their email and chosen password.${portalOpenDate ? `<br/><br/>⏰ <strong>Important:</strong> Your account can be set up now, but course content will only be accessible once the portal opens on <strong>${new Date(portalOpenDate).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong>.` : ''}
                 </p>
 
                 <div style="text-align: center; margin-top: 35px; border-top: 2px dashed #000000; padding-top: 20px;">

@@ -2520,6 +2520,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [searchTerm, setSearchTerm] = useState('');
     const [confirmingPitch, setConfirmingPitch] = useState(null); // { id, status }
 
+    const COHORTS = ['Cohort 1', 'Cohort 2', 'Cohort 3', 'Cohort 4', 'Cohort 5'];
+
     // Form states for adding content
     const [newSpeaker, setNewSpeaker] = useState({ name: '', role: '', expertise: '', image_url: '', bg_class: 'speaker-img-bg-1' });
     const [newPartner, setNewPartner] = useState({ name: '', logo_url: '' });
@@ -2550,6 +2552,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [cohortStudentsLoading, setCohortStudentsLoading] = useState(false);
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+    const [portalDates, setPortalDates] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('fta-portal-dates') || '{}'); } catch { return {}; }
+    });
 
     useEffect(() => {
         fetchRegistrations();
@@ -2564,6 +2569,15 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         fetchPeerGroups();
         fetchAdminPeerSubmissions();
         fetchCohortStudents(selectedCohortView);
+        supabase.from('site_settings').select('*').eq('key', 'portal_dates').maybeSingle().then(({ data }) => {
+            if (data && data.value) {
+                try {
+                    const parsed = JSON.parse(data.value);
+                    setPortalDates(parsed);
+                    localStorage.setItem('fta-portal-dates', data.value);
+                } catch {}
+            }
+        });
     }, []);
 
     const fetchPeerGroups = async () => {
@@ -2599,10 +2613,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         // Build leaderboard per student
         const leaderboard = studentList.map(s => {
             const studentGrades = gradeList.filter(g => g.student_email === s.email);
-            const studentSubmissions = submissionList.filter(sub => {
-                const members = Array.isArray(sub.members) ? sub.modules : [];
-                return members.some(m => m.email === s.email);
-            });
+            const studentSubmissions = submissionList.filter(sub => sub.submitter_email === s.email);
 
             const totalScore = studentGrades.length > 0
                 ? Math.round(studentGrades.reduce((a, g) => a + g.score, 0) / studentGrades.length)
@@ -3386,9 +3397,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                         ✅ {w.cohort || 'Cohort 1'}
                                                                     </span>
                                                                 );
-                                                            }
+    }
 
-                                                            return (
+    return (
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                                     <select
                                                                         id={`cohort-select-${w.id}`}
@@ -3430,7 +3441,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                                             body: JSON.stringify({
                                                                                                 email: w.email,
                                                                                                 name: w.name,
-                                                                                                course: w.company_name || 'Frontend Engineering'
+                                                                                                course: w.company_name || 'Frontend Engineering',
+                                                                                                portalOpenDate: portalDates?.[w.cohort || 'Cohort 1'] || ''
                                                                                             })
                                                                                         });
                                                                                         if (response.ok) {
@@ -3934,6 +3946,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                         { id: 'grade', label: '📝 Grade Submissions' },
                         { id: 'notify', label: '📣 Send Notification' },
                         { id: 'leaderboard', label: '🏆 Leaderboard' },
+                        { id: 'portal-settings', label: '⏰ Portal Settings' },
                     ];
 
                     return (
@@ -4383,115 +4396,118 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                         <button onClick={fetchAdminPeerSubmissions} style={{ padding: '0.3rem 0.7rem', background: '#f1f5f9', border: '2px solid #000', borderRadius: '0.3rem', fontFamily: 'Outfit', fontWeight: 800, fontSize: '0.65rem', cursor: 'pointer', textTransform: 'uppercase' }}>↻ Refresh</button>
                                                     </div>
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                                                        {filteredSubmissions.map(sub => {
-                                                            const isExpanded = expandedSubmission === sub.id;
-                                                            const membersList = Array.isArray(sub.members) ? sub.members : [];
-                                                            const moduleName = ACADEMY_COURSES[selectedTrackAdmin]?.modules[sub.module_index]?.title || `Module ${sub.module_index + 1}`;
-                                                            return (
-                                                                <div key={sub.id} style={{ border: '2px solid #000', borderRadius: '0.5rem', overflow: 'hidden', boxShadow: '3px 3px 0 #000' }}>
-                                                                    {/* Submission Header */}
-                                                                    <button
-                                                                        onClick={() => setExpandedSubmission(isExpanded ? null : sub.id)}
-                                                                        style={{
-                                                                            width: '100%', display: 'flex', alignItems: 'center', gap: '0.8rem',
-                                                                            padding: '0.8rem 1rem', background: isExpanded ? '#f0fdf4' : '#fff',
-                                                                            border: 'none', cursor: 'pointer', textAlign: 'left',
-                                                                            borderBottom: isExpanded ? '2px solid #000' : 'none',
-                                                                        }}
-                                                                    >
-                                                                        <div style={{
-                                                                            width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #000',
-                                                                            background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                            fontWeight: 900, fontSize: '0.65rem', color: '#1d4ed8', flexShrink: 0,
-                                                                        }}>
-                                                                            {sub.group_name ? sub.group_name.replace('Group ', 'G') : '—'}
-                                                                        </div>
-                                                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                                                            <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', color: '#000' }}>
-                                                                                {sub.group_name || 'Unnamed Group'}
-                                                                            </div>
-                                                                            <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700 }}>
-                                                                                {moduleName} · {membersList.length} member{membersList.length !== 1 ? 's' : ''} · {new Date(sub.created_at).toLocaleDateString()}
-                                                                            </div>
-                                                                        </div>
-                                                                        <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
-                                                                    </button>
+                                                         {filteredSubmissions.map(sub => {
+                                                             const isExpanded = expandedSubmission === sub.id;
+                                                             const membersList = Array.isArray(sub.members) ? sub.members : [];
+                                                             const moduleName = ACADEMY_COURSES[selectedTrackAdmin]?.modules[sub.module_index]?.title || `Module ${sub.module_index + 1}`;
+                                                             const submitterName = sub.submitter_name || sub.submitter_email || 'Unknown';
+                                                             return (
+                                                                 <div key={sub.id} style={{ border: '2px solid #000', borderRadius: '0.5rem', overflow: 'hidden', boxShadow: '3px 3px 0 #000' }}>
+                                                                     {/* Submission Header */}
+                                                                     <button
+                                                                         onClick={() => setExpandedSubmission(isExpanded ? null : sub.id)}
+                                                                         style={{
+                                                                             width: '100%', display: 'flex', alignItems: 'center', gap: '0.8rem',
+                                                                             padding: '0.8rem 1rem', background: isExpanded ? '#f0fdf4' : '#fff',
+                                                                             border: 'none', cursor: 'pointer', textAlign: 'left',
+                                                                             borderBottom: isExpanded ? '2px solid #000' : 'none',
+                                                                         }}
+                                                                     >
+                                                                         <div style={{
+                                                                             width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #000',
+                                                                             background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                             fontWeight: 900, fontSize: '0.65rem', color: '#1d4ed8', flexShrink: 0,
+                                                                         }}>
+                                                                             {sub.group_name ? sub.group_name.replace('Group ', 'G') : '—'}
+                                                                         </div>
+                                                                         <div style={{ flex: 1, minWidth: 0 }}>
+                                                                             <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', color: '#000' }}>
+                                                                                 {submitterName}
+                                                                             </div>
+                                                                             <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700 }}>
+                                                                                 {sub.group_name || 'Group'} · {moduleName} · {new Date(sub.created_at).toLocaleDateString()}
+                                                                             </div>
+                                                                         </div>
+                                                                         <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
+                                                                     </button>
 
-                                                                    {/* Expanded Detail */}
-                                                                    {isExpanded && (
-                                                                        <div style={{ padding: '1rem', background: '#f8fafc' }}>
-                                                                            {/* Members */}
-                                                                            <div style={{ marginBottom: '0.8rem' }}>
-                                                                                <div style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.3rem' }}>Team Members</div>
-                                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                                                                                    {membersList.map((m, i) => (
-                                                                                        <span key={i} style={{ fontSize: '0.65rem', fontWeight: 800, background: '#e0e7ff', color: '#3730a3', padding: '0.2rem 0.5rem', borderRadius: '0.3rem', border: '1px solid #6366f1' }}>
-                                                                                            {m.name || m.email}
-                                                                                        </span>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
+                                                                     {/* Expanded Detail */}
+                                                                     {isExpanded && (
+                                                                         <div style={{ padding: '1rem', background: '#f8fafc' }}>
+                                                                             {/* Submitter & Team */}
+                                                                             <div style={{ marginBottom: '0.8rem' }}>
+                                                                                 <div style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.3rem' }}>Submitted by</div>
+                                                                                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1d4ed8', marginBottom: '0.5rem' }}>
+                                                                                     {submitterName} ({sub.submitter_email || 'N/A'})
+                                                                                 </div>
+                                                                                 <div style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.3rem' }}>Team Members</div>
+                                                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                                                                                     {membersList.map((m, i) => (
+                                                                                         <span key={i} style={{ fontSize: '0.65rem', fontWeight: 800, background: m.email === sub.submitter_email ? '#dbeafe' : '#e0e7ff', color: '#3730a3', padding: '0.2rem 0.5rem', borderRadius: '0.3rem', border: `1px solid ${m.email === sub.submitter_email ? '#3b82f6' : '#6366f1'}` }}>
+                                                                                             {m.name || m.email}{m.email === sub.submitter_email ? ' (submitter)' : ''}
+                                                                                         </span>
+                                                                                     ))}
+                                                                                 </div>
+                                                                             </div>
 
-                                                                            {/* Submission Text */}
-                                                                            <div style={{ marginBottom: '1rem' }}>
-                                                                                <div style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.3rem' }}>Submission Content</div>
-                                                                                <div style={{ background: '#fff', border: '2px solid #000', borderRadius: '0.4rem', padding: '0.8rem', fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: '1.5', whiteSpace: 'pre-wrap', maxHeight: '300px', overflowY: 'auto' }}>
-                                                                                    {sub.submission_text || 'No content submitted.'}
-                                                                                </div>
-                                                                            </div>
+                                                                             {/* Submission Text */}
+                                                                             <div style={{ marginBottom: '1rem' }}>
+                                                                                 <div style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.3rem' }}>Submission Content</div>
+                                                                                 <div style={{ background: '#fff', border: '2px solid #000', borderRadius: '0.4rem', padding: '0.8rem', fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: '1.5', whiteSpace: 'pre-wrap', maxHeight: '300px', overflowY: 'auto' }}>
+                                                                                     {sub.submission_text || 'No content submitted.'}
+                                                                                 </div>
+                                                                             </div>
 
-                                                                            {/* Quick Grade Form */}
-                                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5rem', alignItems: 'end' }}>
-                                                                                <div>
-                                                                                    <label style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b' }}>Feedback</label>
-                                                                                    <input
-                                                                                        id={`feedback-${sub.id}`}
-                                                                                        type="text"
-                                                                                        placeholder="Optional feedback..."
-                                                                                        style={{ width: '100%', border: '2px solid #000', padding: '0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.75rem', boxSizing: 'border-box' }}
-                                                                                    />
-                                                                                </div>
-                                                                                <div>
-                                                                                    <label style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b' }}>Score</label>
-                                                                                    <input
-                                                                                        id={`score-${sub.id}`}
-                                                                                        type="number"
-                                                                                        min="0"
-                                                                                        max="100"
-                                                                                        defaultValue="0"
-                                                                                        style={{ width: '80px', border: '2px solid #000', padding: '0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.75rem' }}
-                                                                                    />
-                                                                                </div>
-                                                                                <button
-                                                                                    onClick={async () => {
-                                                                                        const memberEmails = membersList.map(m => m.email).filter(Boolean);
-                                                                                        const memberNames = membersList.map(m => m.name).filter(Boolean);
-                                                                                        const score = parseInt(document.getElementById(`score-${sub.id}`)?.value || '0');
-                                                                                        const feedback = document.getElementById(`feedback-${sub.id}`)?.value?.trim() || '';
-                                                                                        if (score < 0 || score > 100) { alert('Score must be 0-100.'); return; }
-                                                                                        // Grade each member
-                                                                                        for (let i = 0; i < memberEmails.length; i++) {
-                                                                                            await supabase.from('manual_grades').insert({
-                                                                                                student_email: memberEmails[i],
-                                                                                                student_name: memberNames[i] || memberEmails[i],
-                                                                                                cohort: selectedCohortAdmin,
-                                                                                                track: selectedTrackAdmin,
-                                                                                                module_index: sub.module_index,
-                                                                                                score,
-                                                                                                feedback: feedback || `Peer project grade for ${sub.group_name}`
-                                                                                            });
-                                                                                        }
-                                                                                        alert(`✅ Graded ${sub.group_name}: ${score}/100 for ${memberEmails.length} member(s)`);
-                                                                                    }}
-                                                                                    style={{ padding: '0.5rem 1rem', background: '#22c55e', color: '#fff', border: '2px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '2px 2px 0 #000', height: 'fit-content' }}
-                                                                                >
-                                                                                    Grade Group
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            );
+                                                                             {/* Quick Grade Form — grades only this submitter */}
+                                                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.5rem', alignItems: 'end' }}>
+                                                                                 <div>
+                                                                                     <label style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b' }}>Feedback</label>
+                                                                                     <input
+                                                                                         id={`feedback-${sub.id}`}
+                                                                                         type="text"
+                                                                                         placeholder="Optional feedback..."
+                                                                                         style={{ width: '100%', border: '2px solid #000', padding: '0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.75rem', boxSizing: 'border-box' }}
+                                                                                     />
+                                                                                 </div>
+                                                                                 <div>
+                                                                                     <label style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: '#64748b' }}>Score</label>
+                                                                                     <input
+                                                                                         id={`score-${sub.id}`}
+                                                                                         type="number"
+                                                                                         min="0"
+                                                                                         max="100"
+                                                                                         defaultValue="0"
+                                                                                         style={{ width: '80px', border: '2px solid #000', padding: '0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.75rem' }}
+                                                                                     />
+                                                                                 </div>
+                                                                                 <button
+                                                                                     onClick={async () => {
+                                                                                         const email = sub.submitter_email;
+                                                                                         const name = sub.submitter_name || email;
+                                                                                         const score = parseInt(document.getElementById(`score-${sub.id}`)?.value || '0');
+                                                                                         const feedback = document.getElementById(`feedback-${sub.id}`)?.value?.trim() || '';
+                                                                                         if (!email) { alert('No submitter email found.'); return; }
+                                                                                         if (score < 0 || score > 100) { alert('Score must be 0-100.'); return; }
+                                                                                         await supabase.from('manual_grades').insert({
+                                                                                             student_email: email,
+                                                                                             student_name: name,
+                                                                                             cohort: selectedCohortAdmin,
+                                                                                             track: selectedTrackAdmin,
+                                                                                             module_index: sub.module_index,
+                                                                                             score,
+                                                                                             feedback: feedback || `Peer project grade for ${sub.group_name}`
+                                                                                         });
+                                                                                         alert(`✅ Graded ${name}: ${score}/100`);
+                                                                                     }}
+                                                                                     style={{ padding: '0.5rem 1rem', background: '#22c55e', color: '#fff', border: '2px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '2px 2px 0 #000', height: 'fit-content' }}
+                                                                                 >
+                                                                                     Grade
+                                                                                 </button>
+                                                                             </div>
+                                                                         </div>
+                                                                     )}
+                                                                 </div>
+                                                             );
                                                         })}
                                                     </div>
                                                 </div>
@@ -4724,6 +4740,78 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                 </table>
                                             </div>
                                         )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ── PORTAL SETTINGS ── */}
+                            {ftaTab === 'portal-settings' && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                    <div style={{ background: '#fff', border: '3px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
+                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: '0 0 0.5rem 0', textTransform: 'uppercase' }}>⏰ Portal Open Date — Per Cohort</h3>
+                                        <p style={{ fontSize: '0.8rem', color: '#71717a', marginBottom: '1.5rem', fontWeight: 700 }}>Set when each cohort's LMS portal unlocks. Students in that cohort can set up accounts immediately, but course content is locked until the date arrives.</p>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                            {COHORTS.map(cohort => (
+                                                <div key={cohort} style={{ background: '#f8fafc', border: '3px solid #000', padding: '1.5rem', boxShadow: '4px 4px 0 #000' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                        <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem', margin: 0, textTransform: 'uppercase' }}>{cohort}</h4>
+                                                        {portalDates[cohort] && (
+                                                            <span style={{
+                                                                fontSize: '0.65rem', fontWeight: 900, padding: '0.2rem 0.6rem', borderRadius: '0.3rem',
+                                                                background: new Date(portalDates[cohort]) <= new Date() ? '#dcfce7' : '#fef9c3',
+                                                                color: new Date(portalDates[cohort]) <= new Date() ? '#15803d' : '#a16207',
+                                                                border: '1px solid #000'
+                                                            }}>
+                                                                {new Date(portalDates[cohort]) <= new Date() ? '✅ OPEN' : `🔒 LOCKED`}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                        <input
+                                                            type="datetime-local"
+                                                            value={portalDates[cohort] || ''}
+                                                            onChange={e => setPortalDates(prev => ({ ...prev, [cohort]: e.target.value }))}
+                                                            style={{
+                                                                padding: '0.7rem 1rem', border: '2px solid #000', fontSize: '0.9rem',
+                                                                fontFamily: 'Outfit', outline: 'none', background: '#fff', flex: '1 1 250px', boxSizing: 'border-box'
+                                                            }}
+                                                        />
+                                                        {portalDates[cohort] && (
+                                                            <button
+                                                                onClick={() => setPortalDates(prev => { const n = { ...prev }; delete n[cohort]; return n; })}
+                                                                style={{
+                                                                    padding: '0.5rem 0.8rem', background: '#fff', color: '#dc2626', border: '2px solid #dc2626',
+                                                                    fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap'
+                                                                }}
+                                                            >Clear</button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <button
+                                            onClick={async () => {
+                                                const cleaned = {};
+                                                Object.entries(portalDates).forEach(([k, v]) => { if (v) cleaned[k] = v; });
+                                                setPortalDates(cleaned);
+                                                localStorage.setItem('fta-portal-dates', JSON.stringify(cleaned));
+                                                const { error } = await supabase.from('site_settings').upsert({ key: 'portal_dates', value: JSON.stringify(cleaned), updated_at: new Date().toISOString() });
+                                                if (!error) alert('✅ Portal dates saved!');
+                                                else alert('Saved locally. Supabase error: ' + error.message);
+                                            }}
+                                            style={{
+                                                marginTop: '1.5rem', padding: '0.9rem 1.5rem',
+                                                background: 'var(--accent-r)', color: '#ffffff', border: '3px solid #000',
+                                                fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem',
+                                                textTransform: 'uppercase', cursor: 'pointer', boxShadow: '4px 4px 0 #000',
+                                                alignSelf: 'flex-start'
+                                            }}
+                                        >
+                                            Save All Portal Dates
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -5832,7 +5920,7 @@ const runAIGrader = (modIdx, code, courseKey) => {
     return { score, feedback: steps.join('\n'), steps };
 };
 
-const AcademyDashboard = () => {
+const AcademyDashboard = ({ portalDates }) => {
     const [selectedCourse, setSelectedCourse] = useState(() => {
         return localStorage.getItem('fta-admin-assigned-course') || 'Frontend Engineering';
     });
@@ -6095,6 +6183,36 @@ const AcademyDashboard = () => {
     // Sub-tab switching
     const [academyTab, setAcademyTab] = useState('curriculum'); // 'curriculum' | 'peers' | 'notifications'
 
+    // Portal countdown state (always declared, only used when locked)
+    const myPortalDate = portalDates?.[studentCohort] || '';
+    const portalUnlockTime = myPortalDate ? new Date(myPortalDate) : null;
+    const portalIsLocked = studentSession && portalUnlockTime && portalUnlockTime > new Date();
+    const [portalCountdown, setPortalCountdown] = useState(() => {
+        if (!portalUnlockTime) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+        const diff = portalUnlockTime - new Date();
+        return {
+            days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+            minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+            seconds: Math.floor((diff % (1000 * 60)) / 1000)
+        };
+    });
+
+    useEffect(() => {
+        if (!portalIsLocked) return;
+        const timer = setInterval(() => {
+            const diff = portalUnlockTime - new Date();
+            if (diff <= 0) { clearInterval(timer); window.location.reload(); return; }
+            setPortalCountdown({
+                days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+                seconds: Math.floor((diff % (1000 * 60)) / 1000)
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [portalIsLocked]);
+
     // Student Score & Manual Grades State
     const [manualGrades, setManualGrades] = useState([]);
     const [customModules, setCustomModules] = useState([]);
@@ -6134,12 +6252,15 @@ const AcademyDashboard = () => {
     const [peerSubmitLoading, setPeerSubmitLoading] = useState(false);
     useEffect(() => {
         if (studentSession && studentSession.email) {
-            supabase.from('peer_groups').select('*').eq('track', selectedCourse).then(({ data }) => {
-                if (data) {
+            const studentCohort = studentSession.cohort || 'Cohort 1';
+            supabase.from('peer_groups').select('*').eq('track', selectedCourse).eq('cohort', studentCohort).order('created_at', { ascending: false }).then(({ data }) => {
+                if (data && data.length > 0) {
                     const myGroups = data.filter(g =>
                         g.members.some(m => m.email === studentSession.email)
                     );
                     setMyPeerGroups(myGroups);
+                } else {
+                    setMyPeerGroups([]);
                 }
             });
         }
@@ -6155,7 +6276,9 @@ const AcademyDashboard = () => {
                 module_index: group.module_index,
                 group_name: `Group ${group.group_number}`,
                 members: group.members,
-                submission_text: peerSubmitText.trim()
+                submission_text: peerSubmitText.trim(),
+                submitter_email: studentSession.email,
+                submitter_name: studentSession.name || studentSession.email
             });
             if (error) throw error;
             setPeerSubmitText('');
@@ -6183,7 +6306,7 @@ const AcademyDashboard = () => {
         // Penalty: if student is in a peer group and deadline passed without submission, score=0 for that module
         myPeerGroups.forEach(pg => {
             if (pg.deadline && new Date(pg.deadline) < new Date() && !pg.is_unpaired) {
-                const hasSubmitted = peerSubmissions.some(s => s.module_index === pg.module_index && s.members?.some(m => m.email === studentSession?.email));
+                const hasSubmitted = peerSubmissions.some(s => s.module_index === pg.module_index && s.submitter_email === studentSession?.email);
                 if (!hasSubmitted) {
                     // Check if already graded for this module
                     const alreadyGraded = manualGrades.some(g => g.module_index === pg.module_index);
@@ -6209,7 +6332,7 @@ const AcademyDashboard = () => {
             // Check peer group deadline penalty
             const pg = myPeerGroups.find(g => g.module_index === idx && g.track === track);
             if (pg && pg.deadline && new Date(pg.deadline) < new Date() && !pg.is_unpaired) {
-                const hasSubmitted = peerSubmissions.some(s => s.module_index === idx && s.members?.some(m => m.email === studentSession?.email));
+                const hasSubmitted = peerSubmissions.some(s => s.module_index === idx && s.submitter_email === studentSession?.email);
                 if (!hasSubmitted) return { score: 0, feedback: 'Deadline passed — no submission', graded_at: pg.deadline };
             }
             return { score: null, feedback: null, graded_at: null };
@@ -7711,8 +7834,9 @@ const AcademyDashboard = () => {
                 const partner = currentGroup.members.find(m => m.email !== studentSession.email);
                 const myInfo = currentGroup.members.find(m => m.email === studentSession.email);
                 const deadlinePassed = currentGroup.deadline ? new Date(currentGroup.deadline) < new Date() : false;
-                const hasSubmitted = peerSubmissions.some(s => s.module_index === currentModIdx && s.members?.some(m => m.email === studentSession.email));
-                const mySubmission = peerSubmissions.find(s => s.module_index === currentModIdx && s.members?.some(m => m.email === studentSession.email));
+                const hasSubmitted = peerSubmissions.some(s => s.module_index === currentModIdx && s.submitter_email === studentSession.email);
+                const mySubmission = peerSubmissions.find(s => s.module_index === currentModIdx && s.submitter_email === studentSession.email);
+                const partnerSubmission = peerSubmissions.find(s => s.module_index === currentModIdx && partner && s.submitter_email === partner.email);
                 const myGrade = manualGrades.find(g => g.module_index === currentModIdx && g.track === currentGroup.track);
                 const isExpanded = showPeerDetails === currentModIdx;
 
@@ -7727,7 +7851,7 @@ const AcademyDashboard = () => {
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
                             <div style={{ flex: '1 1 auto' }}>
                                 <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem', margin: '0 0 0.3rem 0', textTransform: 'uppercase' }}>
-                                    {isUnpaired ? '⚠️ You are Not Peered' : deadlinePassed && !hasSubmitted ? '❌ Deadline Passed — Score: 0' : hasSubmitted ? '✅ Submitted — Awaiting Score' : `🤝 Your Peer Group — Group ${currentGroup.group_number}`}
+                                    {isUnpaired ? '⚠️ You are Not Peered' : deadlinePassed && !hasSubmitted ? '❌ Deadline Passed — Score: 0' : `🤝 Your Peer Group — Group ${currentGroup.group_number}`}
                                 </h4>
                                 {!isUnpaired && !deadlinePassed && (
                                     <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.8rem', fontWeight: 700 }}>
@@ -7763,11 +7887,34 @@ const AcademyDashboard = () => {
                             </div>
                         )}
 
-                        {/* Submitted — awaiting score */}
+                        {/* Per-partner submission status */}
+                        {!isUnpaired && (hasSubmitted || partnerSubmission) && (
+                            <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                                <div style={{ flex: '1 1 200px', background: hasSubmitted ? '#ecfdf5' : '#fef2f2', border: `2px solid ${hasSubmitted ? '#22c55e' : '#ef4444'}`, padding: '0.6rem 0.8rem', borderRadius: '0.4rem' }}>
+                                    <div style={{ fontWeight: 900, fontSize: '0.75rem', color: hasSubmitted ? '#059669' : '#dc2626' }}>
+                                        {hasSubmitted ? '✅ You: Submitted' : '❌ You: Not Submitted'}
+                                    </div>
+                                    {mySubmission && (
+                                        <div style={{ fontSize: '0.65rem', color: '#555', marginTop: '0.2rem', wordBreak: 'break-word' }}>
+                                            {mySubmission.submission_text?.slice(0, 60)}{mySubmission.submission_text?.length > 60 ? '...' : ''}
+                                        </div>
+                                    )}
+                                </div>
+                                <div style={{ flex: '1 1 200px', background: partnerSubmission ? '#ecfdf5' : '#fef2f2', border: `2px solid ${partnerSubmission ? '#22c55e' : '#ef4444'}`, padding: '0.6rem 0.8rem', borderRadius: '0.4rem' }}>
+                                    <div style={{ fontWeight: 900, fontSize: '0.75rem', color: partnerSubmission ? '#059669' : '#dc2626' }}>
+                                        {partnerSubmission ? `✅ ${partner?.name || 'Partner'}: Submitted` : `❌ ${partner?.name || 'Partner'}: Not Submitted`}
+                                    </div>
+                                    {partnerSubmission && (
+                                        <div style={{ fontSize: '0.65rem', color: '#555', marginTop: '0.2rem', wordBreak: 'break-word' }}>
+                                            {partnerSubmission.submission_text?.slice(0, 60)}{partnerSubmission.submission_text?.length > 60 ? '...' : ''}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                         {hasSubmitted && (
                             <div style={{ background: '#ecfdf5', border: '2px solid #22c55e', padding: '0.8rem 1rem', borderRadius: '0.4rem', marginBottom: '0.5rem' }}>
-                                <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#059669' }}>✅ Your project has been submitted!</div>
-                                {mySubmission && <div style={{ fontSize: '0.7rem', color: '#555', marginTop: '0.3rem' }}>{mySubmission.submission_text?.slice(0, 100)}{mySubmission.submission_text?.length > 100 ? '...' : ''}</div>}
+                                <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#059669' }}>✅ Your submission is in!</div>
                                 {myGrade ? (
                                     <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: '#fff', border: '2px solid #000', display: 'inline-block' }}>
                                         <span style={{ fontWeight: 900, fontSize: '0.8rem' }}>Your Score: </span>
@@ -7790,7 +7937,7 @@ const AcademyDashboard = () => {
                                         <li>Contact your partner via email: <strong>{partner?.email || 'N/A'}</strong></li>
                                         <li>Discuss and divide the work based on your strengths</li>
                                         <li>Collaborate on the solution — pair program if possible</li>
-                                        <li>Submit a single shared submission (link or document)</li>
+                                        <li>Each partner must submit their own work individually</li>
                                     </ul>
                                 </div>
                                 {currentGroup.task_description && (
@@ -7808,14 +7955,31 @@ const AcademyDashboard = () => {
                                 {!hasSubmitted && !deadlinePassed ? (
                                     <div style={{ marginTop: '1rem', borderTop: '2px solid #eee', paddingTop: '1rem' }}>
                                         <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem' }}>Paste your project link or submission</label>
-                                        <textarea value={peerSubmitText} onChange={e => setPeerSubmitText(e.target.value)} rows={3} placeholder="e.g. https://github.com/you-and-partner/project or describe what you built..." style={{ border: '2px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%', resize: 'vertical', boxSizing: 'border-box' }} />
+                                        <textarea value={peerSubmitText} onChange={e => setPeerSubmitText(e.target.value)} rows={3} placeholder="Paste your project link or describe your individual contribution..." style={{ border: '2px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%', resize: 'vertical', boxSizing: 'border-box' }} />
                                         <button onClick={() => handleSubmitPeerProject(currentGroup)} disabled={peerSubmitLoading} style={{ marginTop: '0.5rem', padding: '0.7rem 1.5rem', background: peerSubmitLoading ? '#94a3b8' : '#22c55e', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', cursor: peerSubmitLoading ? 'not-allowed' : 'pointer', boxShadow: '3px 3px 0 #000' }}>
-                                            {peerSubmitLoading ? 'Submitting...' : '🚀 Submit Project'}
+                                            {peerSubmitLoading ? 'Submitting...' : '🚀 Submit Your Part'}
                                         </button>
                                     </div>
                                 ) : hasSubmitted ? (
-                                    <div style={{ marginTop: '1rem', borderTop: '2px solid #eee', paddingTop: '1rem', fontSize: '0.8rem', color: '#059669', fontWeight: 800 }}>
-                                        ✅ You have already submitted your project.
+                                    <div style={{ marginTop: '1rem', borderTop: '2px solid #eee', paddingTop: '1rem' }}>
+                                        <div style={{ fontSize: '0.8rem', color: '#059669', fontWeight: 800, marginBottom: '0.5rem' }}>
+                                            ✅ You have already submitted your project.
+                                        </div>
+                                        {mySubmission && (
+                                            <div style={{ background: '#f0fdf4', border: '2px solid #22c55e', padding: '0.7rem 1rem', borderRadius: '0.4rem', fontSize: '0.75rem', color: '#333', wordBreak: 'break-word' }}>
+                                                <strong>Your Submission:</strong>
+                                                <div style={{ marginTop: '0.3rem' }}>
+                                                    {mySubmission.submission_text?.startsWith('http') ? (
+                                                        <a href={mySubmission.submission_text} target="_blank" rel="noreferrer" style={{ color: '#2563eb', textDecoration: 'underline', fontWeight: 700 }}>{mySubmission.submission_text}</a>
+                                                    ) : (
+                                                        <span>{mySubmission.submission_text}</span>
+                                                    )}
+                                                </div>
+                                                <div style={{ marginTop: '0.4rem', fontSize: '0.65rem', color: '#71717a' }}>
+                                                    Submitted {mySubmission.created_at ? new Date(mySubmission.created_at).toLocaleString() : 'recently'}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : null}
                             </div>
@@ -10318,6 +10482,9 @@ export default function App() {
     const [speakersMode, setSpeakersMode] = useState('live'); // 'live' or 'coming_soon'
     const [comingSoonText, setComingSoonText] = useState('Exciting lineup coming soon! Stay tuned.');
     const [isEventTagsOpen, setIsEventTagsOpen] = useState(true);
+    const [portalDates, setPortalDates] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('fta-portal-dates') || '{}'); } catch { return {}; }
+    });
 
     useEffect(() => {
         fetchCMSData();
@@ -10358,6 +10525,15 @@ export default function App() {
 
                 const etSetting = settings.find(s => s.key === 'event_tags_open');
                 if (etSetting) setIsEventTagsOpen(etSetting.value === 'true');
+
+                const portalSetting = settings.find(s => s.key === 'portal_dates');
+                if (portalSetting && portalSetting.value) {
+                    try {
+                        const parsed = JSON.parse(portalSetting.value);
+                        setPortalDates(parsed);
+                        localStorage.setItem('fta-portal-dates', portalSetting.value);
+                    } catch {}
+                }
             }
         } catch (err) {
             console.warn('CMS Fetch failed (tables might not exist yet):', err);
@@ -10546,7 +10722,7 @@ export default function App() {
                             <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
                         </button>
                     </div>
-                    <AcademyDashboard />
+                    <AcademyDashboard portalDates={portalDates} />
                 </div>
             ) : view === 'verify' ? (
                 <VerificationPortal onBack={() => setView('site')} />

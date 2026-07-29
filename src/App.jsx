@@ -3462,7 +3462,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                         fontSize: '0.65rem',
                                                                         fontWeight: 900
                                                                     }}>
-                                                                        ✅ {w.cohort || 'Cohort 1'}
+                                                                        ✅ {parsedProducts.cohort || w.cohort || 'Cohort 1'}
                                                                     </span>
                                                                     <button
                                                                         onClick={async () => {
@@ -3475,7 +3475,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                                             email: w.email,
                                                                                             name: w.name,
                                                                                             course: w.company_name || 'Frontend Engineering',
-                                                                                            portalOpenDate: portalDates?.[w.cohort || 'Cohort 1'] || ''
+                                                                                            portalOpenDate: portalDates?.[parsedProducts.cohort || w.cohort || 'Cohort 1'] || ''
                                                                                         })
                                                                                     });
                                                                                     if (response.ok) {
@@ -3542,7 +3542,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                                                                     <select
                                                                         id={`cohort-select-${w.id}`}
-                                                                        defaultValue={w.cohort || 'Cohort 1'}
+                                                                        defaultValue={parsedProducts.cohort || w.cohort || 'Cohort 1'}
                                                                         style={{ border: '2px solid #000', padding: '0.3rem 0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.65rem', borderRadius: '0.3rem' }}
                                                                     >
                                                                         {COHORTS.map(c => <option key={c} value={c}>{c}</option>)}
@@ -3557,16 +3557,14 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                                         level: parsedProducts.level || 'Beginner',
                                                                                         admitted: true,
                                                                                         rejected: false,
+                                                                                        cohort: selectedCohort,
                                                                                         password: parsedProducts.password || '',
                                                                                         avatar_url: parsedProducts.avatar_url || ''
                                                                                     });
 
                                                                                     const { error: updateError } = await supabase
                                                                                         .from('registrations')
-                                                                                        .update({
-                                                                                            products: updatedProducts,
-                                                                                            cohort: selectedCohort
-                                                                                        })
+                                                                                        .update({ products: updatedProducts })
                                                                                         .eq('id', w.id);
 
                                                                                     if (updateError) throw updateError;

@@ -6181,7 +6181,91 @@ const AcademyDashboard = ({ portalDates }) => {
     const [recentSubmissionCount, setRecentSubmissionCount] = useState(0);
 
     // Sub-tab switching
-    const [academyTab, setAcademyTab] = useState('curriculum'); // 'curriculum' | 'peers' | 'notifications'
+    const [academyTab, setAcademyTab] = useState('curriculum'); // 'curriculum' | 'tests' | 'peers' | 'notifications'
+    const [testModuleIdx, setTestModuleIdx] = useState(0);
+    const [testAnswers, setTestAnswers] = useState({});
+    const [testSubmitted, setTestSubmitted] = useState(false);
+    const [testScore, setTestScore] = useState(null);
+
+    // MCQ Test bank per module (per course)
+    const MODULE_TESTS = {
+        'Frontend Engineering': [
+            {
+                title: 'Module 1: Internet & Web Foundations',
+                questions: [
+                    { q: 'What does HTTP stand for?', options: ['HyperText Transfer Protocol', 'Highly Technical Transfer Protocol', 'Home Text Transfer Protocol', 'HyperText Terminal Process'], answer: 0 },
+                    { q: 'Which of these is a valid HTML tag?', options: ['<webpage>', '<body>', '<content>', '<internet>'], answer: 1 },
+                    { q: 'CSS stands for:', options: ['Computer Style Sheets', 'Cascading Style Sheets', 'Creative Style System', 'Coded Stylesheet'], answer: 1 },
+                    { q: 'Which HTML attribute is used to link an external CSS file?', options: ['src', 'link', 'href', 'style'], answer: 2 },
+                    { q: 'What port does HTTPS use by default?', options: ['80', '21', '443', '8080'], answer: 2 },
+                ]
+            },
+            {
+                title: 'Module 2: HTML & CSS Fundamentals',
+                questions: [
+                    { q: 'Which HTML element defines the largest heading?', options: ['<h6>', '<heading>', '<h1>', '<head>'], answer: 2 },
+                    { q: 'Which CSS property controls text size?', options: ['text-style', 'font-size', 'text-size', 'font-weight'], answer: 1 },
+                    { q: 'What does "div" stand for in HTML?', options: ['Division', 'Divider', 'Document Index Value', 'Display Inline View'], answer: 0 },
+                    { q: 'Which CSS value makes an element invisible but keeps its space?', options: ['display: none', 'opacity: 0', 'visibility: hidden', 'hidden: true'], answer: 2 },
+                    { q: 'The CSS box model includes margin, border, padding and:', options: ['Space', 'Content', 'Element', 'Layer'], answer: 1 },
+                ]
+            },
+            {
+                title: 'Module 3: JavaScript Essentials',
+                questions: [
+                    { q: 'Which keyword declares a constant in JavaScript?', options: ['var', 'let', 'const', 'def'], answer: 2 },
+                    { q: 'What does === check in JavaScript?', options: ['Assignment', 'Loose equality', 'Strict equality (value + type)', 'Greater than or equal'], answer: 2 },
+                    { q: 'Which method adds an item to the END of a JavaScript array?', options: ['.shift()', '.pop()', '.unshift()', '.push()'], answer: 3 },
+                    { q: 'What will console.log(typeof "hello") output?', options: ['string', 'text', 'word', 'object'], answer: 0 },
+                    { q: 'Arrow functions use which syntax?', options: ['=>', '->', '::', '<-'], answer: 0 },
+                ]
+            },
+            {
+                title: 'Module 4: React JS',
+                questions: [
+                    { q: 'React components return:', options: ['HTML files', 'JSON data', 'JSX elements', 'Plain text'], answer: 2 },
+                    { q: 'Which hook manages local state in React?', options: ['useEffect', 'useState', 'useContext', 'useRef'], answer: 1 },
+                    { q: 'What is props in React?', options: ['Database connection', 'Data passed to a child component', 'A CSS module', 'A React hook'], answer: 1 },
+                    { q: 'useEffect runs:', options: ['Before every render', 'After every render by default', 'Only on button click', 'Never automatically'], answer: 1 },
+                    { q: 'A React key prop helps React identify:', options: ['Styled components', 'Which items changed in a list', 'The page route', 'The root element'], answer: 1 },
+                ]
+            },
+        ],
+        'Product Design (UI/UX)': [
+            {
+                title: 'Module 1: Design Thinking',
+                questions: [
+                    { q: 'The first step in Design Thinking is:', options: ['Prototype', 'Test', 'Empathize', 'Define'], answer: 2 },
+                    { q: 'A user persona is:', options: ['A fictional user representing target audience', 'A real client', 'An app login profile', 'A design template'], answer: 0 },
+                    { q: 'HMW stands for:', options: ['How May We', 'How Might We', 'How Must We', 'How Many Ways'], answer: 1 },
+                    { q: 'Prototyping comes before which step?', options: ['Empathize', 'Define', 'Ideate', 'Test'], answer: 3 },
+                    { q: 'User research helps designers:', options: ['Build faster', 'Understand user needs and pain points', 'Skip testing', 'Avoid client meetings'], answer: 1 },
+                ]
+            },
+            {
+                title: 'Module 2: UI Design Principles',
+                questions: [
+                    { q: 'Visual hierarchy helps users:', options: ['Log in faster', 'Understand importance and order of content', 'Share the interface', 'Choose colors'], answer: 1 },
+                    { q: 'Whitespace in design is:', options: ['Wasted space', 'Empty space that improves readability', 'A background color', 'A grid error'], answer: 1 },
+                    { q: 'Contrast in UI design is used to:', options: ['Add animation', 'Ensure readability and visual emphasis', 'Fill backgrounds', 'Create shadows'], answer: 1 },
+                    { q: 'A style guide defines:', options: ['Backend logic', 'Typography, colors, and component usage', 'Server structure', 'Test cases'], answer: 1 },
+                    { q: 'F-pattern and Z-pattern describe:', options: ['Coding patterns', 'How users visually scan content', 'File structures', 'Animations'], answer: 1 },
+                ]
+            },
+        ],
+        'Grit & Growth Mindset': [
+            {
+                title: 'Module 1: Mindset Foundations',
+                questions: [
+                    { q: 'A growth mindset believes:', options: ['Intelligence is fixed at birth', 'Abilities can be developed through dedication', 'Only talented people succeed', 'Failure should be avoided'], answer: 1 },
+                    { q: "Angela Duckworth defines 'Grit' as:", options: ['Stubbornness', 'Passion and perseverance for long-term goals', 'Natural talent', 'Quick success'], answer: 1 },
+                    { q: 'Which statement reflects a growth mindset?', options: ["I'm not good at this", "I can't do this yet", 'This is too hard for me', 'I will never be good at this'], answer: 1 },
+                    { q: 'Deliberate practice means:', options: ['Practising randomly', 'Practising with focused effort and feedback', 'Doing what you already know', 'Avoiding mistakes'], answer: 1 },
+                    { q: 'WOOP stands for:', options: ['Wish, Outcome, Obstacle, Plan', 'Work, Organize, Optimize, Perform', 'Win, Own, Overcome, Push', 'Want, Order, Offer, Provide'], answer: 0 },
+                ]
+            },
+        ]
+    };
 
     // Portal countdown state (always declared, only used when locked)
     const myPortalDate = portalDates?.[studentCohort] || '';
@@ -7486,6 +7570,7 @@ const AcademyDashboard = ({ portalDates }) => {
 
                                         {[
                                             { icon: '🎓', label: 'Curriculum', sub: 'Videos & Lessons', tab: 'curriculum' },
+                                            { icon: '🧪', label: 'Module Tests', sub: 'MCQ Quizzes', tab: 'tests' },
                                             { icon: '👥', label: 'Peer Hub', sub: 'Bug Board & Help', tab: 'peers' },
                                             { icon: '🔔', label: 'Notifications', sub: `${unreadCount} unread`, tab: 'notifications' },
                                         ].map(item => (
@@ -7619,6 +7704,7 @@ const AcademyDashboard = ({ portalDates }) => {
                             <div style={{ display: 'flex', gap: '0.4rem', background: '#f1f5f9', padding: '0.3rem', border: '3px solid #000', borderRadius: '0.8rem', boxShadow: '3px 3px 0 #000', marginLeft: '2rem' }}>
                                 {[
                                     { icon: '📚', label: 'Curriculum', tab: 'curriculum' },
+                                    { icon: '🧪', label: 'Tests', tab: 'tests' },
                                     { icon: '👥', label: 'Peer Hub', tab: 'peers' },
                                     { icon: '🔔', label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, tab: 'notifications' },
                                 ].map(item => (
@@ -9150,6 +9236,213 @@ const AcademyDashboard = ({ portalDates }) => {
                                             </div>
                                         </div>
                                     ))
+                                )}
+                            </div>
+                        </div>
+                    );
+                })()}
+
+                {/* 🧪 MODULE TESTS VIEW */}
+                {academyTab === 'tests' && (() => {
+                    const courseTests = MODULE_TESTS[selectedCourse] || MODULE_TESTS['Frontend Engineering'];
+                    const currentTest = courseTests[testModuleIdx] || courseTests[0];
+                    const savedKey = `fta-test-score-${selectedCourse}-mod-${testModuleIdx}`;
+                    const savedScore = testScore !== null ? testScore : (localStorage.getItem(savedKey) ? parseInt(localStorage.getItem(savedKey)) : null);
+
+                    const handleTestSubmit = () => {
+                        let correct = 0;
+                        currentTest.questions.forEach((q, i) => {
+                            if (testAnswers[i] === q.answer) correct++;
+                        });
+                        const score = Math.round((correct / currentTest.questions.length) * 100);
+                        setTestScore(score);
+                        setTestSubmitted(true);
+                        localStorage.setItem(savedKey, score.toString());
+                    };
+
+                    const handleRetake = () => {
+                        setTestAnswers({});
+                        setTestSubmitted(false);
+                        setTestScore(null);
+                    };
+
+                    const handleModuleSelect = (idx) => {
+                        setTestModuleIdx(idx);
+                        setTestAnswers({});
+                        setTestSubmitted(false);
+                        setTestScore(null);
+                    };
+
+                    const allAnswered = Object.keys(testAnswers).length === currentTest.questions.length;
+
+                    return (
+                        <div style={{ maxWidth: '860px', margin: '0 auto', width: '100%', animation: 'fadeIn 0.3s ease-out' }}>
+                            {/* Header */}
+                            <div style={{ borderBottom: '3px solid #000', paddingBottom: '0.5rem', marginBottom: '2rem' }}>
+                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.3rem', margin: 0, textTransform: 'uppercase' }}>🧪 Module Tests</h3>
+                                <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#71717a', margin: '0.2rem 0 0 0' }}>Multiple-choice quizzes to test your knowledge for each module</p>
+                            </div>
+
+                            {/* Module Selector */}
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+                                {courseTests.map((mod, idx) => {
+                                    const ms = localStorage.getItem(`fta-test-score-${selectedCourse}-mod-${idx}`);
+                                    const msVal = ms ? parseInt(ms) : null;
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={() => handleModuleSelect(idx)}
+                                            style={{
+                                                padding: '0.5rem 1rem',
+                                                background: testModuleIdx === idx ? '#000' : '#f1f5f9',
+                                                color: testModuleIdx === idx ? '#fff' : '#000',
+                                                border: '2px solid #000',
+                                                fontFamily: 'Outfit',
+                                                fontWeight: 900,
+                                                fontSize: '0.75rem',
+                                                cursor: 'pointer',
+                                                borderRadius: '0.4rem',
+                                                boxShadow: testModuleIdx === idx ? '3px 3px 0 var(--accent-r)' : '2px 2px 0 #000',
+                                                display: 'flex', alignItems: 'center', gap: '0.4rem'
+                                            }}
+                                        >
+                                            Module {idx + 1}
+                                            {msVal !== null && (
+                                                <span style={{
+                                                    background: msVal >= 75 ? '#22c55e' : msVal >= 50 ? '#f59e0b' : '#ef4444',
+                                                    color: '#fff', padding: '0.1rem 0.4rem', borderRadius: '1rem',
+                                                    fontSize: '0.6rem', fontWeight: 900
+                                                }}>{msVal}%</span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Quiz Card */}
+                            <div style={{ background: '#fff', border: '3px solid #000', boxShadow: '8px 8px 0 #000', overflow: 'hidden' }}>
+                                {/* Quiz Header */}
+                                <div style={{ background: '#000', color: '#fff', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                    <div>
+                                        <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase' }}>{currentTest.title}</div>
+                                        <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '0.2rem' }}>{currentTest.questions.length} questions · Passing score: 75%</div>
+                                    </div>
+                                    {savedScore !== null && !testSubmitted && (
+                                        <div style={{ background: savedScore >= 75 ? '#22c55e' : '#ef4444', color: '#fff', padding: '0.3rem 0.8rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 900 }}>
+                                            Last score: {savedScore}%
+                                        </div>
+                                    )}
+                                </div>
+
+                                {testSubmitted ? (
+                                    /* Results View */
+                                    <div style={{ padding: '2rem', textAlign: 'center' }}>
+                                        <div style={{
+                                            width: '120px', height: '120px', borderRadius: '50%',
+                                            background: `conic-gradient(${testScore >= 75 ? '#22c55e' : testScore >= 50 ? '#f59e0b' : '#ef4444'} ${testScore * 3.6}deg, #e5e7eb 0deg)`,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            margin: '0 auto 1.5rem auto', border: '4px solid #000', boxShadow: '4px 4px 0 #000'
+                                        }}>
+                                            <div style={{ width: '90px', height: '90px', borderRadius: '50%', background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                                <span style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.8rem', color: testScore >= 75 ? '#22c55e' : testScore >= 50 ? '#f59e0b' : '#ef4444' }}>{testScore}%</span>
+                                            </div>
+                                        </div>
+                                        <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.4rem', margin: '0 0 0.5rem 0' }}>
+                                            {testScore >= 75 ? '🎉 Excellent Work!' : testScore >= 50 ? '👍 Good Effort!' : '📚 Keep Studying!'}
+                                        </h3>
+                                        <p style={{ color: '#475569', fontSize: '0.9rem', fontWeight: 700, margin: '0 0 2rem 0' }}>
+                                            {testScore >= 75 ? 'You passed this module test! Move on to the next one.' : testScore >= 50 ? 'Almost there! Review the module videos and try again.' : 'Review the lesson materials and retake the test when ready.'}
+                                        </p>
+
+                                        {/* Answer Review */}
+                                        <div style={{ textAlign: 'left', marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            {currentTest.questions.map((q, i) => {
+                                                const chosen = testAnswers[i];
+                                                const isCorrect = chosen === q.answer;
+                                                return (
+                                                    <div key={i} style={{ background: isCorrect ? '#f0fdf4' : '#fff7ed', border: `2px solid ${isCorrect ? '#22c55e' : '#f97316'}`, borderRadius: '0.5rem', padding: '1rem' }}>
+                                                        <div style={{ fontWeight: 900, fontSize: '0.85rem', marginBottom: '0.6rem', color: '#000' }}>{i + 1}. {q.q}</div>
+                                                        {q.options.map((opt, oi) => (
+                                                            <div key={oi} style={{
+                                                                padding: '0.3rem 0.6rem', marginBottom: '0.2rem', borderRadius: '0.3rem', fontSize: '0.8rem', fontWeight: 700,
+                                                                background: oi === q.answer ? '#dcfce7' : oi === chosen && !isCorrect ? '#fee2e2' : 'transparent',
+                                                                color: oi === q.answer ? '#16a34a' : oi === chosen && !isCorrect ? '#dc2626' : '#475569'
+                                                            }}>
+                                                                {oi === q.answer ? '✅ ' : oi === chosen && !isCorrect ? '❌ ' : '○ '}{opt}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <button
+                                            onClick={handleRetake}
+                                            style={{ padding: '0.8rem 2rem', background: 'var(--accent-r)', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '4px 4px 0 #000' }}
+                                        >
+                                            🔄 Retake Test
+                                        </button>
+                                    </div>
+                                ) : (
+                                    /* Questions View */
+                                    <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        {currentTest.questions.map((q, i) => (
+                                            <div key={i} style={{ border: '2px solid #e2e8f0', borderRadius: '0.6rem', padding: '1.2rem', background: testAnswers[i] !== undefined ? '#f8fafc' : '#fff', transition: 'background 0.2s' }}>
+                                                <div style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.95rem', marginBottom: '0.8rem', color: '#000' }}>
+                                                    <span style={{ background: 'var(--accent-r)', color: '#fff', padding: '0.1rem 0.5rem', borderRadius: '0.3rem', fontSize: '0.75rem', marginRight: '0.5rem', fontWeight: 900 }}>Q{i + 1}</span>
+                                                    {q.q}
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                    {q.options.map((opt, oi) => (
+                                                        <button
+                                                            key={oi}
+                                                            onClick={() => setTestAnswers(prev => ({ ...prev, [i]: oi }))}
+                                                            style={{
+                                                                padding: '0.65rem 1rem',
+                                                                border: testAnswers[i] === oi ? '3px solid #000' : '2px solid #d1d5db',
+                                                                borderRadius: '0.4rem',
+                                                                background: testAnswers[i] === oi ? '#000' : '#fff',
+                                                                color: testAnswers[i] === oi ? '#fff' : '#374151',
+                                                                fontWeight: testAnswers[i] === oi ? 900 : 700,
+                                                                fontSize: '0.85rem',
+                                                                cursor: 'pointer',
+                                                                textAlign: 'left',
+                                                                transition: 'all 0.15s',
+                                                                boxShadow: testAnswers[i] === oi ? '3px 3px 0 var(--accent-r)' : 'none'
+                                                            }}
+                                                        >
+                                                            <span style={{ marginRight: '0.5rem', fontSize: '0.75rem' }}>{['A', 'B', 'C', 'D'][oi]}.</span> {opt}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        <div style={{ borderTop: '2px solid #000', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                                            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b' }}>
+                                                {Object.keys(testAnswers).length} / {currentTest.questions.length} answered
+                                            </span>
+                                            <button
+                                                onClick={handleTestSubmit}
+                                                disabled={!allAnswered}
+                                                style={{
+                                                    padding: '0.8rem 2.5rem',
+                                                    background: allAnswered ? 'var(--accent-r)' : '#94a3b8',
+                                                    color: '#fff',
+                                                    border: '3px solid #000',
+                                                    fontFamily: 'Outfit',
+                                                    fontWeight: 900,
+                                                    fontSize: '0.95rem',
+                                                    textTransform: 'uppercase',
+                                                    cursor: allAnswered ? 'pointer' : 'not-allowed',
+                                                    boxShadow: allAnswered ? '4px 4px 0 #000' : 'none',
+                                                    transition: 'all 0.15s'
+                                                }}
+                                            >
+                                                📝 Submit Test
+                                            </button>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         </div>

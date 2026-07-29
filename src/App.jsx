@@ -3468,9 +3468,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                         onClick={async () => {
                                                                             if (confirm(`Re-send admission email to ${w.name} (${w.email})?`)) {
                                                                                 try {
-                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                                                                                    const targetUrl = isLocal ? `https://oou-future-tech.vercel.app/api/send-admission` : '/api/send-admission';
-                                                                                    const response = await fetch(targetUrl, {
+                                                                                    const response = await fetch('/api/send-admission', {
                                                                                         method: 'POST',
                                                                                         headers: { 'Content-Type': 'application/json' },
                                                                                         body: JSON.stringify({
@@ -3516,9 +3514,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                         onClick={async () => {
                                                                             if (confirm(`Re-send Cohort 2 update / rejection email to ${w.name} (${w.email})?`)) {
                                                                                 try {
-                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                                                                                    const targetUrl = isLocal ? `https://oou-future-tech.vercel.app/api/send-rejection` : '/api/send-rejection';
-                                                                                    const response = await fetch(targetUrl, {
+                                                                                    const response = await fetch('/api/send-rejection', {
                                                                                         method: 'POST',
                                                                                         headers: { 'Content-Type': 'application/json' },
                                                                                         body: JSON.stringify({
@@ -3575,11 +3571,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
 
                                                                                     if (updateError) throw updateError;
 
-                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                                                                                    const targetUrl = isLocal ? `https://oou-future-tech.vercel.app/api/send-admission` : '/api/send-admission';
                                                                                     let emailSent = false;
                                                                                     try {
-                                                                                        const response = await fetch(targetUrl, {
+                                                                                        const response = await fetch('/api/send-admission', {
                                                                                             method: 'POST',
                                                                                             headers: { 'Content-Type': 'application/json' },
                                                                                             body: JSON.stringify({
@@ -3639,11 +3633,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
 
                                                                                     if (updateError) throw updateError;
 
-                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                                                                                    const targetUrl = isLocal ? `https://oou-future-tech.vercel.app/api/send-rejection` : '/api/send-rejection';
                                                                                     let emailSent = false;
                                                                                     try {
-                                                                                        const response = await fetch(targetUrl, {
+                                                                                        const response = await fetch('/api/send-rejection', {
                                                                                             method: 'POST',
                                                                                             headers: { 'Content-Type': 'application/json' },
                                                                                             body: JSON.stringify({
@@ -6181,11 +6173,8 @@ const AcademyDashboard = ({ portalDates }) => {
             setGeneratedOtp(code);
             setOtpInput('');
 
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const targetUrl = isLocal ? `https://oou-future-tech.vercel.app/api/send-otp` : '/api/send-otp';
-
             try {
-                await fetch(targetUrl, {
+                await fetch('/api/send-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

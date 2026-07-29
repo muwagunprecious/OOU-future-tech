@@ -2516,6 +2516,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [founders, setFounders] = useState([]);
     const [waitlist, setWaitlist] = useState([]);
     const [waitlistSearch, setWaitlistSearch] = useState('');
+    const [waitlistFilter, setWaitlistFilter] = useState('all'); // 'all' | 'test_done' | 'admitted'
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [confirmingPitch, setConfirmingPitch] = useState(null); // { id, status }
@@ -3293,16 +3294,48 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                             </button>
                         </div>
 
-                        {/* Track summary badges */}
-                        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-                            {['Frontend Engineering', 'Backend Engineering', 'Product Design', 'Mobile Development'].map(track => {
-                                const count = waitlist.filter(w => w.company_name === track).length;
-                                return (
-                                    <div key={track} style={{ background: '#fff', border: '3px solid #000', padding: '0.6rem 1.2rem', boxShadow: '3px 3px 0 #000', fontSize: '0.8rem', fontWeight: 900 }}>
-                                        <span style={{ color: 'var(--accent-r)' }}>{count}</span> {track}
-                                    </div>
-                                );
-                            })}
+                        {/* Filter Tabs */}
+                        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', marginBottom: '1.2rem' }}>
+                            {[
+                                { id: 'all', label: 'All Applicants', count: waitlist.length },
+                                {
+                                    id: 'test_done', label: '🧪 Test Completed',
+                                    count: waitlist.filter(w => {
+                                        try {
+                                            const p = typeof w.products === 'string' ? JSON.parse(w.products) : w.products;
+                                            return p && p.test_done;
+                                        } catch (e) { return false; }
+                                    }).length
+                                },
+                                {
+                                    id: 'admitted', label: '✅ Admitted',
+                                    count: waitlist.filter(w => {
+                                        try {
+                                            const p = typeof w.products === 'string' ? JSON.parse(w.products) : w.products;
+                                            return p && p.admitted;
+                                        } catch (e) { return false; }
+                                    }).length
+                                }
+                            ].map(f => (
+                                <button
+                                    key={f.id}
+                                    onClick={() => setWaitlistFilter(f.id)}
+                                    style={{
+                                        padding: '0.6rem 1.2rem',
+                                        background: waitlistFilter === f.id ? '#000' : '#fff',
+                                        color: waitlistFilter === f.id ? '#fff' : '#000',
+                                        border: '3px solid #000',
+                                        fontFamily: 'Outfit, sans-serif',
+                                        fontWeight: 900,
+                                        fontSize: '0.82rem',
+                                        textTransform: 'uppercase',
+                                        cursor: 'pointer',
+                                        boxShadow: waitlistFilter === f.id ? '3px 3px 0 var(--accent-r)' : '3px 3px 0 #000'
+                                    }}
+                                >
+                                    {f.label} ({f.count})
+                                </button>
+                            ))}
                         </div>
 
                         {/* Search */}
@@ -3321,7 +3354,6 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                         <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>#</th>
                                         <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Applicant</th>
                                         <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Track</th>
-                                        <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Level</th>
                                         <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>WhatsApp</th>
                                         <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Screening Test</th>
                                         <th style={{ padding: '1rem 1.2rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Admission / Action</th>
@@ -3330,57 +3362,82 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                 </thead>
                                 <tbody>
                                     {waitlist
-                                        .filter(w =>
-                                            w.name?.toLowerCase().includes(waitlistSearch.toLowerCase()) ||
-                                            w.email?.toLowerCase().includes(waitlistSearch.toLowerCase()) ||
-                                            w.company_name?.toLowerCase().includes(waitlistSearch.toLowerCase())
-                                        )
-                                        .map((w, i) => (
-                                            <tr key={w.id} style={{ borderBottom: '1px solid #eee', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
-                                                <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.8rem', fontWeight: 700, color: '#71717a' }}>{i + 1}</td>
-                                                <td style={{ padding: '0.9rem 1.2rem' }}>
-                                                    <div style={{ fontWeight: 900, fontSize: '0.95rem' }}>{w.name}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{w.email}</div>
-                                                </td>
-                                                <td style={{ padding: '0.9rem 1.2rem' }}>
-                                                    <span style={{
-                                                        display: 'inline-block',
-                                                        padding: '0.3rem 0.7rem',
-                                                        background: 'var(--accent-r)',
-                                                        color: '#fff',
-                                                        fontSize: '0.65rem',
-                                                        fontWeight: 900,
-                                                        textTransform: 'uppercase',
-                                                        border: '2px solid #000'
-                                                    }}>{w.company_name || '—'}</span>
-                                                </td>
-                                                <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.8rem', fontWeight: 700 }}>{w.products || '—'}</td>
-                                                <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.8rem', color: '#0f172a' }}>
-                                                    {w.whatsapp_number ? (
-                                                        <a href={`https://wa.me/${w.whatsapp_number.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-r)', fontWeight: 700, textDecoration: 'none' }}>
-                                                            {w.whatsapp_number}
-                                                        </a>
-                                                    ) : '—'}
-                                                </td>
-                                                <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.75rem', color: '#475569', fontFamily: 'monospace' }}>{w.ticket_id}</td>
-                                                <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.75rem', color: '#71717a' }}>
-                                                    {w.created_at ? new Date(w.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
-                                                </td>
-                                                <td style={{ padding: '0.9rem 1.2rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                                                        {(() => {
-                                                            let isAdmitted = false;
-                                                            let trackLevel = w.products || 'Beginner';
-                                                            try {
-                                                                const parsed = JSON.parse(w.products);
-                                                                if (parsed && typeof parsed === 'object') {
-                                                                    isAdmitted = !!parsed.admitted;
-                                                                    trackLevel = parsed.level || 'Beginner';
-                                                                }
-                                                            } catch (e) {}
+                                        .filter(w => {
+                                            const matchesSearch =
+                                                w.name?.toLowerCase().includes(waitlistSearch.toLowerCase()) ||
+                                                w.email?.toLowerCase().includes(waitlistSearch.toLowerCase()) ||
+                                                w.company_name?.toLowerCase().includes(waitlistSearch.toLowerCase());
 
-                                                            if (isAdmitted) {
-                                                                return (
+                                            let p = {};
+                                            try { p = typeof w.products === 'string' ? JSON.parse(w.products) : (w.products || {}); } catch (e) { }
+
+                                            if (waitlistFilter === 'test_done') {
+                                                return matchesSearch && !!p.test_done;
+                                            } else if (waitlistFilter === 'admitted') {
+                                                return matchesSearch && !!p.admitted;
+                                            }
+                                            return matchesSearch;
+                                        })
+                                        .map((w, i) => {
+                                            let parsedProducts = {};
+                                            try { parsedProducts = typeof w.products === 'string' ? JSON.parse(w.products) : (w.products || {}); } catch (e) { }
+                                            const isAdmitted = !!parsedProducts.admitted;
+                                            const testDone = !!parsedProducts.test_done;
+                                            const testScore = parsedProducts.test_score;
+
+                                            return (
+                                                <tr key={w.id} style={{ borderBottom: '1px solid #eee', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
+                                                    <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.8rem', fontWeight: 700, color: '#71717a' }}>{i + 1}</td>
+                                                    <td style={{ padding: '0.9rem 1.2rem' }}>
+                                                        <div style={{ fontWeight: 900, fontSize: '0.95rem' }}>{w.name}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{w.email}</div>
+                                                    </td>
+                                                    <td style={{ padding: '0.9rem 1.2rem' }}>
+                                                        <span style={{
+                                                            display: 'inline-block',
+                                                            padding: '0.3rem 0.7rem',
+                                                            background: 'var(--accent-r)',
+                                                            color: '#fff',
+                                                            fontSize: '0.65rem',
+                                                            fontWeight: 900,
+                                                            textTransform: 'uppercase',
+                                                            border: '2px solid #000'
+                                                        }}>{w.company_name || 'Frontend Engineering'}</span>
+                                                    </td>
+                                                    <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.8rem', color: '#0f172a' }}>
+                                                        {w.whatsapp_number ? (
+                                                            <a href={`https://wa.me/${w.whatsapp_number.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-r)', fontWeight: 700, textDecoration: 'none' }}>
+                                                                {w.whatsapp_number}
+                                                            </a>
+                                                        ) : '—'}
+                                                    </td>
+                                                    {/* Screening Test Results */}
+                                                    <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.78rem' }}>
+                                                        {testDone && testScore !== null && testScore !== undefined ? (
+                                                            <div>
+                                                                <span style={{
+                                                                    padding: '0.25rem 0.65rem', borderRadius: '0.4rem',
+                                                                    background: testScore >= 70 ? '#dcfce7' : testScore >= 50 ? '#fef3c7' : '#fee2e2',
+                                                                    color: testScore >= 70 ? '#15803d' : testScore >= 50 ? '#b45309' : '#b91c1c',
+                                                                    border: '2px solid #000', fontWeight: 950, display: 'inline-block', fontSize: '0.75rem'
+                                                                }}>
+                                                                    {testScore}% Score
+                                                                </span>
+                                                                {parsedProducts.test_date && (
+                                                                    <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '0.25rem', fontWeight: 700 }}>
+                                                                        Taken {new Date(parsedProducts.test_date).toLocaleDateString()}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '0.75rem' }}>Not Taken</span>
+                                                        )}
+                                                    </td>
+                                                    {/* Admission / Actions */}
+                                                    <td style={{ padding: '0.9rem 1.2rem' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                                            {isAdmitted ? (
+                                                                <>
                                                                     <span style={{
                                                                         display: 'inline-flex',
                                                                         alignItems: 'center',
@@ -3395,45 +3452,12 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                     }}>
                                                                         ✅ {w.cohort || 'Cohort 1'}
                                                                     </span>
-                                                                );
-    }
-
-    return (
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                                    <select
-                                                                        id={`cohort-select-${w.id}`}
-                                                                        defaultValue={w.cohort || 'Cohort 1'}
-                                                                        style={{ border: '2px solid #000', padding: '0.3rem 0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.65rem', borderRadius: '0.3rem' }}
-                                                                    >
-                                                                        {COHORTS.map(c => <option key={c} value={c}>{c}</option>)}
-                                                                    </select>
                                                                     <button
                                                                         onClick={async () => {
-                                                                            const selectedCohort = document.getElementById(`cohort-select-${w.id}`)?.value || 'Cohort 1';
-                                                                            if (confirm(`Admit ${w.name} (${w.email}) to ${selectedCohort}?`)) {
+                                                                            if (confirm(`Re-send admission email to ${w.name} (${w.email})?`)) {
                                                                                 try {
                                                                                     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-                                                                                    // Save admission status + cohort to Supabase
-                                                                                    const { error: updateError } = await supabase
-                                                                                        .from('registrations')
-                                                                                        .update({
-                                                                                            products: JSON.stringify({
-                                                                                                level: trackLevel,
-                                                                                                admitted: true,
-                                                                                                password: '',
-                                                                                                avatar_url: ''
-                                                                                            }),
-                                                                                            cohort: selectedCohort
-                                                                                        })
-                                                                                        .eq('id', w.id);
-
-                                                                                if (updateError) throw updateError;
-
-                                                                                // Send admission email — only works on Vercel (not local dev)
-                                                                                if (!isLocal) {
-                                                                                    let emailSent = false;
-                                                                                    try {
+                                                                                    if (!isLocal) {
                                                                                         const response = await fetch('/api/send-admission', {
                                                                                             method: 'POST',
                                                                                             headers: { 'Content-Type': 'application/json' },
@@ -3445,49 +3469,110 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                                             })
                                                                                         });
                                                                                         if (response.ok) {
-                                                                                            emailSent = true;
+                                                                                            alert(`✅ Admission email re-sent to ${w.name}!`);
                                                                                         } else {
-                                                                                            const errData = await response.json().catch(() => ({}));
-                                                                                            console.warn('Email send failed:', errData.error);
+                                                                                            alert(`⚠️ Failed to send email. Ensure EMAIL_USER/EMAIL_PASS are configured on Vercel.`);
                                                                                         }
-                                                                                    } catch (emailErr) {
-                                                                                        console.warn('Email request failed:', emailErr);
-                                                                                    }
-                                                                                    if (emailSent) {
-                                                                                        alert(`✅ Admission granted & email sent to ${w.name}!`);
                                                                                     } else {
-                                                                                        alert(`✅ ${w.name} marked as admitted.\n\n⚠️ Email failed to send. Check that EMAIL_USER and EMAIL_PASS are set in your Vercel environment variables.`);
+                                                                                        alert(`(Running locally - email simulation) Admission email sent to ${w.email}!`);
                                                                                     }
-                                                                                } else {
-                                                                                    alert(`✅ ${w.name} marked as admitted in database.\n\n(Email not sent — running locally. Deploy to Vercel to send emails.)`);
+                                                                                } catch (e) {
+                                                                                    alert(`Error sending email: ${e.message}`);
                                                                                 }
-
-                                                                                fetchWaitlist();
-                                                                            } catch (err) {
-                                                                                console.error('Error giving admission:', err);
-                                                                                alert(`Error: ${err.message}`);
                                                                             }
-                                                                        }
-                                                                    }}
-                                                                    style={{
-                                                                        background: 'var(--accent-r)',
-                                                                        color: '#ffffff',
-                                                                        border: '2px solid #000000',
-                                                                        padding: '0.35rem 0.7rem',
-                                                                        borderRadius: '0.4rem',
-                                                                        fontSize: '0.7rem',
-                                                                        fontWeight: 900,
-                                                                        cursor: 'pointer',
-                                                                        boxShadow: '2px 2px 0 #000000',
-                                                                        textTransform: 'uppercase'
-                                                                    }}
-                                                                >
-                                                                    🎓 Admit
-                                                                </button>
-                                                                </div>
-                                                            );
-                                                        })()}
+                                                                        }}
+                                                                        style={{ background: '#fff', border: '1.5px solid #000', padding: '0.25rem 0.5rem', borderRadius: '0.3rem', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer' }}
+                                                                    >
+                                                                        📧 Re-send Email
+                                                                    </button>
+                                                                </>
+                                                            ) : (
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                                    <select
+                                                                        id={`cohort-select-${w.id}`}
+                                                                        defaultValue={w.cohort || 'Cohort 1'}
+                                                                        style={{ border: '2px solid #000', padding: '0.3rem 0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.65rem', borderRadius: '0.3rem' }}
+                                                                    >
+                                                                        {COHORTS.map(c => <option key={c} value={c}>{c}</option>)}
+                                                                    </select>
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            const selectedCohort = document.getElementById(`cohort-select-${w.id}`)?.value || 'Cohort 1';
+                                                                            if (confirm(`Admit ${w.name} (${w.email}) to ${selectedCohort} and send admission email?`)) {
+                                                                                try {
+                                                                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
+                                                                                    const updatedProducts = JSON.stringify({
+                                                                                        ...parsedProducts,
+                                                                                        level: parsedProducts.level || 'Beginner',
+                                                                                        admitted: true,
+                                                                                        password: parsedProducts.password || '',
+                                                                                        avatar_url: parsedProducts.avatar_url || ''
+                                                                                    });
+
+                                                                                    const { error: updateError } = await supabase
+                                                                                        .from('registrations')
+                                                                                        .update({
+                                                                                            products: updatedProducts,
+                                                                                            cohort: selectedCohort
+                                                                                        })
+                                                                                        .eq('id', w.id);
+
+                                                                                    if (updateError) throw updateError;
+
+                                                                                    let emailSent = false;
+                                                                                    if (!isLocal) {
+                                                                                        try {
+                                                                                            const response = await fetch('/api/send-admission', {
+                                                                                                method: 'POST',
+                                                                                                headers: { 'Content-Type': 'application/json' },
+                                                                                                body: JSON.stringify({
+                                                                                                    email: w.email,
+                                                                                                    name: w.name,
+                                                                                                    course: w.company_name || 'Frontend Engineering',
+                                                                                                    portalOpenDate: portalDates?.[selectedCohort] || ''
+                                                                                                })
+                                                                                            });
+                                                                                            if (response.ok) emailSent = true;
+                                                                                        } catch (emailErr) {
+                                                                                            console.warn('Email request failed:', emailErr);
+                                                                                        }
+                                                                                        if (emailSent) {
+                                                                                            alert(`✅ Admission granted & email sent to ${w.name}!`);
+                                                                                        } else {
+                                                                                            alert(`✅ ${w.name} marked as admitted.\n\n⚠️ Email failed to send. Check EMAIL_USER and EMAIL_PASS environment variables.`);
+                                                                                        }
+                                                                                    } else {
+                                                                                        alert(`✅ ${w.name} marked as admitted in database.\n\n(Email simulation - running locally.)`);
+                                                                                    }
+
+                                                                                    fetchWaitlist();
+                                                                                } catch (err) {
+                                                                                    console.error('Error giving admission:', err);
+                                                                                    alert(`Error: ${err.message}`);
+                                                                                }
+                                                                            }
+                                                                        }}
+                                                                        style={{
+                                                                            background: 'var(--accent-r)',
+                                                                            color: '#ffffff',
+                                                                            border: '2px solid #000000',
+                                                                            padding: '0.35rem 0.7rem',
+                                                                            borderRadius: '0.4rem',
+                                                                            fontSize: '0.7rem',
+                                                                            fontWeight: 900,
+                                                                            cursor: 'pointer',
+                                                                            boxShadow: '2px 2px 0 #000000',
+                                                                            textTransform: 'uppercase'
+                                                                        }}
+                                                                    >
+                                                                        🎓 Admit & Send Email
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td style={{ padding: '0.9rem 1.2rem' }}>
                                                         <button
                                                             onClick={() => handleDeleteWaitlistEntry(w.id)}
                                                             style={{ padding: '0.4rem', background: '#fee2e2', color: '#dc2626', border: '2px solid #000', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
@@ -3495,12 +3580,12 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                         >
                                                             <Trash2 size={14} />
                                                         </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     {waitlist.length === 0 && (
-                                        <tr><td colSpan="8" style={{ padding: '3rem', textAlign: 'center', opacity: 0.5, fontWeight: 700 }}>No waitlist signups yet.</td></tr>
+                                        <tr><td colSpan="7" style={{ padding: '3rem', textAlign: 'center', opacity: 0.5, fontWeight: 700 }}>No waitlist signups yet.</td></tr>
                                     )}
                                 </tbody>
                             </table>
@@ -5964,6 +6049,110 @@ const AcademyDashboard = ({ portalDates }) => {
     const [loginError, setLoginError] = useState(null);
     const [loginLoading, setLoginLoading] = useState(false);
 
+    // Forgotten Password States
+    const [otpInput, setOtpInput] = useState('');
+    const [generatedOtp, setGeneratedOtp] = useState('');
+    const [otpNotice, setOtpNotice] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+    const handleRequestOtp = async () => {
+        setLoginError(null);
+        setLoginLoading(true);
+        try {
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            setGeneratedOtp(code);
+            setOtpInput('');
+
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+            if (!isLocal) {
+                try {
+                    await fetch('/api/send-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: admittedRecord.email,
+                            name: admittedRecord.name,
+                            otp: code
+                        })
+                    });
+                } catch (err) {
+                    console.warn('OTP email fetch error:', err);
+                }
+            }
+
+            setOtpNotice(`A 6-digit verification code has been sent to ${admittedRecord.email}.`);
+            setLoginStep('forgot_otp');
+        } catch (err) {
+            setLoginError('Failed to generate reset code.');
+        }
+        setLoginLoading(false);
+    };
+
+    const handleVerifyOtp = (e) => {
+        e.preventDefault();
+        setLoginError(null);
+        if (otpInput.trim() !== generatedOtp.trim()) {
+            setLoginError('Invalid code. Please check your email and try again.');
+            return;
+        }
+        setLoginStep('forgot_reset');
+    };
+
+    const handleResetPasswordSubmit = async (e) => {
+        e.preventDefault();
+        setLoginError(null);
+        if (newPassword.length < 6) {
+            setLoginError('Password must be at least 6 characters.');
+            return;
+        }
+        if (newPassword !== confirmNewPassword) {
+            setLoginError('Passwords do not match.');
+            return;
+        }
+
+        setLoginLoading(true);
+        try {
+            let existingProducts = {};
+            try {
+                existingProducts = typeof admittedRecord.products === 'string' ? JSON.parse(admittedRecord.products) : (admittedRecord.products || {});
+            } catch (e) {}
+
+            const updatedProducts = JSON.stringify({
+                ...existingProducts,
+                password: newPassword
+            });
+
+            const { error: updateError } = await supabase
+                .from('registrations')
+                .update({ products: updatedProducts })
+                .eq('id', admittedRecord.id);
+
+            if (updateError) throw updateError;
+
+            const sessionData = {
+                id: admittedRecord.id,
+                name: admittedRecord.name,
+                email: admittedRecord.email,
+                course: admittedRecord.company_name || 'Frontend Engineering',
+                cohort: admittedRecord.cohort || 'Cohort 1',
+                avatar_url: existingProducts.avatar_url || ''
+            };
+
+            localStorage.setItem('fta-student-session', JSON.stringify(sessionData));
+            setStudentName(admittedRecord.name);
+            setStudentAvatar(existingProducts.avatar_url || '');
+            localStorage.setItem('fta-student-name', admittedRecord.name);
+            localStorage.setItem('fta-student-avatar', existingProducts.avatar_url || '');
+            setStudentSession(sessionData);
+        } catch (err) {
+            console.error('Password reset error:', err);
+            setLoginError('Failed to update password. Try again.');
+        }
+        setLoginLoading(false);
+    };
+
     // Sync selected course track with admitted course when logging in
     useEffect(() => {
         if (studentSession && studentSession.course) {
@@ -6793,7 +6982,16 @@ const AcademyDashboard = ({ portalDates }) => {
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                                <label style={{ fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', color: '#000' }}>Enter Password</label>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <label style={{ fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', color: '#000' }}>Enter Password</label>
+                                    <button
+                                        type="button"
+                                        onClick={handleRequestOtp}
+                                        style={{ background: 'none', border: 'none', color: 'var(--accent-r)', fontSize: '0.72rem', fontWeight: 900, cursor: 'pointer', textDecoration: 'underline' }}
+                                    >
+                                        Forgot Password?
+                                    </button>
+                                </div>
                                 <input
                                     type="password"
                                     required
@@ -6851,6 +7049,139 @@ const AcademyDashboard = ({ portalDates }) => {
                                 }}
                             >
                                 Switch Account
+                            </button>
+                        </form>
+                    )}
+
+                    {loginStep === 'forgot_otp' && (
+                        <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                            <div style={{ background: '#fef3c7', color: '#b45309', border: '2px solid #000', padding: '0.7rem', borderRadius: '0.4rem', fontSize: '0.75rem', fontWeight: 900, textAlign: 'center' }}>
+                                📩 {otpNotice}
+                            </div>
+
+                            {generatedOtp && (
+                                <div style={{ background: '#f4f4f5', border: '2px dashed #000', padding: '0.5rem', borderRadius: '0.4rem', fontSize: '0.7rem', fontWeight: 900, textAlign: 'center', color: '#000' }}>
+                                    🔑 Dev Testing OTP Code: <span style={{ color: 'var(--accent-r)', fontSize: '1rem', letterSpacing: '2px' }}>{generatedOtp}</span>
+                                </div>
+                            )}
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', color: '#000' }}>Enter 6-Digit Code</label>
+                                <input
+                                    type="text"
+                                    required
+                                    maxLength={6}
+                                    value={otpInput}
+                                    onChange={e => setOtpInput(e.target.value)}
+                                    placeholder="123456"
+                                    style={{
+                                        padding: '0.9rem 1.2rem',
+                                        border: '3px solid #000000',
+                                        fontSize: '1.2rem',
+                                        fontFamily: 'monospace',
+                                        fontWeight: 900,
+                                        letterSpacing: '4px',
+                                        textAlign: 'center',
+                                        outline: 'none',
+                                        width: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loginLoading}
+                                style={{
+                                    background: 'var(--accent-r)',
+                                    color: '#ffffff',
+                                    border: '3px solid #000000',
+                                    padding: '1rem',
+                                    fontFamily: 'Outfit',
+                                    fontWeight: 900,
+                                    fontSize: '0.95rem',
+                                    textTransform: 'uppercase',
+                                    cursor: 'pointer',
+                                    boxShadow: '4px 4px 0 #000000',
+                                    width: '100%'
+                                }}
+                            >
+                                Verify Code →
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setLoginStep('password')}
+                                style={{ background: 'none', border: 'none', color: '#71717a', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                                ← Back to Login
+                            </button>
+                        </form>
+                    )}
+
+                    {loginStep === 'forgot_reset' && (
+                        <form onSubmit={handleResetPasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                            <div style={{ background: '#dcfce7', color: '#15803d', border: '2px solid #000', padding: '0.6rem', borderRadius: '0.4rem', fontSize: '0.75rem', fontWeight: 900, textAlign: 'center' }}>
+                                ✅ Code Verified! Enter your new LMS password below.
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', color: '#000' }}>New Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    minLength={6}
+                                    value={newPassword}
+                                    onChange={e => setNewPassword(e.target.value)}
+                                    placeholder="Minimum 6 characters"
+                                    style={{
+                                        padding: '0.9rem 1.2rem',
+                                        border: '3px solid #000000',
+                                        fontSize: '0.95rem',
+                                        outline: 'none',
+                                        width: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 900, textTransform: 'uppercase', color: '#000' }}>Confirm New Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={confirmNewPassword}
+                                    onChange={e => setConfirmNewPassword(e.target.value)}
+                                    placeholder="Repeat new password"
+                                    style={{
+                                        padding: '0.9rem 1.2rem',
+                                        border: '3px solid #000000',
+                                        fontSize: '0.95rem',
+                                        outline: 'none',
+                                        width: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loginLoading}
+                                style={{
+                                    background: 'var(--accent-r)',
+                                    color: '#ffffff',
+                                    border: '3px solid #000000',
+                                    padding: '1rem',
+                                    fontFamily: 'Outfit',
+                                    fontWeight: 900,
+                                    fontSize: '0.95rem',
+                                    textTransform: 'uppercase',
+                                    cursor: 'pointer',
+                                    boxShadow: '4px 4px 0 #000000',
+                                    width: '100%'
+                                }}
+                            >
+                                {loginLoading ? 'Updating Password...' : 'Save New Password & Enter LMS 🚀'}
                             </button>
                         </form>
                     )}

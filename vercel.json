@@ -10,6 +10,10 @@
       "destination": "/api/send-admission.js"
     },
     {
+      "source": "/api/send-otp",
+      "destination": "/api/send-otp.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
@@ -20,6 +24,10 @@
       "maxDuration": 60
     },
     "api/send-admission.js": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/send-otp.js": {
       "memory": 512,
       "maxDuration": 30
     }

@@ -60,11 +60,15 @@ export default async function handler(req, res) {
                     <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
                         <tr>
                             <td style="padding-bottom: 8px; width: 35%;"><strong>Cohort:</strong></td>
-                            <td style="padding-bottom: 8px;">Cohort One (2026)</td>
+                            <td style="padding-bottom: 8px; font-weight: bold; color: #000;">Cohort One (Starting August 15th, 2026)</td>
                         </tr>
                         <tr>
                             <td style="padding-bottom: 8px;"><strong>Course Track:</strong></td>
                             <td style="padding-bottom: 8px; font-weight: bold; color: #000;">${course}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding-bottom: 8px;"><strong>Start Date:</strong></td>
+                            <td style="padding-bottom: 8px; font-weight: bold; color: #E63946;">August 15th, 2026</td>
                         </tr>
                         <tr>
                             <td><strong>Platform:</strong></td>

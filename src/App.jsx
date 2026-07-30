@@ -2557,6 +2557,136 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         try { return JSON.parse(localStorage.getItem('fta-portal-dates') || '{}'); } catch { return {}; }
     });
 
+    // Manual candidate add state
+    const [showManualAddForm, setShowManualAddForm] = useState(false);
+    const [manualCandidate, setManualCandidate] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        course: 'Frontend Engineering',
+        action: 'send_test_invite'
+    });
+    const [manualSubmitting, setManualSubmitting] = useState(false);
+
+    const handleManualAddCandidate = async (e) => {
+        e.preventDefault();
+        if (!manualCandidate.name.trim() || !manualCandidate.email.trim()) {
+            alert('Please provide candidate full name and email address.');
+            return;
+        }
+
+        const cleanEmail = manualCandidate.email.toLowerCase().trim();
+        const cleanName = manualCandidate.name.trim();
+        const cleanPhone = manualCandidate.phone.trim();
+        const cleanCourse = manualCandidate.course;
+
+        setManualSubmitting(true);
+        try {
+            const existing = waitlist.find(w => w.email?.toLowerCase().trim() === cleanEmail);
+            let existingProducts = {};
+            if (existing) {
+                try { existingProducts = typeof existing.products === 'string' ? JSON.parse(existing.products) : (existing.products || {}); } catch (e) { }
+            }
+
+            const isTestInvite = manualCandidate.action === 'send_test_invite';
+            const isAdmission = manualCandidate.action === 'send_admission';
+
+            const updatedProducts = JSON.stringify({
+                ...existingProducts,
+                level: existingProducts.level || 'Beginner',
+                admitted: isAdmission ? true : (existingProducts.admitted || false),
+                rejected: false,
+                test_invited: isTestInvite ? true : (existingProducts.test_invited || false),
+                test_invited_date: isTestInvite ? new Date().toISOString() : (existingProducts.test_invited_date || null),
+                cohort: isAdmission ? 'Cohort 1' : (existingProducts.cohort || 'Cohort 1')
+            });
+
+            if (existing) {
+                const { error: updateErr } = await supabase
+                    .from('registrations')
+                    .update({
+                        name: cleanName,
+                        company_name: cleanCourse,
+                        whatsapp_number: cleanPhone || existing.whatsapp_number || '',
+                        products: updatedProducts
+                    })
+                    .eq('id', existing.id);
+                if (updateErr) throw updateErr;
+            } else {
+                const { error: insertErr } = await supabase
+                    .from('registrations')
+                    .insert([{
+                        name: cleanName,
+                        email: cleanEmail,
+                        company_name: cleanCourse,
+                        whatsapp_number: cleanPhone,
+                        ticket_type: 'tech_waitlist',
+                        products: updatedProducts
+                    }]);
+
+                if (insertErr) throw insertErr;
+            }
+
+            let emailSuccess = false;
+            if (isTestInvite) {
+                try {
+                    const res = await fetch('/api/send-test-invite', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: cleanEmail,
+                            name: cleanName,
+                            course: cleanCourse
+                        })
+                    });
+                    if (res.ok) emailSuccess = true;
+                } catch (err) {
+                    console.warn('Manual test invite email error:', err);
+                }
+            } else if (isAdmission) {
+                try {
+                    const res = await fetch('/api/send-admission', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: cleanEmail,
+                            name: cleanName,
+                            course: cleanCourse,
+                            portalOpenDate: portalDates?.['Cohort 1'] || ''
+                        })
+                    });
+                    if (res.ok) emailSuccess = true;
+                } catch (err) {
+                    console.warn('Manual admission email error:', err);
+                }
+            }
+
+            if (isTestInvite) {
+                if (emailSuccess) alert(`✅ ${cleanName} registered & Screening Test Invitation email sent to ${cleanEmail}!`);
+                else alert(`✅ ${cleanName} registered.\n\n⚠️ Email failed to send. Check EMAIL_USER and EMAIL_PASS on Vercel.`);
+            } else if (isAdmission) {
+                if (emailSuccess) alert(`✅ ${cleanName} admitted & Admission Email sent to ${cleanEmail}!`);
+                else alert(`✅ ${cleanName} admitted.\n\n⚠️ Email failed to send. Check EMAIL_USER and EMAIL_PASS on Vercel.`);
+            } else {
+                alert(`✅ ${cleanName} added to waitlist successfully!`);
+            }
+
+            setManualCandidate({
+                name: '',
+                email: '',
+                phone: '',
+                course: 'Frontend Engineering',
+                action: 'send_test_invite'
+            });
+            setShowManualAddForm(false);
+            fetchWaitlist();
+        } catch (err) {
+            console.error('Error adding candidate manually:', err);
+            alert(`Failed to add candidate: ${err.message}`);
+        }
+        setManualSubmitting(false);
+    };
+
     useEffect(() => {
         fetchRegistrations();
         fetchPitches();
@@ -3285,14 +3415,161 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                 <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.5rem', margin: 0 }}>Future Tech Academy (FTA) Waitlist</h2>
                                 <p style={{ color: '#71717a', fontSize: '0.85rem', marginTop: '0.3rem' }}>{waitlist.length} person{waitlist.length !== 1 ? 's' : ''} registered</p>
                             </div>
-                            <button
-                                onClick={fetchWaitlist}
-                                className="btn-outline"
-                                style={{ padding: '0.7rem 1.4rem', fontSize: '0.8rem', borderRadius: '1rem' }}
-                            >
-                                ↺ Refresh
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <button
+                                    onClick={() => setShowManualAddForm(!showManualAddForm)}
+                                    style={{
+                                        background: 'var(--accent-r)',
+                                        color: '#fff',
+                                        border: '3px solid #000',
+                                        padding: '0.7rem 1.4rem',
+                                        fontFamily: 'Outfit, sans-serif',
+                                        fontWeight: 900,
+                                        fontSize: '0.82rem',
+                                        textTransform: 'uppercase',
+                                        cursor: 'pointer',
+                                        boxShadow: '3px 3px 0 #000'
+                                    }}
+                                >
+                                    {showManualAddForm ? '✕ Close Form' : '➕ Manual Add & Invite Candidate'}
+                                </button>
+                                <button
+                                    onClick={fetchWaitlist}
+                                    className="btn-outline"
+                                    style={{ padding: '0.7rem 1.4rem', fontSize: '0.8rem', borderRadius: '1rem' }}
+                                >
+                                    ↺ Refresh
+                                </button>
+                            </div>
                         </div>
+
+                        {/* Manual Candidate Form Card */}
+                        {showManualAddForm && (
+                            <div style={{
+                                background: '#fffbeb',
+                                border: '4px solid #000000',
+                                borderRadius: '1rem',
+                                padding: '1.8rem',
+                                marginBottom: '2rem',
+                                boxShadow: '6px 6px 0 #000000',
+                                animation: 'fadeIn 0.2s ease-out'
+                            }}>
+                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.2rem', marginTop: 0, marginBottom: '0.5rem', color: '#92400e' }}>
+                                    ➕ Manually Add Candidate & Send Invite Email
+                                </h3>
+                                <p style={{ fontSize: '0.85rem', color: '#78350f', marginBottom: '1.5rem' }}>
+                                    Enter candidate credentials and select their course track to register them and send a test invitation or admission email directly.
+                                </p>
+
+                                <form onSubmit={handleManualAddCandidate}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.2rem', marginBottom: '1.5rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '0.4rem', color: '#000' }}>Full Name *</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="e.g. John Doe"
+                                                value={manualCandidate.name}
+                                                onChange={e => setManualCandidate({ ...manualCandidate, name: e.target.value })}
+                                                style={{ width: '100%', padding: '0.75rem', border: '2.5px solid #000', borderRadius: '0.5rem', fontFamily: 'Inter', fontWeight: 600, fontSize: '0.9rem', boxSizing: 'border-box' }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ display: 'block', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '0.4rem', color: '#000' }}>Email Address *</label>
+                                            <input
+                                                type="email"
+                                                required
+                                                placeholder="e.g. candidate@gmail.com"
+                                                value={manualCandidate.email}
+                                                onChange={e => setManualCandidate({ ...manualCandidate, email: e.target.value })}
+                                                style={{ width: '100%', padding: '0.75rem', border: '2.5px solid #000', borderRadius: '0.5rem', fontFamily: 'Inter', fontWeight: 600, fontSize: '0.9rem', boxSizing: 'border-box' }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ display: 'block', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '0.4rem', color: '#000' }}>WhatsApp Number (Optional)</label>
+                                            <input
+                                                type="text"
+                                                placeholder="e.g. +2348123456789"
+                                                value={manualCandidate.phone}
+                                                onChange={e => setManualCandidate({ ...manualCandidate, phone: e.target.value })}
+                                                style={{ width: '100%', padding: '0.75rem', border: '2.5px solid #000', borderRadius: '0.5rem', fontFamily: 'Inter', fontWeight: 600, fontSize: '0.9rem', boxSizing: 'border-box' }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ display: 'block', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '0.4rem', color: '#000' }}>Course Track *</label>
+                                            <select
+                                                value={manualCandidate.course}
+                                                onChange={e => setManualCandidate({ ...manualCandidate, course: e.target.value })}
+                                                style={{ width: '100%', padding: '0.75rem', border: '2.5px solid #000', borderRadius: '0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.9rem', background: '#fff', boxSizing: 'border-box' }}
+                                            >
+                                                <option value="Frontend Engineering">Frontend Engineering</option>
+                                                <option value="Backend Engineering">Backend Engineering</option>
+                                                <option value="Mobile App Development">Mobile App Development</option>
+                                                <option value="UI/UX Product Design">UI/UX Product Design</option>
+                                                <option value="Data Science & AI">Data Science & AI</option>
+                                                <option value="Cybersecurity">Cybersecurity</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ marginBottom: '1.5rem', background: '#fff', padding: '1rem 1.2rem', border: '2.5px solid #000', borderRadius: '0.6rem' }}>
+                                        <label style={{ display: 'block', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '0.8rem', color: '#000' }}>Action To Perform *</label>
+                                        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}>
+                                                <input
+                                                    type="radio"
+                                                    name="manualAction"
+                                                    value="send_test_invite"
+                                                    checked={manualCandidate.action === 'send_test_invite'}
+                                                    onChange={e => setManualCandidate({ ...manualCandidate, action: e.target.value })}
+                                                />
+                                                📝 Send Screening Test Invitation Email
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}>
+                                                <input
+                                                    type="radio"
+                                                    name="manualAction"
+                                                    value="send_admission"
+                                                    checked={manualCandidate.action === 'send_admission'}
+                                                    onChange={e => setManualCandidate({ ...manualCandidate, action: e.target.value })}
+                                                />
+                                                🎓 Direct Admission & Send Email
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}>
+                                                <input
+                                                    type="radio"
+                                                    name="manualAction"
+                                                    value="just_register"
+                                                    checked={manualCandidate.action === 'just_register'}
+                                                    onChange={e => setManualCandidate({ ...manualCandidate, action: e.target.value })}
+                                                />
+                                                📋 Add to Waitlist Only
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowManualAddForm(false)}
+                                            style={{ background: '#fff', border: '2px solid #000', padding: '0.7rem 1.4rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer' }}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={manualSubmitting}
+                                            style={{ background: 'var(--accent-r)', color: '#fff', border: '3px solid #000', padding: '0.7rem 1.6rem', borderRadius: '0.5rem', fontFamily: 'Outfit', fontWeight: 900, fontSize: '0.9rem', textTransform: 'uppercase', cursor: manualSubmitting ? 'not-allowed' : 'pointer', boxShadow: '3px 3px 0 #000' }}
+                                        >
+                                            {manualSubmitting ? 'Processing...' : '🚀 Save & Dispatch Email'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
 
                         {/* Filter Tabs */}
                         <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', marginBottom: '1.2rem' }}>

@@ -18,6 +18,10 @@
       "destination": "/api/send-rejection.js"
     },
     {
+      "source": "/api/send-test-invite",
+      "destination": "/api/send-test-invite.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
@@ -36,6 +40,10 @@
       "maxDuration": 30
     },
     "api/send-rejection.js": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/send-test-invite.js": {
       "memory": 512,
       "maxDuration": 30
     }

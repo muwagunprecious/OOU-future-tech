@@ -3299,6 +3299,15 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                             {[
                                 { id: 'all', label: 'All Applicants', count: waitlist.length },
                                 {
+                                    id: 'test_invited', label: '📩 Test Invited',
+                                    count: waitlist.filter(w => {
+                                        try {
+                                            const p = typeof w.products === 'string' ? JSON.parse(w.products) : w.products;
+                                            return p && p.test_invited && !p.test_done;
+                                        } catch (e) { return false; }
+                                    }).length
+                                },
+                                {
                                     id: 'test_done', label: '🧪 Test Completed',
                                     count: waitlist.filter(w => {
                                         try {
@@ -3380,7 +3389,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                             let p = {};
                                             try { p = typeof w.products === 'string' ? JSON.parse(w.products) : (w.products || {}); } catch (e) { }
 
-                                            if (waitlistFilter === 'test_done') {
+                                            if (waitlistFilter === 'test_invited') {
+                                                return matchesSearch && !!p.test_invited && !p.test_done;
+                                            } else if (waitlistFilter === 'test_done') {
                                                 return matchesSearch && !!p.test_done;
                                             } else if (waitlistFilter === 'admitted') {
                                                 return matchesSearch && !!p.admitted;
@@ -3396,6 +3407,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                             const isRejected = !!parsedProducts.rejected;
                                             const testDone = !!parsedProducts.test_done;
                                             const testScore = parsedProducts.test_score;
+                                            const isTestInvited = !!parsedProducts.test_invited;
 
                                             return (
                                                 <tr key={w.id} style={{ borderBottom: '1px solid #eee', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
@@ -3441,8 +3453,78 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                     </div>
                                                                 )}
                                                             </div>
+                                                        ) : isTestInvited ? (
+                                                            <div>
+                                                                <span style={{
+                                                                    padding: '0.25rem 0.6rem', borderRadius: '0.4rem',
+                                                                    background: '#eff6ff', color: '#1d4ed8',
+                                                                    border: '2px solid #000', fontWeight: 900, display: 'inline-block', fontSize: '0.7rem'
+                                                                }}>
+                                                                    📩 Invite Sent
+                                                                </span>
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        if (confirm(`Re-send screening test invitation email to ${w.name} (${w.email})?`)) {
+                                                                            try {
+                                                                                const response = await fetch('/api/send-test-invite', {
+                                                                                    method: 'POST',
+                                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                                    body: JSON.stringify({
+                                                                                        email: w.email,
+                                                                                        name: w.name,
+                                                                                        course: w.company_name || 'Frontend Engineering'
+                                                                                    })
+                                                                                });
+                                                                                if (response.ok) alert(`✅ Screening test invite email re-sent to ${w.name}!`);
+                                                                                else {
+                                                                                    const errData = await response.json().catch(() => ({}));
+                                                                                    alert(`⚠️ Failed: ${errData.error || 'Check Vercel email credentials.'}`);
+                                                                                }
+                                                                            } catch (e) { alert(`Error: ${e.message}`); }
+                                                                        }
+                                                                    }}
+                                                                    style={{ marginTop: '0.3rem', display: 'block', background: '#fff', border: '1.5px solid #000', padding: '0.2rem 0.4rem', borderRadius: '0.3rem', fontSize: '0.6rem', fontWeight: 800, cursor: 'pointer' }}
+                                                                >
+                                                                    ✉️ Re-send Invite
+                                                                </button>
+                                                            </div>
                                                         ) : (
-                                                            <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '0.75rem' }}>Not Taken</span>
+                                                            <button
+                                                                onClick={async () => {
+                                                                    if (confirm(`Send screening test invitation email to ${w.name} (${w.email}) for track ${w.company_name || 'Frontend Engineering'}?`)) {
+                                                                        try {
+                                                                            const updatedProducts = JSON.stringify({
+                                                                                ...parsedProducts,
+                                                                                test_invited: true,
+                                                                                test_invited_date: new Date().toISOString()
+                                                                            });
+                                                                            const { error: updateError } = await supabase.from('registrations').update({ products: updatedProducts }).eq('id', w.id);
+                                                                            if (updateError) throw updateError;
+
+                                                                            let emailSent = false;
+                                                                            try {
+                                                                                const response = await fetch('/api/send-test-invite', {
+                                                                                    method: 'POST',
+                                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                                    body: JSON.stringify({
+                                                                                        email: w.email,
+                                                                                        name: w.name,
+                                                                                        course: w.company_name || 'Frontend Engineering'
+                                                                                    })
+                                                                                });
+                                                                                if (response.ok) emailSent = true;
+                                                                            } catch (emailErr) { console.warn('Test invite request failed:', emailErr); }
+
+                                                                            if (emailSent) alert(`✅ Test invitation email sent to ${w.name}!`);
+                                                                            else alert(`✅ Marked as test invited.\n\n⚠️ Email failed to send. Check EMAIL_USER and EMAIL_PASS on Vercel.`);
+                                                                            fetchWaitlist();
+                                                                        } catch (err) { alert(`Error: ${err.message}`); }
+                                                                    }
+                                                                }}
+                                                                style={{ background: '#fef3c7', color: '#92400e', border: '1.5px solid #000', padding: '0.25rem 0.5rem', borderRadius: '0.3rem', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer' }}
+                                                            >
+                                                                📝 Send Test Invite
+                                                            </button>
                                                         )}
                                                     </td>
                                                     {/* Admission / Actions */}

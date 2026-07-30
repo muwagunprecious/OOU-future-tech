@@ -2613,14 +2613,16 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                     .eq('id', existing.id);
                 if (updateErr) throw updateErr;
             } else {
+                const generatedTicketId = `#OOU-EDU-${Math.floor(10000 + Math.random() * 90000)}`;
                 const { error: insertErr } = await supabase
                     .from('registrations')
                     .insert([{
                         name: cleanName,
                         email: cleanEmail,
+                        ticket_id: generatedTicketId,
                         company_name: cleanCourse,
                         whatsapp_number: cleanPhone,
-                        ticket_type: 'tech_waitlist',
+                        ticket_type: `tech_waitlist_${cleanCourse.toLowerCase().replace(/\s+/g, '_')}`,
                         products: updatedProducts
                     }]);
 
@@ -10517,7 +10519,7 @@ const SCREENING_QUESTIONS = {
     ]
 };
 
-const TIMER_PER_QUESTION = 25; // seconds
+const TIMER_PER_QUESTION = 20; // seconds
 
 const ScreeningTest = () => {
     const [step, setStep] = useState('email'); // 'email' | 'taking' | 'done' | 'blocked'
@@ -10598,7 +10600,7 @@ const ScreeningTest = () => {
             return;
         }
 
-        const products = data.products || {};
+        const products = typeof data.products === 'string' ? JSON.parse(data.products) : (data.products || {});
         const track = data.track || products.track || 'Frontend Engineering';
 
         // Already admitted?
@@ -10648,7 +10650,7 @@ const ScreeningTest = () => {
 
         // Save to Supabase — update the registrant's products JSON
         try {
-            const existingProducts = registrationData.products || {};
+            const existingProducts = typeof registrationData.products === 'string' ? JSON.parse(registrationData.products) : (registrationData.products || {});
             const updatedProducts = {
                 ...existingProducts,
                 test_done: true,
@@ -10669,7 +10671,7 @@ const ScreeningTest = () => {
     };
 
     const timerPct = (timeLeft / TIMER_PER_QUESTION) * 100;
-    const timerColor = timeLeft > 15 ? '#22c55e' : timeLeft > 8 ? '#f59e0b' : '#ef4444';
+    const timerColor = timeLeft > 12 ? '#22c55e' : timeLeft > 6 ? '#f59e0b' : '#ef4444';
 
     // ── RENDER ────────────────────────────────────────────────────────────────
     return (
@@ -10720,7 +10722,7 @@ const ScreeningTest = () => {
                         </div>
 
                         <div style={{ background: '#fffbeb', border: '2px solid #f59e0b', padding: '0.8rem 1rem', borderRadius: '0.4rem', marginBottom: '1.5rem', fontSize: '0.78rem', fontWeight: 700, color: '#92400e' }}>
-                            ⚠️ Rules: 10 questions · 25 seconds per question · Auto-advances when time runs out · One attempt only
+                            ⚠️ Rules: 10 questions · 20 seconds per question · Auto-advances when time runs out · One attempt only
                         </div>
 
                         <button

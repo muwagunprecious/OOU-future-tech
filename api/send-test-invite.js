@@ -79,7 +79,7 @@ export default async function handler(req, res) {
                         </tr>
                         <tr>
                             <td style="padding-bottom: 10px;"><strong>Format:</strong></td>
-                            <td style="padding-bottom: 10px; color: #333;">Multiple Choice (25s per question)</td>
+                            <td style="padding-bottom: 10px; color: #333;">Multiple Choice (20s per question)</td>
                         </tr>
                     </table>
                 </div>

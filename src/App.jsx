@@ -6835,35 +6835,58 @@ const AcademyDashboard = ({ portalDates }) => {
     // Sub-tab switching
     const [academyTab, setAcademyTab] = useState('curriculum'); // 'curriculum' | 'peers' | 'notifications'
 
-    // Portal countdown state (always declared, only used when locked)
-    const myPortalDate = portalDates?.[studentCohort] || '';
+    // Portal dates sync state
+    const [localPortalDates, setLocalPortalDates] = useState(() => {
+        if (portalDates && Object.keys(portalDates).length > 0) return portalDates;
+        try { return JSON.parse(localStorage.getItem('fta-portal-dates') || '{}'); } catch { return {}; }
+    });
+
+    useEffect(() => {
+        if (portalDates && Object.keys(portalDates).length > 0) {
+            setLocalPortalDates(portalDates);
+        } else {
+            supabase.from('site_settings').select('*').eq('key', 'portal_dates').maybeSingle().then(({ data }) => {
+                if (data && data.value) {
+                    try {
+                        const parsed = JSON.parse(data.value);
+                        setLocalPortalDates(parsed);
+                        localStorage.setItem('fta-portal-dates', data.value);
+                    } catch {}
+                }
+            });
+        }
+    }, [portalDates]);
+
+    const effectivePortalDates = (portalDates && Object.keys(portalDates).length > 0) ? portalDates : localPortalDates;
+    const myPortalDate = effectivePortalDates?.[studentCohort] || '';
     const portalUnlockTime = myPortalDate ? new Date(myPortalDate) : null;
     const portalIsLocked = studentSession && portalUnlockTime && portalUnlockTime > new Date();
+
     const [portalCountdown, setPortalCountdown] = useState(() => {
         if (!portalUnlockTime) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
         const diff = portalUnlockTime - new Date();
         return {
-            days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-            hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-            minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-            seconds: Math.floor((diff % (1000 * 60)) / 1000)
+            days: Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24))),
+            hours: Math.max(0, Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))),
+            minutes: Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))),
+            seconds: Math.max(0, Math.floor((diff % (1000 * 60)) / 1000))
         };
     });
 
     useEffect(() => {
-        if (!portalIsLocked) return;
+        if (!portalIsLocked || !portalUnlockTime) return;
         const timer = setInterval(() => {
             const diff = portalUnlockTime - new Date();
             if (diff <= 0) { clearInterval(timer); window.location.reload(); return; }
             setPortalCountdown({
-                days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-                minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-                seconds: Math.floor((diff % (1000 * 60)) / 1000)
+                days: Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24))),
+                hours: Math.max(0, Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))),
+                minutes: Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))),
+                seconds: Math.max(0, Math.floor((diff % (1000 * 60)) / 1000))
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, [portalIsLocked]);
+    }, [portalIsLocked, portalUnlockTime]);
 
     // Student Score & Manual Grades State
     const [manualGrades, setManualGrades] = useState([]);
@@ -7649,6 +7672,130 @@ const AcademyDashboard = ({ portalDates }) => {
                             </button>
                         </form>
                     )}
+                </div>
+            </div>
+        );
+    }
+
+    if (portalIsLocked) {
+        return (
+            <div style={{
+                minHeight: '80vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem 1rem',
+                fontFamily: "'Outfit', sans-serif"
+            }}>
+                <div style={{
+                    width: '100%',
+                    maxWidth: '560px',
+                    background: '#ffffff',
+                    border: '5px solid #000000',
+                    boxShadow: '10px 10px 0 #000000',
+                    padding: '2.5rem',
+                    borderRadius: '1.2rem',
+                    boxSizing: 'border-box',
+                    textAlign: 'center',
+                    animation: 'fadeIn 0.3s ease-out'
+                }}>
+                    <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🔒</div>
+                    
+                    <h2 style={{
+                        fontFamily: 'Outfit',
+                        fontWeight: 950,
+                        fontSize: '1.8rem',
+                        color: '#000000',
+                        margin: '0 0 0.5rem 0',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em'
+                    }}>
+                        Portal Locked
+                    </h2>
+
+                    <p style={{ color: '#52525b', fontSize: '0.9rem', fontWeight: 700, margin: '0 0 1.8rem 0' }}>
+                        Future Tech Academy • {studentCohort}
+                    </p>
+
+                    <div style={{
+                        background: '#fffbeb',
+                        border: '3px solid #d97706',
+                        borderRadius: '0.8rem',
+                        padding: '1.2rem',
+                        marginBottom: '1.8rem',
+                        textAlign: 'left'
+                    }}>
+                        <div style={{ fontSize: '0.85rem', color: '#92400e', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                            🎉 Admission Confirmed, {studentSession?.name || studentSession?.email}!
+                        </div>
+                        <div style={{ fontSize: '0.88rem', color: '#78350f', lineHeight: 1.5 }}>
+                            Your admission is fully confirmed for the <strong>{selectedCourse}</strong> track ({studentCohort}). The learning portal for your cohort is scheduled to open on:
+                        </div>
+                        <div style={{
+                            marginTop: '0.8rem',
+                            padding: '0.6rem 0.8rem',
+                            background: '#ffffff',
+                            border: '2px solid #000',
+                            borderRadius: '0.5rem',
+                            fontWeight: 900,
+                            fontSize: '0.95rem',
+                            color: '#000',
+                            textAlign: 'center'
+                        }}>
+                            📅 {new Date(myPortalDate).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                    </div>
+
+                    {/* Countdown Card */}
+                    <div style={{
+                        background: '#000000',
+                        color: '#ffffff',
+                        padding: '1.5rem',
+                        borderRadius: '1rem',
+                        border: '3px solid #000',
+                        boxShadow: '4px 4px 0 var(--accent-r)',
+                        marginBottom: '2rem'
+                    }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#e4e4e7', marginBottom: '1rem' }}>
+                            ⏱️ Portal Opens In
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', textAlign: 'center' }}>
+                            <div>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 950, color: 'var(--accent-r)' }}>{portalCountdown.days}</div>
+                                <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 800, color: '#a1a1aa' }}>Days</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 950, color: 'var(--accent-r)' }}>{portalCountdown.hours}</div>
+                                <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 800, color: '#a1a1aa' }}>Hours</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 950, color: 'var(--accent-r)' }}>{portalCountdown.minutes}</div>
+                                <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 800, color: '#a1a1aa' }}>Mins</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 950, color: 'var(--accent-r)' }}>{portalCountdown.seconds}</div>
+                                <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 800, color: '#a1a1aa' }}>Secs</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={handleLogout}
+                        style={{
+                            background: '#ffffff',
+                            color: '#dc2626',
+                            border: '2.5px solid #dc2626',
+                            padding: '0.75rem 1.8rem',
+                            borderRadius: '0.6rem',
+                            fontFamily: 'Outfit, sans-serif',
+                            fontWeight: 900,
+                            fontSize: '0.85rem',
+                            textTransform: 'uppercase',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        🚪 Log Out
+                    </button>
                 </div>
             </div>
         );

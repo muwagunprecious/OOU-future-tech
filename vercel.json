@@ -26,6 +26,14 @@
       "destination": "/api/send-test-reminder.js"
     },
     {
+      "source": "/api/send-payment-link",
+      "destination": "/api/send-payment-link.js"
+    },
+    {
+      "source": "/api/paystack-webhook",
+      "destination": "/api/paystack-webhook.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
@@ -52,6 +60,14 @@
       "maxDuration": 30
     },
     "api/send-test-reminder.js": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/send-payment-link.js": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/paystack-webhook.js": {
       "memory": 512,
       "maxDuration": 30
     }

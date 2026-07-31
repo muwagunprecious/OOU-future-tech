@@ -3479,6 +3479,13 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                         } catch (e) { return false; }
                     }).length;
 
+                    const pendingPaymentCount = waitlist.filter(w => {
+                        try {
+                            const p = typeof w.products === 'string' ? JSON.parse(w.products) : (w.products || {});
+                            return (p.test_done || p.admitted) && !p.paid && !p.rejected;
+                        } catch (e) { return false; }
+                    }).length;
+
                     return (
                     <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
                         {/* Header */}
@@ -3488,6 +3495,77 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                 <p style={{ color: '#71717a', fontSize: '0.85rem', marginTop: '0.3rem' }}>{waitlist.length} person{waitlist.length !== 1 ? 's' : ''} registered</p>
                             </div>
                             <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <button
+                                    onClick={async () => {
+                                        const eligible = waitlist.filter(w => {
+                                            try {
+                                                const p = typeof w.products === 'string' ? JSON.parse(w.products) : (w.products || {});
+                                                return (p.test_done || p.admitted) && !p.paid && !p.rejected;
+                                            } catch (e) { return false; }
+                                        });
+
+                                        if (eligible.length === 0) {
+                                            alert('No candidates waiting to receive course fee payment links.');
+                                            return;
+                                        }
+
+                                        if (!confirm(`Send ₦10,000 course commitment fee payment link emails to ALL ${eligible.length} test-passed/admitted candidate(s)?`)) {
+                                            return;
+                                        }
+
+                                        setSendingBulkReminders(true);
+                                        let successCount = 0;
+                                        let failCount = 0;
+
+                                        for (const w of eligible) {
+                                            let parsedProducts = {};
+                                            try { parsedProducts = typeof w.products === 'string' ? JSON.parse(w.products) : (w.products || {}); } catch (e) { }
+
+                                            try {
+                                                const updatedProducts = JSON.stringify({
+                                                    ...parsedProducts,
+                                                    payment_link_sent: true,
+                                                    payment_link_date: new Date().toISOString()
+                                                });
+                                                await supabase.from('registrations').update({ products: updatedProducts }).eq('id', w.id);
+
+                                                const response = await fetch('/api/send-payment-link', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({
+                                                        email: w.email,
+                                                        name: w.name,
+                                                        course: w.company_name || 'Frontend Engineering'
+                                                    })
+                                                });
+
+                                                if (response.ok) successCount++;
+                                                else failCount++;
+                                            } catch (err) { failCount++; }
+                                        }
+
+                                        setSendingBulkReminders(false);
+                                        alert(`🎉 Bulk Payment Links Dispatch Complete!\n\n✅ Emailed successfully: ${successCount}\n⚠️ Failed: ${failCount}`);
+                                        fetchWaitlist();
+                                    }}
+                                    disabled={sendingBulkReminders || pendingPaymentCount === 0}
+                                    style={{
+                                        background: '#16a34a',
+                                        color: '#ffffff',
+                                        border: '3px solid #000',
+                                        padding: '0.7rem 1.4rem',
+                                        fontFamily: 'Outfit, sans-serif',
+                                        fontWeight: 900,
+                                        fontSize: '0.82rem',
+                                        textTransform: 'uppercase',
+                                        cursor: (sendingBulkReminders || pendingPaymentCount === 0) ? 'not-allowed' : 'pointer',
+                                        boxShadow: '3px 3px 0 #000',
+                                        opacity: pendingPaymentCount === 0 ? 0.6 : 1
+                                    }}
+                                >
+                                    {sendingBulkReminders ? '⌛ Sending Pay Links...' : `💳 Send Pay Links (₦10k) (${pendingPaymentCount})`}
+                                </button>
+
                                 <button
                                     onClick={handleBulkSendTestReminders}
                                     disabled={sendingBulkReminders || pendingTestCount === 0}
@@ -3687,6 +3765,15 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                     }).length
                                 },
                                 {
+                                    id: 'paid', label: '💳 Fee Paid (₦10k)',
+                                    count: waitlist.filter(w => {
+                                        try {
+                                            const p = typeof w.products === 'string' ? JSON.parse(w.products) : w.products;
+                                            return p && p.paid;
+                                        } catch (e) { return false; }
+                                    }).length
+                                },
+                                {
                                     id: 'admitted', label: '✅ Admitted',
                                     count: waitlist.filter(w => {
                                         try {
@@ -3763,6 +3850,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                 return matchesSearch && !!p.test_invited && !p.test_done;
                                             } else if (waitlistFilter === 'test_done') {
                                                 return matchesSearch && !!p.test_done;
+                                            } else if (waitlistFilter === 'paid') {
+                                                return matchesSearch && !!p.paid;
                                             } else if (waitlistFilter === 'admitted') {
                                                 return matchesSearch && !!p.admitted;
                                             } else if (waitlistFilter === 'rejected') {
@@ -3805,7 +3894,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                             </a>
                                                         ) : '—'}
                                                     </td>
-                                                    {/* Screening Test Results & Actions */}
+                                                    {/* Screening Test Results & Payment Actions */}
                                                     <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.78rem' }}>
                                                         {testDone && testScore !== null && testScore !== undefined ? (
                                                             <div>
@@ -3817,10 +3906,53 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                 }}>
                                                                     {testScore}% Score
                                                                 </span>
-                                                                {parsedProducts.test_date && (
-                                                                    <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '0.25rem', fontWeight: 700 }}>
-                                                                        Taken {new Date(parsedProducts.test_date).toLocaleDateString()}
+                                                                {parsedProducts.paid ? (
+                                                                    <div style={{ marginTop: '0.3rem' }}>
+                                                                        <span style={{
+                                                                            padding: '0.2rem 0.5rem', borderRadius: '0.3rem',
+                                                                            background: '#dcfce7', color: '#15803d',
+                                                                            border: '1.5px solid #000', fontWeight: 900, display: 'inline-block', fontSize: '0.6rem'
+                                                                        }}>
+                                                                            💳 Paid ₦10,000
+                                                                        </span>
                                                                     </div>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            if (confirm(`Send ₦10,000 course fee payment link email to ${w.name} (${w.email}) for track ${w.company_name || 'Frontend Engineering'}?`)) {
+                                                                                try {
+                                                                                    const updatedProducts = JSON.stringify({
+                                                                                        ...parsedProducts,
+                                                                                        payment_link_sent: true,
+                                                                                        payment_link_date: new Date().toISOString()
+                                                                                    });
+                                                                                    const { error: updateError } = await supabase.from('registrations').update({ products: updatedProducts }).eq('id', w.id);
+                                                                                    if (updateError) throw updateError;
+
+                                                                                    let emailSent = false;
+                                                                                    try {
+                                                                                        const response = await fetch('/api/send-payment-link', {
+                                                                                            method: 'POST',
+                                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                                            body: JSON.stringify({
+                                                                                                email: w.email,
+                                                                                                name: w.name,
+                                                                                                course: w.company_name || 'Frontend Engineering'
+                                                                                            })
+                                                                                        });
+                                                                                        if (response.ok) emailSent = true;
+                                                                                    } catch (e) {}
+
+                                                                                    if (emailSent) alert(`✅ Payment link email (₦10,000) sent to ${w.name}!`);
+                                                                                    else alert(`✅ Marked payment link sent.\n\n⚠️ Check EMAIL_USER and EMAIL_PASS on Vercel.`);
+                                                                                    fetchWaitlist();
+                                                                                } catch (err) { alert(`Error: ${err.message}`); }
+                                                                            }
+                                                                        }}
+                                                                        style={{ marginTop: '0.3rem', display: 'block', background: parsedProducts.payment_link_sent ? '#fff' : '#dcfce7', color: '#15803d', border: '1.5px solid #000', padding: '0.2rem 0.4rem', borderRadius: '0.3rem', fontSize: '0.6rem', fontWeight: 900, cursor: 'pointer' }}
+                                                                    >
+                                                                        {parsedProducts.payment_link_sent ? '💳 Re-send Pay Link' : '💳 Send Pay Link (₦10k)'}
+                                                                    </button>
                                                                 )}
                                                             </div>
                                                         ) : isTestInvited ? (
@@ -10760,6 +10892,199 @@ const SCREENING_QUESTIONS = {
 
 const TIMER_PER_QUESTION = 20; // seconds
 
+function PayCheckout() {
+    const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
+    const [course, setCourse] = useState('Frontend Engineering');
+    const [loading, setLoading] = useState(false);
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
+    const [paymentRef, setPaymentRef] = useState('');
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('email')) setEmail(params.get('email'));
+        if (params.get('name')) setName(params.get('name'));
+        if (params.get('course')) setCourse(params.get('course'));
+
+        if (!document.getElementById('paystack-js')) {
+            const script = document.createElement('script');
+            script.id = 'paystack-js';
+            script.src = 'https://js.paystack.co/v1/inline.js';
+            script.async = true;
+            document.body.appendChild(script);
+        }
+    }, []);
+
+    const handlePaystackPayment = () => {
+        if (!email || !email.includes('@')) {
+            alert('Please enter a valid registered email address.');
+            return;
+        }
+
+        if (typeof window.PaystackPop === 'undefined') {
+            alert('Paystack payment system is still initializing. Please try again in a few seconds.');
+            return;
+        }
+
+        setLoading(true);
+
+        const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_live_cf6029110cbb5f3362b36cdd46f6538ba6c99b58';
+
+        const handler = window.PaystackPop.setup({
+            key: publicKey,
+            email: email.trim(),
+            amount: 1000000, // ₦10,000 in Kobo
+            currency: 'NGN',
+            ref: 'FTA-PAY-' + Math.floor((Math.random() * 1000000000) + 1),
+            metadata: {
+                name: name || 'Student',
+                course: course || 'Tech Track',
+                custom_fields: [
+                    { display_name: "Student Name", variable_name: "student_name", value: name || 'Student' },
+                    { display_name: "Course Track", variable_name: "course_track", value: course || 'Tech Track' }
+                ]
+            },
+            callback: function(response) {
+                setLoading(false);
+                setPaymentRef(response.reference);
+                setPaymentSuccess(true);
+            },
+            onClose: function() {
+                setLoading(false);
+            }
+        });
+
+        handler.openIframe();
+    };
+
+    if (paymentSuccess) {
+        return (
+            <div style={{ maxWidth: '600px', margin: '4rem auto', padding: '2.5rem', background: '#fff', border: '5px solid #000', borderRadius: '1.5rem', boxShadow: '8px 8px 0 #000', fontFamily: 'Outfit, sans-serif' }}>
+                <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                    <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>🎉</div>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: 950, color: '#16a34a', textTransform: 'uppercase', margin: 0 }}>
+                        Payment Successful!
+                    </h2>
+                    <p style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 700, marginTop: '0.3rem' }}>
+                        Payment Reference: <span style={{ fontFamily: 'monospace', color: '#000' }}>{paymentRef}</span>
+                    </p>
+                </div>
+
+                <div style={{ background: '#eff6ff', border: '3px solid #2563eb', padding: '1.5rem', borderRadius: '1rem', marginBottom: '1.5rem' }}>
+                    <h4 style={{ margin: '0 0 0.8rem 0', color: '#1e40af', fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                        📌 Important Next Steps
+                    </h4>
+                    <p style={{ margin: '0 0 0.8rem 0', fontSize: '0.95rem', color: '#1e3a8a', lineHeight: 1.6, fontWeight: 700 }}>
+                        The admin will send you an email to log in to your dashboard soon!
+                    </p>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#1e40af', lineHeight: 1.6 }}>
+                        <strong>Cohort 1 starts August 15th.</strong> You will have access to tutors every 2 weeks and also a community of fellow learners to build and grow together!
+                    </p>
+                </div>
+
+                <button
+                    onClick={() => {
+                        window.location.href = '/';
+                    }}
+                    style={{
+                        width: '100%',
+                        background: '#000',
+                        color: '#fff',
+                        border: '3px solid #000',
+                        padding: '1rem',
+                        borderRadius: '0.8rem',
+                        fontWeight: 900,
+                        fontSize: '1rem',
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        boxShadow: '4px 4px 0 var(--accent-r)'
+                    }}
+                >
+                    Return to Homepage
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div style={{ maxWidth: '550px', margin: '4rem auto', padding: '2.5rem', background: '#fff', border: '5px solid #000', borderRadius: '1.5rem', boxShadow: '8px 8px 0 #000', fontFamily: 'Outfit, sans-serif' }}>
+            <div style={{ textTransform: 'uppercase', fontWeight: 900, fontSize: '0.8rem', color: 'var(--accent-r)', letterSpacing: '1px', marginBottom: '0.3rem' }}>
+                Future Tech Academy • Cohort 1
+            </div>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 950, textTransform: 'uppercase', margin: '0 0 1rem 0' }}>
+                Complete Course Commitment Fee
+            </h2>
+
+            <div style={{ background: '#f4f4f5', border: '3px solid #000', padding: '1.2rem', borderRadius: '1rem', marginBottom: '1.5rem', boxShadow: '4px 4px 0 #000' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', fontSize: '0.9rem' }}>
+                    <span style={{ color: '#71717a', fontWeight: 700 }}>Course Track:</span>
+                    <span style={{ fontWeight: 900, color: '#000' }}>{course}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', fontSize: '0.9rem' }}>
+                    <span style={{ color: '#71717a', fontWeight: 700 }}>Cohort Start:</span>
+                    <span style={{ fontWeight: 900, color: '#000' }}>August 15th, 2026</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', paddingTop: '0.6rem', borderTop: '2px dashed #000' }}>
+                    <span style={{ fontWeight: 900 }}>Total Fee:</span>
+                    <span style={{ fontWeight: 950, color: '#16a34a' }}>₦10,000 NGN</span>
+                </div>
+            </div>
+
+            <div style={{ marginBottom: '1.2rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                    Full Name
+                </label>
+                <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Enter your full name"
+                    style={{ width: '100%', padding: '0.8rem 1rem', border: '3px solid #000', borderRadius: '0.6rem', fontWeight: 700, outline: 'none', boxSizing: 'border-box' }}
+                />
+            </div>
+
+            <div style={{ marginBottom: '1.8rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                    Registered Email Address
+                </label>
+                <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="Enter your registered email"
+                    style={{ width: '100%', padding: '0.8rem 1rem', border: '3px solid #000', borderRadius: '0.6rem', fontWeight: 700, outline: 'none', boxSizing: 'border-box' }}
+                />
+            </div>
+
+            <button
+                onClick={handlePaystackPayment}
+                disabled={loading}
+                style={{
+                    width: '100%',
+                    background: '#16a34a',
+                    color: '#ffffff',
+                    border: '3.5px solid #000',
+                    padding: '1.1rem',
+                    borderRadius: '0.8rem',
+                    fontFamily: 'Outfit, sans-serif',
+                    fontWeight: 950,
+                    fontSize: '1.1rem',
+                    textTransform: 'uppercase',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    boxShadow: '4px 4px 0 #000',
+                    letterSpacing: '0.5px'
+                }}
+            >
+                {loading ? '⌛ Opening Paystack...' : '💳 Pay ₦10,000 via Paystack'}
+            </button>
+
+            <div style={{ textAlign: 'center', marginTop: '1.2rem', fontSize: '0.75rem', color: '#71717a', fontWeight: 700 }}>
+                🔒 Secured by Paystack (Card, Transfer, USSD)
+            </div>
+        </div>
+    );
+}
+
 const ScreeningTest = () => {
     const [step, setStep] = useState('email'); // 'email' | 'taking' | 'done' | 'blocked'
     const [email, setEmail] = useState('');
@@ -12151,6 +12476,9 @@ export default function App() {
         } else if (path === '/test' || path === '/test/') {
             setView('test');
             setShowOnboardingPopup(false);
+        } else if (path === '/pay' || path === '/pay/') {
+            setView('pay');
+            setShowOnboardingPopup(false);
         } else {
             setView('site');
             setShowOnboardingPopup(true);
@@ -12404,6 +12732,31 @@ export default function App() {
                         </button>
                     </div>
                     <ScreeningTest />
+                </div>
+            ) : view === 'pay' ? (
+                <div style={{ paddingTop: '8rem' }}>
+                    <div className="container" style={{ marginBottom: '2rem' }}>
+                        <button
+                            onClick={() => {
+                                setView('site');
+                                window.history.pushState({}, '', '/');
+                            }}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontWeight: 900,
+                                fontSize: '1rem',
+                                color: 'var(--accent-r)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
+                        </button>
+                    </div>
+                    <PayCheckout />
                 </div>
             ) : view === 'verify' ? (
                 <VerificationPortal onBack={() => setView('site')} />

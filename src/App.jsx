@@ -2689,6 +2689,68 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         setManualSubmitting(false);
     };
 
+    const [sendingBulkReminders, setSendingBulkReminders] = useState(false);
+
+    const handleBulkSendTestReminders = async () => {
+        const candidatesToInvite = waitlist.filter(w => {
+            try {
+                const p = typeof w.products === 'string' ? JSON.parse(w.products) : (w.products || {});
+                return !p.test_done && !p.admitted && !p.rejected;
+            } catch (e) { return false; }
+        });
+
+        if (candidatesToInvite.length === 0) {
+            alert('There are currently no candidates pending screening test!');
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to send screening test reminder emails to all ${candidatesToInvite.length} candidate(s) who haven't taken the test yet?`)) {
+            return;
+        }
+
+        setSendingBulkReminders(true);
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const w of candidatesToInvite) {
+            let parsedProducts = {};
+            try { parsedProducts = typeof w.products === 'string' ? JSON.parse(w.products) : (w.products || {}); } catch (e) { }
+
+            try {
+                const updatedProducts = JSON.stringify({
+                    ...parsedProducts,
+                    test_invited: true,
+                    test_reminder_date: new Date().toISOString()
+                });
+
+                await supabase
+                    .from('registrations')
+                    .update({ products: updatedProducts })
+                    .eq('id', w.id);
+
+                const res = await fetch('/api/send-test-reminder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: w.email,
+                        name: w.name,
+                        course: w.company_name || 'Frontend Engineering'
+                    })
+                });
+
+                if (res.ok) successCount++;
+                else failCount++;
+            } catch (err) {
+                console.warn(`Error sending reminder to ${w.email}:`, err);
+                failCount++;
+            }
+        }
+
+        setSendingBulkReminders(false);
+        alert(`📢 Bulk Reminder Dispatch Finished!\n\n✅ Successfully sent: ${successCount} emails\n❌ Failed: ${failCount} emails`);
+        fetchWaitlist();
+    };
+
     useEffect(() => {
         fetchRegistrations();
         fetchPitches();
@@ -3409,7 +3471,15 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                     </div>
                 )}
 
-                {activeTab === 'techwaitlist' && (
+                {activeTab === 'techwaitlist' && (() => {
+                    const pendingTestCount = waitlist.filter(w => {
+                        try {
+                            const p = typeof w.products === 'string' ? JSON.parse(w.products) : (w.products || {});
+                            return !p.test_done && !p.admitted && !p.rejected;
+                        } catch (e) { return false; }
+                    }).length;
+
+                    return (
                     <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
                         {/* Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -3418,6 +3488,26 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                 <p style={{ color: '#71717a', fontSize: '0.85rem', marginTop: '0.3rem' }}>{waitlist.length} person{waitlist.length !== 1 ? 's' : ''} registered</p>
                             </div>
                             <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <button
+                                    onClick={handleBulkSendTestReminders}
+                                    disabled={sendingBulkReminders || pendingTestCount === 0}
+                                    style={{
+                                        background: '#f59e0b',
+                                        color: '#000',
+                                        border: '3px solid #000',
+                                        padding: '0.7rem 1.4rem',
+                                        fontFamily: 'Outfit, sans-serif',
+                                        fontWeight: 900,
+                                        fontSize: '0.82rem',
+                                        textTransform: 'uppercase',
+                                        cursor: (sendingBulkReminders || pendingTestCount === 0) ? 'not-allowed' : 'pointer',
+                                        boxShadow: '3px 3px 0 #000',
+                                        opacity: pendingTestCount === 0 ? 0.6 : 1
+                                    }}
+                                >
+                                    {sendingBulkReminders ? '⌛ Sending Reminders...' : `📢 Remind Untaken Candidates (${pendingTestCount})`}
+                                </button>
+
                                 <button
                                     onClick={() => setShowManualAddForm(!showManualAddForm)}
                                     style={{
@@ -3435,6 +3525,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                 >
                                     {showManualAddForm ? '✕ Close Form' : '➕ Manual Add & Invite Candidate'}
                                 </button>
+
                                 <button
                                     onClick={fetchWaitlist}
                                     className="btn-outline"
@@ -3714,7 +3805,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                             </a>
                                                         ) : '—'}
                                                     </td>
-                                                    {/* Screening Test Results */}
+                                                    {/* Screening Test Results & Actions */}
                                                     <td style={{ padding: '0.9rem 1.2rem', fontSize: '0.78rem' }}>
                                                         {testDone && testScore !== null && testScore !== undefined ? (
                                                             <div>
@@ -3743,9 +3834,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                 </span>
                                                                 <button
                                                                     onClick={async () => {
-                                                                        if (confirm(`Re-send screening test invitation email to ${w.name} (${w.email})?`)) {
+                                                                        if (confirm(`Send screening test reminder email to ${w.name} (${w.email})?`)) {
                                                                             try {
-                                                                                const response = await fetch('/api/send-test-invite', {
+                                                                                const response = await fetch('/api/send-test-reminder', {
                                                                                     method: 'POST',
                                                                                     headers: { 'Content-Type': 'application/json' },
                                                                                     body: JSON.stringify({
@@ -3754,7 +3845,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                                         course: w.company_name || 'Frontend Engineering'
                                                                                     })
                                                                                 });
-                                                                                if (response.ok) alert(`✅ Screening test invite email re-sent to ${w.name}!`);
+                                                                                if (response.ok) alert(`✅ Screening test reminder email sent to ${w.name}!`);
                                                                                 else {
                                                                                     const errData = await response.json().catch(() => ({}));
                                                                                     alert(`⚠️ Failed: ${errData.error || 'Check Vercel email credentials.'}`);
@@ -3762,9 +3853,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                             } catch (e) { alert(`Error: ${e.message}`); }
                                                                         }
                                                                     }}
-                                                                    style={{ marginTop: '0.3rem', display: 'block', background: '#fff', border: '1.5px solid #000', padding: '0.2rem 0.4rem', borderRadius: '0.3rem', fontSize: '0.6rem', fontWeight: 800, cursor: 'pointer' }}
+                                                                    style={{ marginTop: '0.3rem', display: 'block', background: '#fef3c7', color: '#b45309', border: '1.5px solid #000', padding: '0.2rem 0.4rem', borderRadius: '0.3rem', fontSize: '0.6rem', fontWeight: 900, cursor: 'pointer' }}
                                                                 >
-                                                                    ✉️ Re-send Invite
+                                                                    ⏰ Send Reminder
                                                                 </button>
                                                             </div>
                                                         ) : (
@@ -4059,7 +4150,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                             </table>
                         </div>
                     </div>
-                )}
+                    );
+                })()}
 
                 {activeTab === 'pitches' && (
                     <div style={{ animation: 'fadeIn 0.3s ease-out' }}>

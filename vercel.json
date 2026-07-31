@@ -22,6 +22,10 @@
       "destination": "/api/send-test-invite.js"
     },
     {
+      "source": "/api/send-test-reminder",
+      "destination": "/api/send-test-reminder.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
@@ -44,6 +48,10 @@
       "maxDuration": 30
     },
     "api/send-test-invite.js": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/send-test-reminder.js": {
       "memory": 512,
       "maxDuration": 30
     }

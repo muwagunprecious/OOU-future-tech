@@ -2590,6 +2590,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
 
             const isTestInvite = manualCandidate.action === 'send_test_invite';
             const isAdmission = manualCandidate.action === 'send_admission';
+            const isPaymentLink = manualCandidate.action === 'send_payment_link';
 
             const updatedProducts = JSON.stringify({
                 ...existingProducts,
@@ -2598,6 +2599,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                 rejected: false,
                 test_invited: isTestInvite ? true : (existingProducts.test_invited || false),
                 test_invited_date: isTestInvite ? new Date().toISOString() : (existingProducts.test_invited_date || null),
+                payment_link_sent: isPaymentLink ? true : (existingProducts.payment_link_sent || false),
+                payment_link_date: isPaymentLink ? new Date().toISOString() : (existingProducts.payment_link_date || null),
                 cohort: isAdmission ? 'Cohort 1' : (existingProducts.cohort || 'Cohort 1')
             });
 
@@ -2661,6 +2664,21 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                 } catch (err) {
                     console.warn('Manual admission email error:', err);
                 }
+            } else if (isPaymentLink) {
+                try {
+                    const res = await fetch('/api/send-payment-link', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: cleanEmail,
+                            name: cleanName,
+                            course: cleanCourse
+                        })
+                    });
+                    if (res.ok) emailSuccess = true;
+                } catch (err) {
+                    console.warn('Manual payment link email error:', err);
+                }
             }
 
             if (isTestInvite) {
@@ -2669,6 +2687,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
             } else if (isAdmission) {
                 if (emailSuccess) alert(`✅ ${cleanName} admitted & Admission Email sent to ${cleanEmail}!`);
                 else alert(`✅ ${cleanName} admitted.\n\n⚠️ Email failed to send. Check EMAIL_USER and EMAIL_PASS on Vercel.`);
+            } else if (isPaymentLink) {
+                if (emailSuccess) alert(`✅ ₦10,000 Payment Request email successfully sent to ${cleanEmail}!`);
+                else alert(`✅ ${cleanName} saved.\n\n⚠️ Payment email failed to send. Check EMAIL_USER and EMAIL_PASS on Vercel.`);
             } else {
                 alert(`✅ ${cleanName} added to waitlist successfully!`);
             }
@@ -3708,6 +3729,16 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                     onChange={e => setManualCandidate({ ...manualCandidate, action: e.target.value })}
                                                 />
                                                 🎓 Direct Admission & Send Email
+                                            </label>
+                                             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}>
+                                                <input
+                                                    type="radio"
+                                                    name="manualAction"
+                                                    value="send_payment_link"
+                                                    checked={manualCandidate.action === 'send_payment_link'}
+                                                    onChange={e => setManualCandidate({ ...manualCandidate, action: e.target.value })}
+                                                />
+                                                💳 Send ₦10,000 Payment Email
                                             </label>
                                             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}>
                                                 <input

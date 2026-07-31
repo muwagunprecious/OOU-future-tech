@@ -10922,7 +10922,7 @@ const SCREENING_QUESTIONS = {
 };
 SCREENING_QUESTIONS['UI/UX Product Design'] = SCREENING_QUESTIONS['Product Design (UI/UX)'];
 
-const TIMER_PER_QUESTION = 20; // seconds
+const TIMER_PER_QUESTION = 15; // seconds
 
 function PayCheckout() {
     const [email, setEmail] = useState('');

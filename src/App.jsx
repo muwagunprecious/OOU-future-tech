@@ -10920,6 +10920,7 @@ const SCREENING_QUESTIONS = {
         }
     ]
 };
+SCREENING_QUESTIONS['UI/UX Product Design'] = SCREENING_QUESTIONS['Product Design (UI/UX)'];
 
 const TIMER_PER_QUESTION = 20; // seconds
 
@@ -11196,7 +11197,22 @@ const ScreeningTest = () => {
         }
 
         const products = typeof data.products === 'string' ? JSON.parse(data.products) : (data.products || {});
-        const track = data.track || products.track || 'Frontend Engineering';
+        const rawTrack = data.company_name || data.track || products.track || products.course || 'Frontend Engineering';
+        
+        let track = 'Frontend Engineering';
+        if (rawTrack.includes('UI') || rawTrack.includes('Product Design') || rawTrack.includes('UX')) {
+            track = 'Product Design (UI/UX)';
+        } else if (rawTrack.includes('Backend')) {
+            track = 'Backend Engineering';
+        } else if (rawTrack.includes('Mobile')) {
+            track = 'Mobile App Development';
+        } else if (rawTrack.includes('Data') || rawTrack.includes('AI')) {
+            track = 'Data Science & AI';
+        } else if (rawTrack.includes('Cyber')) {
+            track = 'Cybersecurity';
+        } else if (SCREENING_QUESTIONS[rawTrack]) {
+            track = rawTrack;
+        }
 
         // Already admitted?
         if (products.admitted === true) {

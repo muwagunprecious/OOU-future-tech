@@ -7780,7 +7780,7 @@ const AcademyDashboard = ({ portalDates }) => {
                     </div>
 
                     <button
-                        onClick={handleLogout}
+                        onClick={handleLogOut}
                         style={{
                             background: '#ffffff',
                             color: '#dc2626',

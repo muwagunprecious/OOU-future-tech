@@ -6884,20 +6884,27 @@ const AcademyDashboard = ({ portalDates }) => {
         setLoginError(null);
         setLoginLoading(true);
         try {
-            const { data, error } = await supabase
+            const cleanEmail = loginEmail.trim().toLowerCase();
+            const { data: records, error } = await supabase
                 .from('registrations')
                 .select('*')
-                .eq('email', loginEmail.trim())
-                .like('ticket_type', 'tech_waitlist_%')
-                .maybeSingle();
+                .ilike('email', cleanEmail);
 
             if (error) throw error;
 
-            if (!data) {
+            if (!records || records.length === 0) {
                 setLoginError('not yet admitted');
                 setLoginLoading(false);
                 return;
             }
+
+            // Find an admitted record first, or fallback to the first record found
+            const data = records.find(r => {
+                try {
+                    const p = typeof r.products === 'string' ? JSON.parse(r.products) : (r.products || {});
+                    return p && p.admitted === true;
+                } catch (e) { return false; }
+            }) || records[0];
 
             let admitted = false;
             let password = '';

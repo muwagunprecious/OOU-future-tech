@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         }
     });
 
-    const origin = req.headers.origin || 'https://oou-future-tech.vercel.app';
+    const origin = req.headers.origin || 'https://ooufuturetech.com.ng';
     const checkoutLink = `${origin}/pay?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&course=${encodeURIComponent(course || 'Tech Track')}`;
     const senderEmail = (process.env.EMAIL_USER || 'ooufuturetech@gmail.com').trim();
     const courseTrack = course || 'Tech Track';

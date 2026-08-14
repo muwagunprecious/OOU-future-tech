@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         }
     });
 
-    const testLink = `${req.headers.origin || 'https://oou-future-tech.vercel.app'}/test`;
+    const testLink = `${req.headers.origin || 'https://ooufuturetech.com.ng'}/test`;
     const senderEmail = (process.env.EMAIL_USER || 'ooufuturetech@gmail.com').trim();
     const courseTrack = course || 'Tech Track';
 

@@ -37,7 +37,7 @@ export default async function handler(req, res) {
         }
     });
 
-    const lmsLink = `${req.headers.origin || 'https://oou-future-tech.vercel.app'}/academy`;
+    const lmsLink = `${req.headers.origin || 'https://ooufuturetech.com.ng'}/academy`;
     console.log(`📧 Attempting to send admission email to: ${email}`);
 
     const senderEmail = (process.env.EMAIL_USER || 'ooufuturetech@gmail.com').trim();

@@ -11047,78 +11047,67 @@ function PayCheckout() {
 
     return (
         <div style={{ maxWidth: '550px', margin: '4rem auto', padding: '2.5rem', background: '#fff', border: '5px solid #000', borderRadius: '1.5rem', boxShadow: '8px 8px 0 #000', fontFamily: 'Outfit, sans-serif' }}>
-            <div style={{ textTransform: 'uppercase', fontWeight: 900, fontSize: '0.8rem', color: 'var(--accent-r)', letterSpacing: '1px', marginBottom: '0.3rem' }}>
-                Future Tech Academy • Cohort 1
+            <div style={{ textTransform: 'uppercase', fontWeight: 900, fontSize: '0.8rem', color: '#dc2626', letterSpacing: '1px', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span>🔒</span> Future Tech Academy • Cohort 1 Locked
             </div>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: 950, textTransform: 'uppercase', margin: '0 0 1rem 0' }}>
-                Complete Course Commitment Fee
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 950, textTransform: 'uppercase', margin: '0 0 1rem 0', color: '#000' }}>
+                Payment Portal Locked
             </h2>
+
+            <div style={{ background: '#fef2f2', border: '3px solid #dc2626', padding: '1.5rem', borderRadius: '1rem', marginBottom: '1.5rem', boxShadow: '4px 4px 0 #000' }}>
+                <div style={{ fontSize: '2.8rem', textAlign: 'center', marginBottom: '0.5rem' }}>🔒</div>
+                <h3 style={{ margin: '0 0 0.5rem 0', textAlign: 'center', color: '#991b1b', fontWeight: 900, fontSize: '1.2rem', textTransform: 'uppercase' }}>
+                    Payment Locked for Cohort 1
+                </h3>
+                <p style={{ margin: 0, textAlign: 'center', color: '#7f1d1d', fontSize: '0.92rem', lineHeight: 1.6, fontWeight: 700 }}>
+                    Course commitment fee payments for <strong>Cohort 1</strong> are officially closed and locked. No further payments can be made for Cohort 1.
+                </p>
+            </div>
 
             <div style={{ background: '#f4f4f5', border: '3px solid #000', padding: '1.2rem', borderRadius: '1rem', marginBottom: '1.5rem', boxShadow: '4px 4px 0 #000' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', fontSize: '0.9rem' }}>
-                    <span style={{ color: '#71717a', fontWeight: 700 }}>Course Track:</span>
-                    <span style={{ fontWeight: 900, color: '#000' }}>{course}</span>
+                    <span style={{ color: '#71717a', fontWeight: 700 }}>Payment Status:</span>
+                    <span style={{ fontWeight: 900, color: '#dc2626' }}>CLOSED / LOCKED</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', fontSize: '0.9rem' }}>
-                    <span style={{ color: '#71717a', fontWeight: 700 }}>Cohort Start:</span>
-                    <span style={{ fontWeight: 900, color: '#000' }}>August 15th, 2026</span>
+                    <span style={{ color: '#71717a', fontWeight: 700 }}>Cohort:</span>
+                    <span style={{ fontWeight: 900, color: '#000' }}>Cohort 1</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', paddingTop: '0.6rem', borderTop: '2px dashed #000' }}>
-                    <span style={{ fontWeight: 900 }}>Total Fee:</span>
-                    <span style={{ fontWeight: 950, color: '#16a34a' }}>₦10,000 NGN</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                    <span style={{ color: '#71717a', fontWeight: 700 }}>Next Application:</span>
+                    <span style={{ fontWeight: 900, color: '#2563eb' }}>Cohort 2 (Coming Soon)</span>
                 </div>
-            </div>
-
-            <div style={{ marginBottom: '1.2rem' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
-                    Full Name
-                </label>
-                <input
-                    type="text"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Enter your full name"
-                    style={{ width: '100%', padding: '0.8rem 1rem', border: '3px solid #000', borderRadius: '0.6rem', fontWeight: 700, outline: 'none', boxSizing: 'border-box' }}
-                />
-            </div>
-
-            <div style={{ marginBottom: '1.8rem' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
-                    Registered Email Address
-                </label>
-                <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Enter your registered email"
-                    style={{ width: '100%', padding: '0.8rem 1rem', border: '3px solid #000', borderRadius: '0.6rem', fontWeight: 700, outline: 'none', boxSizing: 'border-box' }}
-                />
             </div>
 
             <button
-                onClick={handlePaystackPayment}
-                disabled={loading}
+                disabled
+                onClick={() => alert('Payment for Cohort 1 is locked. No further payments are being accepted.')}
                 style={{
                     width: '100%',
-                    background: '#16a34a',
+                    background: '#ef4444',
                     color: '#ffffff',
                     border: '3.5px solid #000',
                     padding: '1.1rem',
                     borderRadius: '0.8rem',
                     fontFamily: 'Outfit, sans-serif',
                     fontWeight: 950,
-                    fontSize: '1.1rem',
+                    fontSize: '1.05rem',
                     textTransform: 'uppercase',
-                    cursor: loading ? 'not-allowed' : 'pointer',
+                    cursor: 'not-allowed',
                     boxShadow: '4px 4px 0 #000',
                     letterSpacing: '0.5px'
                 }}
             >
-                {loading ? '⌛ Opening Paystack...' : '💳 Pay ₦10,000 via Paystack'}
+                🔒 Payment Locked for Cohort 1
             </button>
 
-            <div style={{ textAlign: 'center', marginTop: '1.2rem', fontSize: '0.75rem', color: '#71717a', fontWeight: 700 }}>
-                🔒 Secured by Paystack (Card, Transfer, USSD)
+            <div style={{ textAlign: 'center', marginTop: '1.2rem' }}>
+                <button
+                    onClick={() => { window.location.href = '/'; }}
+                    style={{ background: 'none', border: 'none', textDecoration: 'underline', fontWeight: 800, cursor: 'pointer', fontSize: '0.85rem', color: '#000' }}
+                >
+                    Return to Homepage
+                </button>
             </div>
         </div>
     );

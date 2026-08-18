@@ -34,11 +34,19 @@
       "destination": "/api/paystack-webhook.js"
     },
     {
+      "source": "/api/send-newsletter",
+      "destination": "/api/send-newsletter.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
   ],
   "functions": {
+    "api/send-newsletter.js": {
+      "memory": 512,
+      "maxDuration": 60
+    },
     "api/founders.js": {
       "memory": 1024,
       "maxDuration": 60

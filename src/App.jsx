@@ -2556,6 +2556,11 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [portalDates, setPortalDates] = useState(() => {
         try { return JSON.parse(localStorage.getItem('fta-portal-dates') || '{}'); } catch { return {}; }
     });
+    const [newsletterSubject, setNewsletterSubject] = useState("🚀 Don't Waste Your Holiday! Master a Digital Tech Skill with Future Tech Academy");
+    const [newsletterTestEmail, setNewsletterTestEmail] = useState("ademuwagunremi60@gmail.com");
+    const [newsletterSending, setNewsletterSending] = useState(false);
+    const [newsletterTestSent, setNewsletterTestSent] = useState(false);
+    const [newsletterStatus, setNewsletterStatus] = useState("");
 
     // Manual candidate add state
     const [showManualAddForm, setShowManualAddForm] = useState(false);
@@ -4753,6 +4758,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                         { id: 'peers', label: '🤝 Merge Peers' },
                         { id: 'grade', label: '📝 Grade Submissions' },
                         { id: 'notify', label: '📣 Send Notification' },
+                        { id: 'newsletter', label: '📧 Holiday Newsletter' },
                         { id: 'leaderboard', label: '🏆 Leaderboard' },
                         { id: 'portal-settings', label: '⏰ Portal Settings' },
                     ];
@@ -5051,6 +5057,154 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                 </div>
                                             );
                                         })()}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ── BROADCAST NEWSLETTER ── */}
+                            {ftaTab === 'newsletter' && (
+                                <div style={{ maxWidth: '800px' }}>
+                                    <div style={{ background: '#fff', border: '3px solid #000', padding: '2rem', boxShadow: '8px 8px 0 #000', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        <div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
+                                                <span style={{ background: '#E63946', color: '#fff', fontSize: '0.75rem', fontWeight: 900, padding: '0.2rem 0.6rem', borderRadius: '4px', textTransform: 'uppercase' }}>HOLIDAY CAMPAIGN</span>
+                                                <h3 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.4rem', margin: 0, textTransform: 'uppercase' }}>📧 Broadcast Holiday Newsletter</h3>
+                                            </div>
+                                            <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b', fontWeight: 700, lineHeight: 1.5 }}>
+                                                Send branded email campaign featuring the holiday notice ("Do not waste your holiday, join Future Tech Academy for ₦10,000"), available tracks (Frontend, Backend, Data Science, Product Design), a funny AI story, mind-blowing AI fact, and developer meme.
+                                            </p>
+                                        </div>
+
+                                        {/* Subject Line */}
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.5rem', color: '#0f172a' }}>Email Subject Line</label>
+                                            <input
+                                                type="text"
+                                                value={newsletterSubject}
+                                                onChange={e => setNewsletterSubject(e.target.value)}
+                                                style={{ border: '3px solid #000', padding: '0.8rem 1rem', width: '100%', borderRadius: '0.6rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.9rem' }}
+                                            />
+                                        </div>
+
+                                        {/* STEP 1: TEST EMAIL */}
+                                        <div style={{ background: '#eff6ff', border: '2px solid #3b82f6', padding: '1.2rem', borderRadius: '0.8rem' }}>
+                                            <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, color: '#1d4ed8', margin: '0 0 0.5rem 0', fontSize: '0.95rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <span>1️⃣ Test Mode (Send to Admin First)</span>
+                                                {newsletterTestSent && <span style={{ background: '#22c55e', color: '#fff', fontSize: '0.65rem', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>TEST PASSED ✅</span>}
+                                            </h4>
+                                            <p style={{ fontSize: '0.78rem', color: '#1e40af', margin: '0 0 1rem 0', fontWeight: 650 }}>
+                                                Per safety requirements, send a preview test email to verify formatting before dispatching to the entire database.
+                                            </p>
+
+                                            <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+                                                <input
+                                                    type="email"
+                                                    value={newsletterTestEmail}
+                                                    onChange={e => setNewsletterTestEmail(e.target.value)}
+                                                    placeholder="Enter test email address"
+                                                    style={{ flex: 1, minWidth: '240px', border: '2px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.85rem', borderRadius: '0.4rem' }}
+                                                />
+                                                <button
+                                                    disabled={newsletterSending}
+                                                    onClick={async () => {
+                                                        if (!newsletterTestEmail.trim()) { alert('Enter a test email address.'); return; }
+                                                        setNewsletterSending(true);
+                                                        setNewsletterStatus('⏳ Dispatching test email to ' + newsletterTestEmail + '...');
+                                                        try {
+                                                            const res = await fetch('/api/send-newsletter', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({ testEmail: newsletterTestEmail.trim(), subject: newsletterSubject })
+                                                            });
+                                                            const data = await res.json();
+                                                            if (data.success && data.sentCount > 0) {
+                                                                setNewsletterTestSent(true);
+                                                                setNewsletterStatus(`✅ Test email delivered successfully to ${newsletterTestEmail}! Please check inbox/spam.`);
+                                                            } else {
+                                                                setNewsletterStatus(`❌ Delivery failed: ${data.error || data.errors?.[0]?.error || 'Unknown error'}`);
+                                                            }
+                                                        } catch (err) {
+                                                            setNewsletterStatus(`❌ Error dispatching test email: ${err.message}`);
+                                                        } finally {
+                                                            setNewsletterSending(false);
+                                                        }
+                                                    }}
+                                                    style={{ padding: '0.7rem 1.2rem', background: '#3b82f6', color: '#fff', border: '2px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: newsletterSending ? 'wait' : 'pointer', fontSize: '0.8rem', boxShadow: '3px 3px 0 #000' }}
+                                                >
+                                                    {newsletterSending ? '⏳ Sending...' : '🧪 Send Test Email'}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* STEP 2: MASSIVE BROADCAST */}
+                                        <div style={{ background: '#fef2f2', border: '2px solid #ef4444', padding: '1.2rem', borderRadius: '0.8rem' }}>
+                                            <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, color: '#b91c1c', margin: '0 0 0.5rem 0', fontSize: '0.95rem', textTransform: 'uppercase' }}>
+                                                2️⃣ Massive Broadcast (All Database Applicants)
+                                            </h4>
+                                            <p style={{ fontSize: '0.78rem', color: '#991b1b', margin: '0 0 1rem 0', fontWeight: 650 }}>
+                                                Dispatches the newsletter to all unique registered emails in Supabase.
+                                            </p>
+
+                                            <button
+                                                disabled={newsletterSending}
+                                                onClick={async () => {
+                                                    if (!newsletterTestSent) {
+                                                        if (!confirm('⚠️ You have not sent a test email yet. Are you sure you want to proceed with massive broadcast to all emails in the database?')) {
+                                                            return;
+                                                        }
+                                                    }
+                                                    const count = waitlist.length;
+                                                    if (!confirm(`🚀 Are you sure you want to send this newsletter to all ${count} contacts/registrations in your database?`)) {
+                                                        return;
+                                                    }
+
+                                                    setNewsletterSending(true);
+                                                    setNewsletterStatus('⏳ Fetching database recipients...');
+
+                                                    try {
+                                                        const { data: dbRows, error: dbErr } = await supabase.from('registrations').select('email');
+                                                        if (dbErr) throw dbErr;
+
+                                                        const allEmails = Array.from(new Set((dbRows || []).map(r => r.email?.trim()).filter(Boolean)));
+                                                        if (!allEmails.length) {
+                                                            alert('No registered emails found in database.');
+                                                            setNewsletterSending(false);
+                                                            return;
+                                                        }
+
+                                                        setNewsletterStatus(`⏳ Sending massive newsletter to ${allEmails.length} recipients...`);
+
+                                                        const res = await fetch('/api/send-newsletter', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ recipients: allEmails, subject: newsletterSubject })
+                                                        });
+                                                        const data = await res.json();
+
+                                                        if (data.success) {
+                                                            setNewsletterStatus(`🎉 Massive broadcast complete! Successfully delivered to ${data.sentCount} recipients. (Failed: ${data.failCount})`);
+                                                            alert(`🎉 Newsletter dispatched to ${data.sentCount} emails in the database!`);
+                                                        } else {
+                                                            setNewsletterStatus(`❌ Broadcast error: ${data.error || 'Failed'}`);
+                                                        }
+                                                    } catch (err) {
+                                                        setNewsletterStatus(`❌ Error sending newsletter: ${err.message}`);
+                                                    } finally {
+                                                        setNewsletterSending(false);
+                                                    }
+                                                }}
+                                                style={{ padding: '0.9rem 1.5rem', background: '#dc2626', color: '#fff', border: '3px solid #000', fontFamily: 'Outfit', fontWeight: 900, textTransform: 'uppercase', cursor: newsletterSending ? 'wait' : 'pointer', fontSize: '0.85rem', boxShadow: '4px 4px 0 #000' }}
+                                            >
+                                                {newsletterSending ? '⏳ Dispatches in Progress...' : `🚀 Send Massively to All Database Mails (${waitlist.length})`}
+                                            </button>
+                                        </div>
+
+                                        {/* Status Message Display */}
+                                        {newsletterStatus && (
+                                            <div style={{ background: newsletterStatus.includes('✅') || newsletterStatus.includes('🎉') ? '#f0fdf4' : newsletterStatus.includes('⏳') ? '#eff6ff' : '#fef2f2', border: `2px solid ${newsletterStatus.includes('✅') || newsletterStatus.includes('🎉') ? '#22c55e' : newsletterStatus.includes('⏳') ? '#3b82f6' : '#ef4444'}`, padding: '1rem', borderRadius: '0.6rem', fontWeight: 800, fontSize: '0.85rem', color: newsletterStatus.includes('✅') || newsletterStatus.includes('🎉') ? '#166534' : newsletterStatus.includes('⏳') ? '#1e40af' : '#991b1b' }}>
+                                                {newsletterStatus}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}

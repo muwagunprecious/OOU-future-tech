@@ -4714,11 +4714,12 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                 {/* ─── FTA CONTROL PANEL ─── */}
                 {activeTab === 'fta-control' && (() => {
                     const COHORTS = ['Cohort 1', 'Cohort 2', 'Cohort 3', 'Cohort 4', 'Cohort 5'];
-                    const TRACKS = ['Frontend Engineering', 'Backend Engineering', 'Product Design (UI/UX)'];
+                    const TRACKS = ['Frontend Engineering', 'Backend Engineering', 'Product Design (UI/UX)', 'Data Science'];
                     const TRACK_MODULES = {
-                        'Frontend Engineering': [...ACADEMY_COURSES['Frontend Engineering'].modules.map((m, i) => ({ index: i, title: m.title })), ...customModules.filter(m => m.track === 'Frontend Engineering').map((m, i) => ({ index: ACADEMY_COURSES['Frontend Engineering'].modules.length + i, title: m.title }))],
-                        'Backend Engineering': [...ACADEMY_COURSES['Backend Engineering'].modules.map((m, i) => ({ index: i, title: m.title })), ...customModules.filter(m => m.track === 'Backend Engineering').map((m, i) => ({ index: ACADEMY_COURSES['Backend Engineering'].modules.length + i, title: m.title }))],
-                        'Product Design (UI/UX)': [...ACADEMY_COURSES['Product Design (UI/UX)'].modules.map((m, i) => ({ index: i, title: m.title })), ...customModules.filter(m => m.track === 'Product Design (UI/UX)').map((m, i) => ({ index: ACADEMY_COURSES['Product Design (UI/UX)'].modules.length + i, title: m.title }))],
+                        'Frontend Engineering': [...(ACADEMY_COURSES['Frontend Engineering']?.modules || []).map((m, i) => ({ index: i, title: m.title })), ...customModules.filter(m => m.track === 'Frontend Engineering').map((m, i) => ({ index: (ACADEMY_COURSES['Frontend Engineering']?.modules || []).length + i, title: m.title }))],
+                        'Backend Engineering': [...(ACADEMY_COURSES['Backend Engineering']?.modules || []).map((m, i) => ({ index: i, title: m.title })), ...customModules.filter(m => m.track === 'Backend Engineering').map((m, i) => ({ index: (ACADEMY_COURSES['Backend Engineering']?.modules || []).length + i, title: m.title }))],
+                        'Product Design (UI/UX)': [...(ACADEMY_COURSES['Product Design (UI/UX)']?.modules || []).map((m, i) => ({ index: i, title: m.title })), ...customModules.filter(m => m.track === 'Product Design (UI/UX)').map((m, i) => ({ index: (ACADEMY_COURSES['Product Design (UI/UX)']?.modules || []).length + i, title: m.title }))],
+                        'Data Science': [...(ACADEMY_COURSES['Data Science']?.modules || []).map((m, i) => ({ index: i, title: m.title })), ...customModules.filter(m => m.track === 'Data Science').map((m, i) => ({ index: (ACADEMY_COURSES['Data Science']?.modules || []).length + i, title: m.title }))],
                     };
                     // (states declared at top of AdminDashboard to follow Rules of Hooks)
 
@@ -4810,7 +4811,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                     <div>
                                         <h4 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '1.1rem', marginBottom: '1rem', textTransform: 'uppercase', color: '#000', borderBottom: '2px solid #000', paddingBottom: '0.3rem' }}>2. Assign Student Course Track</h4>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.2rem' }}>
-                                            {['Frontend Engineering', 'Backend Engineering', 'Product Design (UI/UX)'].map(track => {
+                                            {['Frontend Engineering', 'Backend Engineering', 'Product Design (UI/UX)', 'Data Science'].map(track => {
                                                 const isCurrent = localStorage.getItem('fta-admin-assigned-course') === track || (!localStorage.getItem('fta-admin-assigned-course') && track === 'Frontend Engineering');
                                                 return (
                                                     <div key={track} style={{ background: '#fff', border: `3px solid ${isCurrent ? 'var(--accent-b, #3b82f6)' : '#000'}`, padding: '1.2rem', boxShadow: isCurrent ? '4px 4px 0 var(--accent-b, #3b82f6)' : '4px 4px 0 #000', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -5064,7 +5065,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                             <div>
                                                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '0.3rem' }}>Target Track</label>
                                                 <select value={selectedTrackAdmin} onChange={e => setSelectedTrackAdmin(e.target.value)} style={{ border: '3px solid #000', padding: '0.7rem', fontFamily: 'Outfit', fontWeight: 700, width: '100%' }}>
-                                                    {['Frontend Engineering', 'Backend Engineering', 'Product Design (UI/UX)'].map(t => <option key={t} value={t}>{t}</option>)}
+                                                    {['Frontend Engineering', 'Backend Engineering', 'Product Design (UI/UX)', 'Data Science'].map(t => <option key={t} value={t}>{t}</option>)}
                                                 </select>
                                             </div>
                                             <div>
@@ -6373,6 +6374,103 @@ const ACADEMY_COURSES = {
                 ]
             }
         ]
+    },
+    'Data Science': {
+        description: 'Master mathematics, statistics, Python, algorithms, SQL, Pandas, machine learning, deep learning, MLOps, AI engineering, and Claude for data science.',
+        modules: [
+            {
+                title: 'Module 1: Foundations of Mathematics & Statistics',
+                lessons: [
+                    {
+                        id: 'ds-math',
+                        title: '1. Mathematics for Data Science',
+                        videoUrl: 'https://www.youtube.com/embed/0z6AhrOSrRs',
+                        notes: `### Mathematics for Data Science\n\nFundamental mathematical concepts underpinning machine learning algorithms and statistical analysis:\n\n* **Linear Algebra**: Vectors, matrices, matrix multiplication, eigenvalues, and eigenvectors.\n* **Calculus**: Derivatives, partial derivatives, gradient descent, and optimization algorithms.\n* **Probability Theory**: Probability distributions, random variables, and expectation.`
+                    },
+                    {
+                        id: 'ds-stats-intro',
+                        title: '2. Introduction to Statistics',
+                        videoUrl: 'https://www.youtube.com/embed/XDqTDEZQZp4',
+                        notes: `### Introduction to Statistics\n\nDescriptive and inferential statistics for data interpretation:\n\n* **Measures of Central Tendency**: Mean, median, and mode.\n* **Measures of Dispersion**: Variance, standard deviation, range, and interquartile range (IQR).\n* **Data Distributions**: Normal distribution, skewness, kurtosis, and Z-scores.`
+                    },
+                    {
+                        id: 'ds-hypothesis',
+                        title: '3. Hypothesis Testing',
+                        videoUrl: 'https://www.youtube.com/embed/VK-rnA3-41c',
+                        notes: `### Hypothesis Testing\n\nStatistical framework for evaluating data-driven claims and experimental results:\n\n* **Null vs Alternative Hypothesis**: Formulating H0 and H1.\n* **Significance & P-Values**: Type I & Type II errors, alpha levels (0.05), and p-value evaluation.\n* **Statistical Tests**: T-tests, Z-tests, ANOVA, and Chi-Square tests.`
+                    }
+                ]
+            },
+            {
+                title: 'Module 2: Programming, Algorithms & Data Manipulation (Python, DSA, SQL & Pandas)',
+                lessons: [
+                    {
+                        id: 'ds-python',
+                        title: '4. Python for Data Science',
+                        videoUrl: 'https://www.youtube.com/embed/LHBE6Q9XlzI',
+                        notes: `### Python Programming for Data Science\n\nThe industry-standard language for data analysis and artificial intelligence:\n\n* **Core Syntax**: Variables, control flow, functions, list comprehensions, and dictionaries.\n* **Scientific Libraries**: Introduction to NumPy arrays, vectorization, and mathematical operations.`
+                    },
+                    {
+                        id: 'ds-dsa',
+                        title: '5. Algorithm and Data Structure',
+                        videoUrl: 'https://www.youtube.com/embed/8hly31xKli0',
+                        notes: `### Algorithms & Data Structures\n\nEssential computer science principles for building performant data pipelines:\n\n* **Data Structures**: Arrays, stacks, queues, hash tables, trees, and graphs.\n* **Algorithmic Complexity**: Big O notation, sorting, searching, and memory optimization.`
+                    },
+                    {
+                        id: 'ds-sql',
+                        title: '6. SQL for Data Analysis',
+                        videoUrl: 'https://www.youtube.com/embed/7S_tz1z_5bA',
+                        notes: `### Structured Query Language (SQL)\n\nQuerying relational databases to extract business insights:\n\n* **Queries**: SELECT, WHERE, GROUP BY, HAVING, and ORDER BY.\n* **Joins & Aggregations**: INNER JOIN, LEFT JOIN, FULL JOIN, COUNT, SUM, and AVG.\n* **Window Functions & Subqueries**: CTEs, RANK(), DENSE_RANK(), and nested queries.`
+                    },
+                    {
+                        id: 'ds-pandas',
+                        title: '7. Data Analysis with Pandas',
+                        videoUrl: 'https://www.youtube.com/embed/EXIgjIBu4EU',
+                        notes: `### Data Manipulation with Pandas\n\nCleaning, transforming, and analyzing tabular datasets in Python:\n\n* **DataFrames & Series**: Indexing, slicing, filtering, and assignment.\n* **Data Wrangling**: Handling missing values, deduplication, merging, concatenating, and pivot tables.`
+                    }
+                ]
+            },
+            {
+                title: 'Module 3: Machine Learning & Deep Learning Architectures',
+                lessons: [
+                    {
+                        id: 'ds-ml',
+                        title: '8. Machine Learning',
+                        videoUrl: 'https://www.youtube.com/embed/NWONeJKn6kc',
+                        notes: `### Machine Learning Fundamentals\n\nBuilding predictive models from historical data:\n\n* **Supervised Learning**: Linear regression, logistic regression, decision trees, random forests, and SVMs.\n* **Unsupervised Learning**: K-Means clustering, PCA, and anomaly detection.\n* **Model Evaluation**: Precision, recall, F1-score, ROC-AUC curve, and cross-validation.`
+                    },
+                    {
+                        id: 'ds-dl',
+                        title: '9. Deep Learning & Neural Networks',
+                        videoUrl: 'https://www.youtube.com/embed/19LQRx78QVU',
+                        notes: `### Deep Learning Architecture\n\nArtificial Neural Networks (ANNs) for complex pattern recognition:\n\n* **Perceptrons & Neural Nets**: Layers, activation functions (ReLU, Sigmoid, Softmax), forward & backpropagation.\n* **Deep Learning Frameworks**: TensorFlow, Keras, PyTorch, and CNNs/RNNs architecture.`
+                    }
+                ]
+            },
+            {
+                title: 'Module 4: MLOps, AI Engineering & LLM Integration',
+                lessons: [
+                    {
+                        id: 'ds-mlops',
+                        title: '10. MLOps (Machine Learning Operations)',
+                        videoUrl: 'https://www.youtube.com/embed/w71RHxAWxaM',
+                        notes: `### MLOps Practices\n\nDeploying, monitoring, and maintaining machine learning models in production:\n\n* **Model Lifecycle**: Experiment tracking, model registry, versioning (DVC), and CI/CD pipelines.\n* **Monitoring & Drift**: Detecting data drift, concept drift, and automated re-training.`
+                    },
+                    {
+                        id: 'ds-ai-eng',
+                        title: '11. AI Engineering',
+                        videoUrl: 'https://www.youtube.com/embed/JV3pL1_mn2M',
+                        notes: `### AI Engineering & Production Systems\n\nIntegrating AI capabilities into software applications:\n\n* **Generative AI & LLMs**: Prompt engineering, embeddings, vector databases (Pinecone/Chroma), and RAG.\n* **API Integration**: Serving ML models via REST APIs (FastAPI/Flask) and microservices.`
+                    },
+                    {
+                        id: 'ds-claude',
+                        title: '12. Claude for Data Science',
+                        videoUrl: 'https://www.youtube.com/embed/w2vRlfDEhyE',
+                        notes: `### Claude AI for Data Analysis & Automation\n\nLeveraging Anthropic's Claude for advanced data workflows:\n\n* **Code Generation**: Automated EDA scripts, SQL query optimization, and debugging.\n* **Data Interpretation**: Synthesizing insights, automated reporting, and AI-assisted data modeling.`
+                    }
+                ]
+            }
+        ]
     }
 };
 
@@ -6453,11 +6551,40 @@ const getModuleExercise = (courseKey, modIdx) => {
             };
         }
     }
-    // Backend fallbacks
+    if (courseKey.includes('Data') || courseKey.includes('Science')) {
+        switch (modIdx) {
+            case 0: return {
+                title: 'Module 1 Exercise: Mathematics & Statistics',
+                instruction: `Write a Python script and theoretical analysis detailing:\n1. Calculation of mean, median, standard deviation, and variance for a sample dataset\n2. Formulation of a Null Hypothesis (H0) and Alternative Hypothesis (H1)\n3. Explanation of p-value, alpha threshold (0.05), and Type I vs Type II errors\n4. Application of Linear Algebra (vectors, matrices) in data transformations\n\nInclude step-by-step calculations and Python code.`,
+                langHint: 'python'
+            };
+            case 1: return {
+                title: 'Module 2 Exercise: Python, SQL & Pandas Data Wrangling',
+                instruction: `Write a complete Data Science pipeline using Python, SQL, and Pandas:\n1. Write a SQL query using JOIN, GROUP BY, and HAVING to aggregate database records\n2. Use Pandas to load a dataset, clean missing values (fillna/dropna), and deduplicate rows\n3. Demonstrate Pandas indexing (.loc/.iloc), filtering, and computed columns\n4. Implement a custom Python function utilizing lists/dictionaries with Big O notation comments\n\nInclude detailed inline comments (#) explaining every step.`,
+                langHint: 'python'
+            };
+            case 2: return {
+                title: 'Module 3 Exercise: Machine Learning & Deep Learning Model',
+                instruction: `Write a complete Machine Learning training script in Python:\n1. Split a dataset into training and testing sets (train_test_split)\n2. Train a classification or regression model (e.g. Scikit-Learn RandomForest or Logistic Regression)\n3. Evaluate model performance using Accuracy, Precision, Recall, and F1-Score\n4. Build an Artificial Neural Network (ANN) architecture with activation functions (ReLU, Sigmoid)\n\nInclude comments on data preprocessing and hyperparameter tuning.`,
+                langHint: 'python'
+            };
+            case 3: return {
+                title: 'Module 4 Exercise: MLOps, AI Engineering & LLM Integration',
+                instruction: `Write an AI Engineering & MLOps deployment specification and Python script:\n1. Demonstrate how to track model metrics and register models in an MLOps pipeline\n2. Write a Python script implementing a RAG (Retrieval-Augmented Generation) pattern with vector embeddings\n3. Call an LLM API (such as Claude) to perform automated data analysis and insight extraction\n4. Include error handling and API response parsing\n\nInclude detailed inline comments explaining the MLOps architecture.`,
+                langHint: 'python'
+            };
+            default: return {
+                title: `Module ${modIdx + 1} Data Science Exercise`,
+                instruction: `Write a complete Python data science pipeline demonstrating core concepts from this module. Include inline comments explaining each step.`,
+                langHint: 'python'
+            };
+        }
+    }
+    // Fallback exercises
     return {
-        title: `Module ${modIdx + 1} Coding Exercise`,
+        title: `Module ${modIdx + 1} Exercise`,
         instruction: `Write a complete code solution demonstrating all core concepts from this module. Include detailed inline comments.`,
-        langHint: courseKey.includes('Backend') ? 'javascript' : 'text'
+        langHint: courseKey.includes('Backend') ? 'javascript' : (courseKey.includes('Data') ? 'python' : 'text')
     };
 };
 
@@ -10925,9 +11052,112 @@ const SCREENING_QUESTIONS = {
             ],
             answer: 1
         }
+    ],
+    'Data Science': [
+        {
+            q: 'You are analyzing customer income data and notice values range from $20,000 to $50,000,000 due to a few extreme outliers. Which measure of central tendency best represents the typical customer income?',
+            options: [
+                'The Mean (Average)',
+                'The Median (Middle value)',
+                'The Mode (Most frequent)',
+                'The Standard Deviation'
+            ],
+            answer: 1
+        },
+        {
+            q: 'When building a predictive machine learning model, why do data scientists split their dataset into training and testing sets?',
+            options: [
+                'To make the data file smaller and faster to load',
+                'To evaluate how well the model generalizes to new, unseen data and prevent overfitting',
+                'To delete duplicate records automatically',
+                'To convert all numbers into strings'
+            ],
+            answer: 1
+        },
+        {
+            q: 'In Python, which library is most commonly used for handling DataFrames, data cleaning, and tabular data manipulation?',
+            options: [
+                'Matplotlib',
+                'Pandas',
+                'Requests',
+                'Flask'
+            ],
+            answer: 1
+        },
+        {
+            q: 'You run an A/B test on a new feature and obtain a P-value of 0.01 (with significance threshold alpha = 0.05). What does this statistical result mean?',
+            options: [
+                'The result is statistically significant, so we reject the null hypothesis',
+                'The result is invalid and the experiment must be deleted',
+                'There is a 99% chance the new feature failed',
+                'The null hypothesis is proven 100% true'
+            ],
+            answer: 0
+        },
+        {
+            q: 'You want to retrieve all customers who made a purchase over $500 from a database table named "orders". Which SQL query is correct?',
+            options: [
+                'SELECT * FROM orders WHERE amount > 500;',
+                'GET ALL orders FILTER amount > 500;',
+                'FIND orders IF amount > 500;',
+                'SEARCH orders WITH amount > 500;'
+            ],
+            answer: 0
+        },
+        {
+            q: 'What is the primary goal of Supervised Machine Learning?',
+            options: [
+                'To group data without any target labels',
+                'To predict target output labels based on labeled historical input data',
+                'To compress images into smaller files',
+                'To automatically design computer hardware'
+            ],
+            answer: 1
+        },
+        {
+            q: 'What does "Data Drift" refer to in MLOps and Machine Learning operations?',
+            options: [
+                'When data files get corrupted on disk',
+                'When real-world input data distribution changes over time, reducing model accuracy in production',
+                'When a model trains faster than expected',
+                'When network bandwidth drops'
+            ],
+            answer: 1
+        },
+        {
+            q: 'In Deep Learning, what is the key purpose of an "Activation Function" in a neural network layer?',
+            options: [
+                'To introduce non-linearity so the network can learn complex, non-linear relationships',
+                'To shut down the GPU when training finishes',
+                'To count the total number of files in a directory',
+                'To encrypt user passwords'
+            ],
+            answer: 0
+        },
+        {
+            q: 'What architectural pattern is commonly used in modern AI Engineering to retrieve external documents and inject them into an LLM prompt for accurate answers?',
+            options: [
+                'RAG (Retrieval-Augmented Generation)',
+                'CSS Flexbox',
+                'Binary Search Tree',
+                'SQL Inner Join'
+            ],
+            answer: 0
+        },
+        {
+            q: 'What is the Big O time complexity of accessing an element in a Python list or array by its index?',
+            options: [
+                'O(1) - Constant Time',
+                'O(N) - Linear Time',
+                'O(N^2) - Quadratic Time',
+                'O(log N) - Logarithmic Time'
+            ],
+            answer: 0
+        }
     ]
 };
 SCREENING_QUESTIONS['UI/UX Product Design'] = SCREENING_QUESTIONS['Product Design (UI/UX)'];
+SCREENING_QUESTIONS['Data Science & AI'] = SCREENING_QUESTIONS['Data Science'];
 
 const TIMER_PER_QUESTION = 15; // seconds
 

@@ -11936,6 +11936,7 @@ const TechWaitlistSection = () => {
                             <option value="Frontend Engineering">Frontend Engineering (HTML/CSS/JS/React)</option>
                             <option value="Backend Engineering">Backend Engineering (Node.js/Database/Cloud)</option>
                             <option value="Product Design">Product Design (UI/UX/Figma)</option>
+                            <option value="Data Science">Data Science (Python/SQL/ML/AI)</option>
                             <option value="Mobile Development">Mobile Development (Flutter/React Native)</option>
                         </select>
                     </div>

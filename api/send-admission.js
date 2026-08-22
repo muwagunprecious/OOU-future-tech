@@ -14,12 +14,15 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { email, name, course, portalOpenDate } = req.body;
+    const { email, name, course, portalOpenDate, cohort, startDate } = req.body;
 
     if (!email || !name || !course) {
         console.error('❌ Missing required fields:', { email, name, course });
         return res.status(400).json({ error: 'Missing required fields' });
     }
+
+    const cohortName = cohort || 'Cohort 2';
+    const programStartDate = startDate || (cohortName === 'Cohort 1' ? 'August 15th, 2026' : 'August 24th, 2026');
 
     // Verify Env Vars
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -38,14 +41,14 @@ export default async function handler(req, res) {
     });
 
     const lmsLink = `${req.headers.origin || 'https://ooufuturetech.com.ng'}/academy`;
-    console.log(`📧 Attempting to send admission email to: ${email}`);
+    console.log(`📧 Attempting to send ${cohortName} admission email to: ${email}`);
 
     const senderEmail = (process.env.EMAIL_USER || 'ooufuturetech@gmail.com').trim();
 
     const mailOptions = {
         from: `"OOU Future Tech Academy" <${senderEmail}>`,
         to: email,
-        subject: `Future Tech Academy Cohort One Admission - Congratulations!`,
+        subject: `Future Tech Academy ${cohortName} Admission - Congratulations!`,
         html: `
             <div style="font-family: 'Outfit', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 5px solid #000; padding: 30px; border-radius: 20px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 25px;">
@@ -63,7 +66,7 @@ export default async function handler(req, res) {
                 </p>
                 
                 <p style="font-size: 15px; color: #333333; line-height: 1.6;">
-                    We are excited to inform you that you have been offered admission into <strong>Cohort One</strong> of the <strong>${course}</strong> track at Future Tech Academy!
+                    We are excited to inform you that you have been offered admission into <strong>${cohortName}</strong> of the <strong>${course}</strong> track at Future Tech Academy!
                 </p>
                 
                 <div style="background: #f4f4f5; padding: 25px; border: 3px solid #000000; border-radius: 15px; margin: 25px 0; box-shadow: 4px 4px 0 #000000;">
@@ -71,7 +74,7 @@ export default async function handler(req, res) {
                     <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
                         <tr>
                             <td style="padding-bottom: 8px; width: 35%;"><strong>Cohort:</strong></td>
-                            <td style="padding-bottom: 8px; font-weight: bold; color: #000;">Cohort One (Starting August 15th, 2026)</td>
+                            <td style="padding-bottom: 8px; font-weight: bold; color: #000;">${cohortName} (Starting ${programStartDate})</td>
                         </tr>
                         <tr>
                             <td style="padding-bottom: 8px;"><strong>Course Track:</strong></td>
@@ -79,11 +82,11 @@ export default async function handler(req, res) {
                         </tr>
                         <tr>
                             <td style="padding-bottom: 8px;"><strong>Start Date:</strong></td>
-                            <td style="padding-bottom: 8px; font-weight: bold; color: #E63946;">August 15th, 2026</td>
+                            <td style="padding-bottom: 8px; font-weight: bold; color: #E63946;">${programStartDate}</td>
                         </tr>
                         <tr>
                             <td><strong>Platform:</strong></td>
-                            <td>Future Tech Academy LMS</td>
+                            <td>Future Tech Academy LMS (<a href="${lmsLink}" style="color: #E63946; font-weight: bold;">https://ooufuturetech.com.ng/academy</a>)</td>
                         </tr>
                         ${portalOpenDate ? `<tr>
                             <td style="padding-bottom: 8px;"><strong>Portal Opens:</strong></td>

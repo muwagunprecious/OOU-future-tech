@@ -2554,7 +2554,12 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [leaderboardLoading, setLeaderboardLoading] = useState(false);
     const [portalDates, setPortalDates] = useState(() => {
-        try { return JSON.parse(localStorage.getItem('fta-portal-dates') || '{}'); } catch { return {}; }
+        try {
+            const parsed = JSON.parse(localStorage.getItem('fta-portal-dates') || '{}');
+            return { 'Cohort 1': '2026-08-15', 'Cohort 2': '2026-08-24', ...parsed };
+        } catch {
+            return { 'Cohort 1': '2026-08-15', 'Cohort 2': '2026-08-24' };
+        }
     });
     const [newsletterSubject, setNewsletterSubject] = useState("🚀 Don't Waste Your Holiday! Master a Digital Tech Skill with Future Tech Academy");
     const [newsletterTestEmail, setNewsletterTestEmail] = useState("ademuwagunremi60@gmail.com");
@@ -2606,7 +2611,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                 test_invited_date: isTestInvite ? new Date().toISOString() : (existingProducts.test_invited_date || null),
                 payment_link_sent: isPaymentLink ? true : (existingProducts.payment_link_sent || false),
                 payment_link_date: isPaymentLink ? new Date().toISOString() : (existingProducts.payment_link_date || null),
-                cohort: isAdmission ? 'Cohort 1' : (existingProducts.cohort || 'Cohort 1')
+                cohort: isAdmission ? 'Cohort 2' : (existingProducts.cohort || 'Cohort 2')
             });
 
             if (existing) {
@@ -2662,7 +2667,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                             email: cleanEmail,
                             name: cleanName,
                             course: cleanCourse,
-                            portalOpenDate: portalDates?.['Cohort 1'] || ''
+                            cohort: 'Cohort 2',
+                            startDate: 'August 24th, 2026',
+                            portalOpenDate: portalDates?.['Cohort 2'] || '2026-08-24'
                         })
                     });
                     if (res.ok) emailSuccess = true;
@@ -4162,14 +4169,14 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                                                                     <select
                                                                         id={`cohort-select-${w.id}`}
-                                                                        defaultValue={parsedProducts.cohort || w.cohort || 'Cohort 1'}
+                                                                        defaultValue={parsedProducts.cohort || w.cohort || 'Cohort 2'}
                                                                         style={{ border: '2px solid #000', padding: '0.3rem 0.5rem', fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.65rem', borderRadius: '0.3rem' }}
                                                                     >
                                                                         {COHORTS.map(c => <option key={c} value={c}>{c}</option>)}
                                                                     </select>
                                                                     <button
                                                                         onClick={async () => {
-                                                                            const selectedCohort = document.getElementById(`cohort-select-${w.id}`)?.value || 'Cohort 1';
+                                                                            const selectedCohort = document.getElementById(`cohort-select-${w.id}`)?.value || 'Cohort 2';
                                                                             if (confirm(`Admit ${w.name} (${w.email}) to ${selectedCohort} and send admission email?`)) {
                                                                                 try {
                                                                                     const updatedProducts = JSON.stringify({
@@ -4198,6 +4205,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                                                                                                 email: w.email,
                                                                                                 name: w.name,
                                                                                                 course: w.company_name || 'Frontend Engineering',
+                                                                                                cohort: selectedCohort,
+                                                                                                startDate: selectedCohort === 'Cohort 2' ? 'August 24th, 2026' : 'August 15th, 2026',
                                                                                                 portalOpenDate: portalDates?.[selectedCohort] || ''
                                                                                             })
                                                                                         });

@@ -45,7 +45,7 @@ export default async function handler(req, res) {
     const mailOptions = {
         from: `"OOU Future Tech Academy" <${senderEmail}>`,
         to: email,
-        subject: `Future Tech Academy - Take Your Screening Test (${courseTrack})`,
+        subject: `Future Tech Academy Cohort 2 - Take Your Screening Test (${courseTrack})`,
         html: `
             <div style="font-family: 'Outfit', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 5px solid #000; padding: 30px; border-radius: 20px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 25px;">
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
                 </div>
                 
                 <h2 style="color: #E63946; text-align: center; font-size: 24px; font-weight: 900; text-transform: uppercase;">
-                    🧪 Complete Your Screening Test
+                    🧪 Complete Your Cohort 2 Screening Test
                 </h2>
                 
                 <p style="font-size: 16px; color: #000000; line-height: 1.6;">
@@ -63,14 +63,18 @@ export default async function handler(req, res) {
                 </p>
                 
                 <p style="font-size: 15px; color: #333333; line-height: 1.6;">
-                    Thank you for joining the waitlist for Future Tech Academy! To proceed with your application evaluation for the <strong>${courseTrack}</strong> track, you are invited to take your online Screening Test.
+                    Thank you for joining the waitlist for Future Tech Academy! To proceed with your application evaluation for <strong>Cohort 2</strong> (starting <strong>August 24th, 2026</strong>) in the <strong>${courseTrack}</strong> track, you are invited to take your online Screening Test.
                 </p>
                 
                 <div style="background: #f4f4f5; padding: 25px; border: 3px solid #000000; border-radius: 15px; margin: 25px 0; box-shadow: 4px 4px 0 #000000;">
                     <h4 style="margin-top: 0; text-transform: uppercase; font-size: 13px; color: #E63946; letter-spacing: 0.5px;">Test Details & Instructions</h4>
                     <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
                         <tr>
-                            <td style="padding-bottom: 10px; width: 35%;"><strong>Course Track:</strong></td>
+                            <td style="padding-bottom: 10px; width: 35%;"><strong>Target Cohort:</strong></td>
+                            <td style="padding-bottom: 10px; font-weight: bold; color: #E63946;">Cohort 2 (Starts August 24th, 2026)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding-bottom: 10px;"><strong>Course Track:</strong></td>
                             <td style="padding-bottom: 10px; font-weight: bold; color: #000;">${courseTrack}</td>
                         </tr>
                         <tr>

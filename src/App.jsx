@@ -9,9 +9,12 @@ import {
     Zap, Code2, Mic, Network, Lightbulb, Rocket, Lock,
     Download, CheckCircle, Ticket, X, Trash2, Store, Menu, Camera as CameraIcon,
     PartyPopper, Heart, Sparkles, Building2, UserPlus, Scale, Pencil, User,
-    FileText, Upload, AlertCircle, ArrowLeft, Paperclip, Terminal, Send, Play, BookOpen, Video, PlayCircle
+    FileText, Upload, AlertCircle, ArrowLeft, Paperclip, Terminal, Send, Play, BookOpen, Video, PlayCircle, Plane
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import FlightEditionHomepage from './components/flight/FlightEditionHomepage';
+import FlightRegisterModal from './components/flight/FlightRegisterModal';
+import './styles/flight.css';
 
 /* ───────────────────────────────────────────
    GLOBAL STYLES (injected once)
@@ -12893,7 +12896,7 @@ export default function App() {
     const [dynamicSpeakers, setDynamicSpeakers] = useState([]);
     const [dynamicPartners, setDynamicPartners] = useState([]);
     const [dynamicTeam, setDynamicTeam] = useState([]);
-    const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
+    const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
     const [speakersMode, setSpeakersMode] = useState('live'); // 'live' or 'coming_soon'
     const [comingSoonText, setComingSoonText] = useState('Exciting lineup coming soon! Stay tuned.');
     const [isEventTagsOpen, setIsEventTagsOpen] = useState(true);
@@ -12935,8 +12938,9 @@ export default function App() {
 
             const { data: settings } = await supabase.from('site_settings').select('*');
             if (settings) {
-                // Enforce registration closed since the conference is finished
-                setIsRegistrationOpen(false);
+                // Flight FT2027: Now accepting passengers
+                const regSetting = settings.find(s => s.key === 'registration_open');
+                setIsRegistrationOpen(regSetting ? regSetting.value === 'true' : true);
 
                 const modeSetting = settings.find(s => s.key === 'speakers_mode');
                 if (modeSetting) setSpeakersMode(modeSetting.value);
@@ -13017,214 +13021,80 @@ export default function App() {
     return (
         <>
             <GlobalStyle />
-            <Navbar
-                onRegister={openModal}
-                isRegistrationOpen={isRegistrationOpen}
-                isMenuOpen={isMenuOpen}
-                setIsMenuOpen={setIsMenuOpen}
-                onViewChange={(v) => {
-                    setView(v);
-                    window.scrollTo(0, 0);
-                }}
-                currentView={view}
-            />
-
-            {view === 'event-tags' ? (
-                <div style={{ paddingTop: '8rem' }}>
-                    <div className="container" style={{ marginBottom: '2rem' }}>
-                        <button
-                            onClick={() => setView('site')}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                fontWeight: 900,
-                                fontSize: '1rem',
-                                color: 'var(--accent-r)',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
-                        </button>
-                    </div>
-                    <EventTagsSection isOpen={isEventTagsOpen} />
-                </div>
-            ) : view === 'pitch' ? (
-                <div style={{ paddingTop: '8rem' }}>
-                    <div className="container" style={{ marginBottom: '2rem' }}>
-                        <button
-                            onClick={() => setView('site')}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                fontWeight: 900,
-                                fontSize: '1rem',
-                                color: 'var(--accent-r)',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
-                        </button>
-                    </div>
-                    <PitchSection />
-                </div>
-            ) : view === 'founders' ? (
-                <div style={{ paddingTop: '5rem' }}>
-                    <div className="container" style={{ marginBottom: '2rem' }}>
-                        <button
-                            onClick={() => setView('site')}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                fontWeight: 900,
-                                fontSize: '1rem',
-                                color: 'var(--accent-r)',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
-                        </button>
-                    </div>
-                    <FoundersSection />
-                </div>
-            ) : view === 'techwaitlist' ? (
-                <div style={{ paddingTop: '8rem' }}>
-                    <div className="container" style={{ marginBottom: '2rem' }}>
-                        <button
-                            onClick={() => {
-                                setView('site');
-                                window.history.pushState({}, '', '/');
-                            }}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                fontWeight: 900,
-                                fontSize: '1rem',
-                                color: 'var(--accent-r)',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
-                        </button>
-                    </div>
-                    <TechWaitlistSection />
-                </div>
-            ) : view === 'academy' ? (
-                <div style={{ paddingTop: '8rem' }}>
-                    <div className="container" style={{ marginBottom: '2rem' }}>
-                        <button
-                            onClick={() => {
-                                setView('site');
-                                window.history.pushState({}, '', '/');
-                            }}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                fontWeight: 900,
-                                fontSize: '1rem',
-                                color: 'var(--accent-r)',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
-                        </button>
-                    </div>
-                    <AcademyDashboard portalDates={portalDates} />
-                </div>
-            ) : view === 'test' ? (
-                <div style={{ paddingTop: '8rem' }}>
-                    <div className="container" style={{ marginBottom: '2rem' }}>
-                        <button
-                            onClick={() => {
-                                setView('site');
-                                window.history.pushState({}, '', '/');
-                            }}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                fontWeight: 900,
-                                fontSize: '1rem',
-                                color: 'var(--accent-r)',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
-                        </button>
-                    </div>
-                    <ScreeningTest />
-                </div>
-            ) : view === 'pay' ? (
-                <div style={{ paddingTop: '8rem' }}>
-                    <div className="container" style={{ marginBottom: '2rem' }}>
-                        <button
-                            onClick={() => {
-                                setView('site');
-                                window.history.pushState({}, '', '/');
-                            }}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                fontWeight: 900,
-                                fontSize: '1rem',
-                                color: 'var(--accent-r)',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <ChevronRight style={{ transform: 'rotate(180deg)' }} /> Back to Homepage
-                        </button>
-                    </div>
-                    <PayCheckout />
-                </div>
-            ) : view === 'verify' ? (
-                <VerificationPortal onBack={() => setView('site')} />
+            {view === 'site' ? (
+                <FlightEditionHomepage
+                    onRegister={openModal}
+                    onViewChange={(v) => {
+                        setView(v);
+                        window.scrollTo(0, 0);
+                    }}
+                    currentView={view}
+                    dynamicSpeakers={dynamicSpeakers}
+                    dynamicPartners={dynamicPartners}
+                    dynamicTeam={dynamicTeam}
+                    speakersMode={speakersMode}
+                    comingSoonText={comingSoonText}
+                    onAdmin={(targetView) => { 
+                        localStorage.setItem('admin_redirect', targetView); 
+                        setView('admin-login'); 
+                    }}
+                />
             ) : (
-                <>
-                    <Hero onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
-                    <Partners dynamicPartners={dynamicPartners} />
-                    <EventStats />
-                    <ProspectusSection />
-                    <Vision />
-                    <Tickets onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
-                    <Speakers
-                        dynamicSpeakers={dynamicSpeakers}
-                        speakersMode={speakersMode}
-                        comingSoonText={comingSoonText}
-                    />
-                    <Schedule />
-                    <Experience />
-                    <FAQ />
-                    <Team dynamicTeam={dynamicTeam} />
-                </>
+                <div style={{ background: '#0A0A0A', minHeight: '100vh', color: '#FFFFFF' }}>
+                    <div style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        background: 'rgba(10, 10, 10, 0.95)',
+                        backdropFilter: 'blur(12px)',
+                        WebkitBackdropFilter: 'blur(12px)',
+                        zIndex: 100,
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                        padding: '1rem 2rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                    }}>
+                        <button
+                            onClick={() => {
+                                setView('site');
+                                window.history.pushState({}, '', '/');
+                            }}
+                            className="flight-mono"
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--color-airline-red)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontWeight: 700,
+                                fontSize: '0.85rem',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <ChevronRight style={{ transform: 'rotate(180deg)' }} size={16} /> RETURN TO FLIGHT FT2027
+                        </button>
+                        <span className="flight-mono" style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                            PORTAL TERMINAL: {view.toUpperCase()}
+                        </span>
+                    </div>
+
+                    <div style={{ paddingTop: '5.5rem' }}>
+                        {view === 'event-tags' && <EventTagsSection isOpen={isEventTagsOpen} />}
+                        {view === 'pitch' && <PitchSection />}
+                        {view === 'founders' && <FoundersSection />}
+                        {view === 'techwaitlist' && <TechWaitlistSection />}
+                        {view === 'academy' && <AcademyDashboard portalDates={portalDates} />}
+                        {view === 'test' && <ScreeningTest />}
+                        {view === 'pay' && <PayCheckout />}
+                        {view === 'verify' && <VerificationPortal onBack={() => setView('site')} />}
+                    </div>
+                </div>
             )}
 
-            <CTABanner onRegister={openModal} isRegistrationOpen={isRegistrationOpen} />
-            <Footer onAdmin={(targetView) => { 
-                localStorage.setItem('admin_redirect', targetView); 
-                setView('admin-login'); 
-            }} />
-
-
-            <RegisterModal
+            <FlightRegisterModal
                 isOpen={isRegModalOpen}
                 onClose={() => setIsRegModalOpen(false)}
                 initialType={selectedTicketType}
@@ -13241,7 +13111,6 @@ export default function App() {
                 }}
             />
 
-
             {showOnboardingPopup && (
                 <div style={{
                     position: 'fixed',
@@ -13249,7 +13118,9 @@ export default function App() {
                     left: 0,
                     width: '100vw',
                     height: '100vh',
-                    background: 'rgba(0, 0, 0, 0.85)',
+                    background: 'rgba(0, 0, 0, 0.88)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -13258,88 +13129,70 @@ export default function App() {
                     boxSizing: 'border-box'
                 }}>
                     <div style={{
-                        background: '#161b22',
-                        border: '4px solid #000000',
-                        boxShadow: '10px 10px 0 var(--accent-r)',
+                        background: '#FFFFFF',
+                        border: '3px solid #000000',
+                        boxShadow: '12px 12px 0 #000000',
                         display: 'flex',
                         flexDirection: 'column',
                         width: '100%',
-                        maxWidth: '500px',
-                        borderRadius: '0.8rem',
+                        maxWidth: '520px',
+                        borderRadius: '1.75rem',
                         padding: '2.5rem',
                         boxSizing: 'border-box',
                         textAlign: 'center',
-                        fontFamily: "'Outfit', sans-serif"
+                        fontFamily: "var(--font-heading)"
                     }}>
-                        <div style={{ fontSize: '3.3rem', marginBottom: '1rem' }}>🚀</div>
-                        <h2 style={{ fontFamily: 'Outfit', fontWeight: 950, fontSize: '1.8rem', color: '#ffffff', margin: '0 0 0.5rem 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            Welcome to OOU Future Tech
+                        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '56px', height: '56px', background: 'var(--color-airline-red)', border: '2px solid #000', boxShadow: '3px 3px 0 #000', borderRadius: '12px', margin: '0 auto 1.25rem auto' }}>
+                            <Plane size={28} color="#FFFFFF" style={{ transform: 'rotate(-45deg)' }} />
+                        </div>
+                        <div className="flight-mono" style={{ fontSize: '0.75rem', color: 'var(--color-airline-red)', letterSpacing: '0.12em', marginBottom: '0.4rem', fontWeight: 800 }}>
+                            OOU FUTURETECH AIRLINES • FLIGHT FT2027
+                        </div>
+                        <h2 style={{ fontWeight: 950, fontSize: '2rem', color: '#000000', margin: '0 0 0.5rem 0', textTransform: 'uppercase', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+                            YOUR FUTURE IS BOARDING.
                         </h2>
-                        <p style={{ color: '#8b949e', fontSize: '0.9rem', fontWeight: 700, margin: '0 0 2rem 0', lineHeight: '1.5' }}>
-                            Please choose how you would like to proceed:
+                        <p style={{ color: '#475569', fontSize: '0.95rem', fontFamily: "'Inter', sans-serif", margin: '0 0 2rem 0', lineHeight: '1.55' }}>
+                            Building the Digital and Creative Workforce of Tomorrow. Please select your departure terminal:
                         </p>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
                             <button
+                                type="button"
+                                onClick={() => {
+                                    setShowOnboardingPopup(false);
+                                }}
+                                className="flight-btn-red"
+                                style={{
+                                    padding: '1.1rem 1.5rem',
+                                    borderRadius: '4px',
+                                    fontSize: '0.92rem',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                ✈️ ENTER FLIGHT FT2027 (CONFERENCE)
+                            </button>
+
+                            <button
+                                type="button"
                                 onClick={() => {
                                     setShowOnboardingPopup(false);
                                     window.history.pushState({}, '', '/waitlist');
                                     setView('techwaitlist');
                                 }}
+                                className="flight-btn-outline"
                                 style={{
-                                    background: 'var(--accent-r)',
-                                    color: '#ffffff',
-                                    border: '3px solid #000000',
                                     padding: '1.1rem 1.5rem',
-                                    borderRadius: '0.6rem',
-                                    fontFamily: 'Outfit',
-                                    fontWeight: 900,
-                                    fontSize: '0.98rem',
-                                    textTransform: 'uppercase',
-                                    cursor: 'pointer',
-                                    boxShadow: '4px 4px 0 #000000',
-                                    transition: 'all 0.1s ease',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.5rem'
+                                    borderRadius: '4px',
+                                    fontSize: '0.92rem',
+                                    justifyContent: 'center'
                                 }}
-                                onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-1px,-1px)'; e.currentTarget.style.boxShadow = '5px 5px 0 #000000'; }}
-                                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '4px 4px 0 #000000'; }}
                             >
-                                🎓 Enter Academy Waitlist
-                            </button>
-
-                            <button
-                                onClick={() => {
-                                    setShowOnboardingPopup(false);
-                                }}
-                                style={{
-                                    background: '#ffffff',
-                                    color: '#000000',
-                                    border: '3px solid #000000',
-                                    padding: '1.1rem 1.5rem',
-                                    borderRadius: '0.6rem',
-                                    fontFamily: 'Outfit',
-                                    fontWeight: 900,
-                                    fontSize: '0.98rem',
-                                    textTransform: 'uppercase',
-                                    cursor: 'pointer',
-                                    boxShadow: '4px 4px 0 #000000',
-                                    transition: 'all 0.1s ease',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.5rem'
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-1px,-1px)'; e.currentTarget.style.boxShadow = '5px 5px 0 #000000'; }}
-                                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '4px 4px 0 #000000'; }}
-                            >
-                                🌐 Enter Conference Website
+                                🎓 ENTER ACADEMY WAITLIST (TRAINING)
                             </button>
                         </div>
                     </div>
                 </div>
-            )}        </>
+            )}
+        </>
     );
 }

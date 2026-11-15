@@ -220,7 +220,7 @@ export default function DepartureBoard() {
               * FOCUS DESTINATIONS VERIFIED BY OOU TECH RESEARCH LABS
             </span>
             <span className="flight-mono" style={{ fontSize: '0.72rem', color: '#000000', fontWeight: 800 }}>
-              DEPARTURE: 02 APRIL 2027
+              DEPARTURE: TO BE ANNOUNCED
             </span>
           </div>
 

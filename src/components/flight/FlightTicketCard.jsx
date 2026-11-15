@@ -64,17 +64,36 @@ export default function FlightTicketCard({
         position: 'relative',
         minHeight: '280px'
       }}>
-        {/* Top Header */}
+        {/* Top Header with Future Tech Logo */}
         <div>
-          <div className="flight-mono" style={{
-            fontSize: 'clamp(0.85rem, 1.5vw, 1.05rem)',
-            fontWeight: 900,
-            color: '#000000',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            marginBottom: '1rem'
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.85rem',
+            marginBottom: '1.25rem'
           }}>
-            OOU FUTURETECH
+            <img
+              src="/conference-logo.png"
+              alt="OOU FutureTech Logo"
+              style={{
+                height: '46px',
+                width: 'auto',
+                borderRadius: '6px',
+                border: '2px solid #000000',
+                boxShadow: '2px 2px 0 #000000',
+                objectFit: 'contain',
+                display: 'block'
+              }}
+            />
+            <div className="flight-mono" style={{
+              fontSize: 'clamp(0.85rem, 1.5vw, 1.05rem)',
+              fontWeight: 900,
+              color: '#000000',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase'
+            }}>
+              OOU FUTURETECH
+            </div>
           </div>
 
           <div className="flight-mono" style={{
@@ -296,16 +315,17 @@ export default function FlightTicketCard({
             />
           </div>
 
-          {/* Date Label (matching reference "02 APR 27") */}
+          {/* Date Label */}
           <div className="flight-mono" style={{
-            fontSize: '0.82rem',
+            fontSize: '0.68rem',
             fontWeight: 900,
             color: '#FFFFFF',
-            letterSpacing: '0.1em',
+            letterSpacing: '0.06em',
             textAlign: 'center',
-            marginTop: '4px'
+            marginTop: '4px',
+            lineHeight: 1.2
           }}>
-            02 APR 27
+            TO BE ANNOUNCED
           </div>
         </div>
       </div>

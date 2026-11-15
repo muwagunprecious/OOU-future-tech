@@ -74,7 +74,7 @@ export default function FlightFooter({ onViewChange, onAdmin }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#1E293B', fontSize: '0.95rem', fontWeight: 600 }}>
                 <Calendar size={18} color="var(--color-airline-red)" />
-                <span>Friday, April 02, 2027</span>
+                <span>Date: To Be Announced Soon</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', color: '#475569', fontSize: '0.95rem' }}>
                 <MapPin size={18} color="var(--color-airline-red)" style={{ marginTop: '2px', flexShrink: 0 }} />

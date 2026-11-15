@@ -238,7 +238,7 @@ export default function FlightHero({ onRegister }) {
             flexWrap: 'wrap'
           }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-              <Calendar size={14} color="var(--color-airline-red)" /> APRIL 02, 2027
+              <Calendar size={14} color="var(--color-airline-red)" /> TO BE ANNOUNCED
             </span>
             <span>•</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
@@ -275,7 +275,7 @@ export default function FlightHero({ onRegister }) {
               DEPARTURE DATE
             </span>
             <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.45rem', fontWeight: 900, color: '#000000' }}>
-              APRIL 02, 2027
+              TO BE ANNOUNCED
             </span>
           </div>
 

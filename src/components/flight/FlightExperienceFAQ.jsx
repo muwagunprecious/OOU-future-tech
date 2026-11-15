@@ -19,7 +19,7 @@ export default function FlightExperienceFAQ() {
     },
     {
       q: 'How do I receive and present my Boarding Pass?',
-      a: 'Your pass generates instantly upon registration. Save it to your phone and show it at Gate FT-02 on April 02, 2027 for rapid check-in.'
+      a: 'Your pass generates instantly upon registration. Save it to your phone and present it at Gate FT-02 on event day for rapid check-in.'
     },
     {
       q: 'How can organizations partner or sponsor?',

@@ -518,7 +518,7 @@ export default function FlightRegisterModal({
                 Your Boarding Pass is Issued
               </h2>
               <p style={{ fontSize: '0.95rem', color: '#64748B', margin: 0 }}>
-                Present this official credential on April 02, 2027 at OGD Hall, OOU.
+                Present this official credential at OGD Hall, OOU. Event date to be announced soon.
               </p>
             </div>
 

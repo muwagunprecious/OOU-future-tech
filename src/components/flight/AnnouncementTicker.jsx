@@ -9,7 +9,7 @@ export default function AnnouncementTicker() {
             <span className="flight-status-dot" />
             <span style={{ fontWeight: 800 }}>OOU FUTURETECH AIRLINES — FLIGHT FT2027 NOW ACCEPTING PASSENGERS</span>
             <span style={{ color: '#CBD5E1' }}>/</span>
-            <span>DEPARTURE: APRIL 02, 2027</span>
+            <span>DEPARTURE DATE: TO BE ANNOUNCED</span>
             <span style={{ color: '#CBD5E1' }}>/</span>
             <span style={{ color: 'var(--color-airline-red)', fontWeight: 800 }}>THEME: AFRICA'S NEXT EXPORT: TALENT</span>
             <span style={{ color: '#CBD5E1' }}>/</span>

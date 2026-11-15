@@ -244,7 +244,7 @@ export default function PassengerVerificationModal({ onClose }) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Calendar size={15} color="var(--color-airline-red)" />
-                <strong>Friday, April 02, 2027</strong>
+                <strong>Date: To Be Announced Soon</strong>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <MapPin size={15} color="var(--color-airline-red)" />

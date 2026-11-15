@@ -289,7 +289,7 @@ export default function FlightItinerary() {
           marginTop: '2.5rem',
           textAlign: 'center'
         }}>
-          * TIMINGS ARE ESTIMATED FLIGHT PLAN CHECKPOINTS SUBJECT TO LIVE DEPARTURE ADJUSTMENTS ON APRIL 02, 2027
+          * TIMINGS ARE ESTIMATED FLIGHT PLAN CHECKPOINTS • OFFICIAL EVENT DATE TO BE ANNOUNCED SOON
         </p>
 
       </div>

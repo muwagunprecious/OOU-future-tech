@@ -147,7 +147,7 @@ export default function FinalCTA({ onRegister }) {
               marginTop: '3.5rem',
               letterSpacing: '0.08em'
             }}>
-              DESTINATION: THE FUTURE • ORIGIN: OOU, NIGERIA • DEPARTURE: 02 APRIL 2027
+              DESTINATION: THE FUTURE • ORIGIN: OOU, NIGERIA • DATE: TO BE ANNOUNCED
             </div>
 
           </div>

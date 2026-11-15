@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, Plane, Calendar, MapPin, ChevronLeft, ChevronRight, Maximize2, X, CheckCircle2, Play, Pause } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Play, Pause } from 'lucide-react';
 
 export default function FlightArchives2026() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
@@ -12,47 +12,27 @@ export default function FlightArchives2026() {
     {
       id: 'crowd-full',
       src: '/archives/archive-2026-crowd.png',
-      title: 'CAPACITY ASCENT // 2,000+ STUDENT BUILDERS',
-      category: 'AUDITORIUM DECK',
-      flightLog: 'LOG #01 • CAPACITY MANIFEST',
-      date: 'MARCH 2026',
-      caption: 'Over 2,000 undergraduate engineers and designers filling the main auditorium.'
+      alt: 'OOU FutureTech 2026 Auditorium Audience'
     },
     {
       id: 'keynote-stage',
       src: '/archives/archive-2026-keynote-speaker.jpg',
-      title: 'KEYNOTE TRANSMISSION // STAGE COMMAND',
-      category: 'KEYNOTE DISPATCH',
-      flightLog: 'LOG #02 • MISSION PODIUM',
-      date: 'MARCH 2026',
-      caption: 'Keynote transmission on building technological self-reliance and digital sovereignty.'
+      alt: 'OOU FutureTech 2026 Keynote Address'
     },
     {
       id: 'dignitary-patron',
       src: '/archives/archive-2026-dignitary.jpg',
-      title: 'PATRON DIRECTIVE // UNIVERSITY LEADERSHIP',
-      category: 'VIP FLIGHT SALON',
-      flightLog: 'LOG #03 • EXECUTIVE PATRONAGE',
-      date: 'MARCH 2026',
-      caption: 'University leadership and deans endorsing student tech innovation.'
+      alt: 'OOU FutureTech 2026 University Leadership'
     },
     {
       id: 'press-conference',
       src: '/archives/archive-2026-press-conference.jpg',
-      title: 'NATIONAL BROADCAST // PRESS CLEARANCE',
-      category: 'MEDIA TOWER',
-      flightLog: 'LOG #04 • BROADCAST AIRSPACE',
-      date: 'MARCH 2026',
-      caption: 'National broadcast television documenting OOU FutureTech as Ogun State’s tech landmark.'
+      alt: 'OOU FutureTech 2026 Press Coverage'
     },
     {
       id: 'hall-focus',
       src: '/archives/archive-2026-auditorium-hall.png',
-      title: 'TIERED SESSIONS // IMMERSIVE AUDIENCE',
-      category: 'PASSENGER CABIN',
-      flightLog: 'LOG #05 • TIERED SECTORS',
-      date: 'MARCH 2026',
-      caption: 'Tiered auditorium halls packed with student builders in deep focus.'
+      alt: 'OOU FutureTech 2026 Student Builders'
     }
   ];
 
@@ -90,13 +70,13 @@ export default function FlightArchives2026() {
   return (
     <section id="archives" style={{
       position: 'relative',
-      padding: 'clamp(5rem, 8vw, 8rem) 0',
+      padding: 'clamp(4.5rem, 7vw, 7rem) 0',
       backgroundColor: '#070709',
       color: '#FFFFFF',
       borderBottom: '3px solid #000000',
       overflow: 'hidden'
     }}>
-      {/* Aviation Radar Sweep Grid Pattern on dark background */}
+      {/* Aviation Radar Grid pattern on dark background */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -108,8 +88,8 @@ export default function FlightArchives2026() {
 
       <div className="flight-container" style={{ position: 'relative', zIndex: 2 }}>
         
-        {/* Section Header */}
-        <div style={{ marginBottom: '3.5rem' }}>
+        {/* Simple Section Header */}
+        <div style={{ marginBottom: '2.5rem' }}>
           
           <div style={{
             display: 'inline-flex',
@@ -119,16 +99,11 @@ export default function FlightArchives2026() {
             border: '2px solid var(--color-airline-red)',
             borderRadius: '9999px',
             padding: '0.45rem 1.15rem',
-            marginBottom: '1.25rem',
-            flexWrap: 'wrap'
+            marginBottom: '1.25rem'
           }}>
             <span className="flight-status-dot" />
             <span className="flight-mono" style={{ fontSize: '0.72rem', fontWeight: 800, color: '#FFFFFF' }}>
               BLACK BOX FLIGHT RECORDER // MARCH 2026
-            </span>
-            <span style={{ color: '#475569' }}>|</span>
-            <span className="flight-mono" style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--color-airline-red)' }}>
-              THE INAUGURAL EXPEDITION
             </span>
           </div>
 
@@ -139,39 +114,21 @@ export default function FlightArchives2026() {
             justifyContent: 'space-between',
             gap: '1.5rem'
           }}>
-            <div style={{ maxWidth: '820px' }}>
+            <div>
               <h2 style={{
-                fontSize: 'clamp(2.2rem, 5.5vw, 4.4rem)',
+                fontSize: 'clamp(2.2rem, 5vw, 4rem)',
                 fontWeight: 950,
-                lineHeight: 1.02,
+                lineHeight: 1.05,
                 color: '#FFFFFF',
-                margin: '0 0 1rem 0',
+                margin: 0,
                 textTransform: 'uppercase',
                 letterSpacing: '-0.03em'
               }}>
-                THE 2026 EVENT ARCHIVES. <br />
-                <span style={{
-                  color: 'var(--color-airline-red)',
-                  textDecoration: 'underline',
-                  textDecorationColor: '#FFFFFF',
-                  textUnderlineOffset: '8px'
-                }}>
-                  PROOF OF ASCENT.
-                </span>
+                2026 EVENT ARCHIVES.
               </h2>
-
-              <p style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(1rem, 1.8vw, 1.15rem)',
-                color: '#CBD5E1',
-                lineHeight: 1.5,
-                margin: 0
-              }}>
-                Documented moments from the inaugural OOU FutureTech 2026 conference where over 2,000 student builders converged.
-              </p>
             </div>
 
-            {/* Navigation & Auto-Glide Controls */}
+            {/* Navigation & Glide Controls */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <button
                 type="button"
@@ -198,10 +155,10 @@ export default function FlightArchives2026() {
               <button
                 type="button"
                 onClick={handlePrev}
-                aria-label="Previous slide"
+                aria-label="Previous photo"
                 style={{
-                  width: '44px',
-                  height: '44px',
+                  width: '42px',
+                  height: '42px',
                   borderRadius: '50%',
                   background: '#FFFFFF',
                   border: '2px solid #000000',
@@ -219,10 +176,10 @@ export default function FlightArchives2026() {
               <button
                 type="button"
                 onClick={handleNext}
-                aria-label="Next slide"
+                aria-label="Next photo"
                 style={{
-                  width: '44px',
-                  height: '44px',
+                  width: '42px',
+                  height: '42px',
                   borderRadius: '50%',
                   background: '#FFFFFF',
                   border: '2px solid #000000',
@@ -242,14 +199,14 @@ export default function FlightArchives2026() {
 
       </div>
 
-      {/* Freely Gliding Photos Carousel (WITHOUT BOX FRAMES) */}
+      {/* Freely Gliding Photos Carousel - PURE CLEAN PICTURES, NO TEXT OVERLAY */}
       <div
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         style={{
           width: '100%',
           overflow: 'hidden',
-          padding: '1rem 0 2.5rem 0',
+          padding: '0.5rem 0 2rem 0',
           position: 'relative'
         }}
       >
@@ -272,7 +229,7 @@ export default function FlightArchives2026() {
                 onClick={() => setSelectedPhoto(photo)}
                 style={{
                   flex: '0 0 auto',
-                  width: 'clamp(300px, 68vw, 720px)',
+                  width: 'clamp(280px, 60vw, 640px)',
                   position: 'relative',
                   cursor: 'pointer',
                   transition: 'opacity 0.5s ease, transform 0.5s ease',
@@ -280,24 +237,24 @@ export default function FlightArchives2026() {
                   transform: isActive ? 'scale(1)' : 'scale(0.97)'
                 }}
               >
-                {/* Clean borderless photo without card box */}
+                {/* Pure Clean Picture - NO TEXT, NO BOX */}
                 <div style={{
                   position: 'relative',
-                  height: 'clamp(260px, 46vw, 450px)',
+                  height: 'clamp(240px, 42vw, 420px)',
                   borderRadius: '1.5rem',
                   overflow: 'hidden',
                   backgroundColor: '#0F172A'
                 }}>
                   <img
                     src={photo.src}
-                    alt={photo.title}
+                    alt={photo.alt}
                     style={{
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
-                      objectPosition: 'center 25%',
+                      objectPosition: 'center',
                       display: 'block',
-                      transition: 'transform 0.6s ease'
+                      transition: 'transform 0.5s ease'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'scale(1.03)';
@@ -306,118 +263,6 @@ export default function FlightArchives2026() {
                       e.currentTarget.style.transform = 'scale(1)';
                     }}
                   />
-
-                  {/* Cinematic dark gradient vignette */}
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.2) 40%, rgba(7,7,9,0.92) 100%)',
-                    pointerEvents: 'none'
-                  }} />
-
-                  {/* Top Floating Badge */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '1.25rem',
-                    left: '1.25rem',
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '9999px',
-                    padding: '0.4rem 1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    color: '#FFFFFF'
-                  }}>
-                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--color-airline-red)', display: 'inline-block' }} />
-                    <span>{photo.flightLog}</span>
-                  </div>
-
-                  {/* Expand Icon */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '1.25rem',
-                    right: '1.25rem',
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '50%',
-                    width: '36px',
-                    height: '36px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#FFFFFF'
-                  }}>
-                    <Maximize2 size={16} />
-                  </div>
-
-                  {/* Bottom Text Over Photo (No Box) */}
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '1.5rem',
-                    left: '1.5rem',
-                    right: '1.5rem'
-                  }}>
-                    <div style={{
-                      display: 'inline-block',
-                      color: 'var(--color-airline-red)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.72rem',
-                      fontWeight: 900,
-                      letterSpacing: '0.08em',
-                      marginBottom: '0.4rem'
-                    }}>
-                      {photo.category}
-                    </div>
-
-                    <h3 style={{
-                      fontFamily: 'var(--font-heading)',
-                      fontSize: 'clamp(1.15rem, 2.5vw, 1.65rem)',
-                      fontWeight: 950,
-                      color: '#FFFFFF',
-                      margin: '0 0 0.5rem 0',
-                      lineHeight: 1.2
-                    }}>
-                      {photo.title}
-                    </h3>
-
-                    <p style={{
-                      fontFamily: 'var(--font-body)',
-                      fontSize: 'clamp(0.85rem, 1.4vw, 0.98rem)',
-                      color: '#CBD5E1',
-                      lineHeight: 1.5,
-                      margin: 0,
-                      maxWidth: '620px'
-                    }}>
-                      {photo.caption}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Sub-photo date & location indicator */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.25rem',
-                  marginTop: '0.85rem',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.75rem',
-                  color: '#94A3B8',
-                  fontWeight: 800,
-                  paddingLeft: '0.5rem'
-                }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                    <Calendar size={13} color="var(--color-airline-red)" /> {photo.date}
-                  </span>
-                  <span>•</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                    <MapPin size={13} color="var(--color-airline-red)" /> OOU MAIN AUDITORIUM
-                  </span>
                 </div>
               </div>
             );
@@ -425,50 +270,36 @@ export default function FlightArchives2026() {
         </div>
       </div>
 
-      {/* Progress Dots Indicator & Auto-Glide Progress Line */}
-      <div className="flight-container" style={{ position: 'relative', zIndex: 2, marginTop: '1rem' }}>
+      {/* Progress Dots Indicator */}
+      <div className="flight-container" style={{ position: 'relative', zIndex: 2 }}>
         <div style={{
           display: 'flex',
-          flexWrap: 'wrap',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '1.5rem',
-          borderTop: '1px solid #1E293B',
-          paddingTop: '1.5rem'
+          justifyContent: 'center',
+          gap: '0.65rem',
+          paddingTop: '0.5rem'
         }}>
-          {/* Slide Indicator Dots */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {archivePhotos.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setCurrentIndex(idx)}
-                aria-label={`Go to slide ${idx + 1}`}
-                style={{
-                  width: idx === currentIndex ? '38px' : '12px',
-                  height: '10px',
-                  borderRadius: '9999px',
-                  background: idx === currentIndex ? 'var(--color-airline-red)' : '#334155',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-              />
-            ))}
-          </div>
-
-          <div style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.75rem',
-            color: '#94A3B8',
-            fontWeight: 800
-          }}>
-            FLIGHT ARCHIVE LOG {currentIndex + 1} OF {archivePhotos.length} // CONTINUOUS 4S GLIDE
-          </div>
+          {archivePhotos.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setCurrentIndex(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+              style={{
+                width: idx === currentIndex ? '32px' : '10px',
+                height: '8px',
+                borderRadius: '9999px',
+                background: idx === currentIndex ? 'var(--color-airline-red)' : '#334155',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Interactive Lightbox Modal */}
+      {/* Clean Lightbox Modal - Just the pure photo with close button */}
       {selectedPhoto && (
         <div
           onClick={() => setSelectedPhoto(null)}
@@ -481,136 +312,68 @@ export default function FlightArchives2026() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1.5rem'
+            padding: '2rem'
           }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: '#070709',
-              border: '2px solid #334155',
-              borderRadius: '1.5rem',
-              boxShadow: '0 0 40px rgba(0, 0, 0, 0.9)',
+              position: 'relative',
               maxWidth: '920px',
               width: '100%',
-              maxHeight: '92vh',
-              overflowY: 'auto',
-              position: 'relative',
-              color: '#FFFFFF'
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
             }}
           >
-            {/* Modal Header */}
-            <div style={{
-              background: '#000000',
-              color: '#FFFFFF',
-              padding: '1rem 1.5rem',
-              borderBottom: '2px solid #1E293B',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.75rem',
-              fontWeight: 800
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Plane size={14} color="var(--color-airline-red)" style={{ transform: 'rotate(-45deg)' }} />
-                <span>{selectedPhoto.flightLog}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedPhoto(null)}
-                style={{
-                  background: 'var(--color-airline-red)',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer'
-                }}
-              >
-                <X size={18} />
-              </button>
-            </div>
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setSelectedPhoto(null)}
+              aria-label="Close modal"
+              style={{
+                position: 'absolute',
+                top: '-3.2rem',
+                right: 0,
+                background: 'var(--color-airline-red)',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 10,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+              }}
+            >
+              <X size={22} />
+            </button>
 
             {/* Modal Photo */}
             <div style={{
-              maxHeight: '560px',
-              backgroundColor: '#000000',
+              borderRadius: '1.25rem',
+              overflow: 'hidden',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.9)',
+              maxHeight: '85vh',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              overflow: 'hidden'
+              backgroundColor: '#000000'
             }}>
               <img
                 src={selectedPhoto.src}
-                alt={selectedPhoto.title}
+                alt={selectedPhoto.alt}
                 style={{
                   maxWidth: '100%',
-                  maxHeight: '560px',
+                  maxHeight: '85vh',
                   objectFit: 'contain',
                   display: 'block'
                 }}
               />
             </div>
-
-            {/* Modal Description */}
-            <div style={{ padding: '1.5rem 1.75rem' }}>
-              <div style={{
-                display: 'inline-block',
-                background: 'rgba(215, 25, 32, 0.15)',
-                color: 'var(--color-airline-red)',
-                border: '1px solid var(--color-airline-red)',
-                borderRadius: '9999px',
-                padding: '0.25rem 0.75rem',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.68rem',
-                fontWeight: 900,
-                marginBottom: '0.75rem'
-              }}>
-                {selectedPhoto.category}
-              </div>
-              <h3 style={{
-                fontFamily: 'var(--font-heading)',
-                fontSize: '1.45rem',
-                fontWeight: 950,
-                color: '#FFFFFF',
-                margin: '0 0 0.5rem 0'
-              }}>
-                {selectedPhoto.title}
-              </h3>
-              <p style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '1rem',
-                color: '#CBD5E1',
-                lineHeight: 1.6,
-                margin: '0 0 1.25rem 0'
-              }}>
-                {selectedPhoto.caption}
-              </p>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1.5rem',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.75rem',
-                color: '#94A3B8',
-                fontWeight: 800,
-                borderTop: '1px solid #1E293B',
-                paddingTop: '1rem'
-              }}>
-                <span>DATE: {selectedPhoto.date}</span>
-                <span>•</span>
-                <span>VENUE: OOU MAIN CAMPUS, AGO-IWOYE</span>
-                <span>•</span>
-                <span style={{ color: '#22C55E' }}>STATUS: ARCHIVED IN BLACK BOX</span>
-              </div>
-            </div>
-
           </div>
         </div>
       )}

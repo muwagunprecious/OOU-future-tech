@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AnnouncementTicker from './AnnouncementTicker';
 import FlightNavbar from './FlightNavbar';
 import FlightHero from './FlightHero';
@@ -14,6 +14,7 @@ import FlightArchives2026 from './FlightArchives2026';
 import FlightExperienceFAQ from './FlightExperienceFAQ';
 import FinalCTA from './FinalCTA';
 import FlightFooter from './FlightFooter';
+import PassengerVerificationModal from './PassengerVerificationModal';
 
 export default function FlightEditionHomepage({
   onRegister,
@@ -26,8 +27,24 @@ export default function FlightEditionHomepage({
   comingSoonText,
   onAdmin
 }) {
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('verify') || params.has('id') || params.has('ticket')) {
+        setShowVerifyModal(true);
+      }
+    }
+  }, []);
+
   return (
     <div className="flight-edition">
+      {/* Real-time QR Code Passenger Verification Modal */}
+      {showVerifyModal && (
+        <PassengerVerificationModal onClose={() => setShowVerifyModal(false)} />
+      )}
+
       {/* 1. Top Announcement Ticker */}
       <AnnouncementTicker />
 

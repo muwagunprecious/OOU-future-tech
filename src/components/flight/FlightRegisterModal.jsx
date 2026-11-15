@@ -3,8 +3,9 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import { supabase } from '../../lib/supabase';
 import {
-  X, Plane, CheckCircle2, Download, AlertCircle, ArrowRight, ShieldCheck, Ticket
+  X, Plane, CheckCircle2, Download, AlertCircle, ArrowRight, ShieldCheck, Ticket, Image as ImageIcon
 } from 'lucide-react';
+import FlightTicketCard from './FlightTicketCard';
 
 export default function FlightRegisterModal({
   isOpen,
@@ -154,6 +155,30 @@ export default function FlightRegisterModal({
     } catch (err) {
       console.error('Download ticket error:', err);
       alert('Could not generate PDF download directly. Please take a screenshot of your boarding pass.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleDownloadPng = async () => {
+    if (!ticketRef.current) return;
+    setDownloading(true);
+    try {
+      const node = ticketRef.current;
+      const dataUrl = await toPng(node, {
+        quality: 1,
+        pixelRatio: 2,
+        backgroundColor: '#FFFFFF',
+        cacheBust: true
+      });
+
+      const link = document.createElement('a');
+      link.download = `OOU-FutureTech-2027-BoardingPass-${formData.name.replace(/\s+/g, '-')}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Download PNG error:', err);
+      alert('Could not generate PNG download directly.');
     } finally {
       setDownloading(false);
     }
@@ -501,184 +526,57 @@ export default function FlightRegisterModal({
             <div
               ref={ticketRef}
               style={{
-                background: '#FFFFFF',
-                border: '3px solid #000000',
-                boxShadow: '8px 8px 0 #000000',
-                borderRadius: '1.5rem',
-                padding: '2rem',
-                marginBottom: '2rem',
-                position: 'relative'
+                maxWidth: '780px',
+                margin: '0 auto 2rem auto',
+                padding: '4px',
+                backgroundColor: '#FFFFFF'
               }}
             >
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderBottom: '2px solid #000000',
-                paddingBottom: '1.25rem',
-                marginBottom: '1.5rem',
-                flexWrap: 'wrap',
-                gap: '1rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                  <img
-                    src="/conference-logo.png"
-                    alt="OOU FutureTech"
-                    style={{
-                      height: '42px',
-                      width: 'auto',
-                      borderRadius: '8px',
-                      border: '2px solid #000',
-                      boxShadow: '2px 2px 0 #000',
-                      objectFit: 'contain'
-                    }}
-                  />
-                  <div>
-                    <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 950, fontSize: '1.15rem', color: '#000', display: 'block' }}>
-                      OOU FUTURETECH
-                    </span>
-                    <span className="flight-mono" style={{ fontSize: '0.68rem', color: 'var(--color-airline-red)', fontWeight: 800 }}>
-                      FLIGHT FT2027 • OFFICIAL PASSENGER
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flight-mono" style={{
-                  fontSize: '0.9rem',
-                  fontWeight: 900,
-                  color: '#000000',
-                  background: '#F1F5F9',
-                  border: '2px solid #000000',
-                  boxShadow: '2px 2px 0 #000000',
-                  padding: '0.35rem 0.8rem',
-                  borderRadius: '6px'
-                }}>
-                  {ticketId}
-                </div>
-              </div>
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                gap: '1.25rem',
-                marginBottom: '1.5rem'
-              }}>
-                <div>
-                  <span className="flight-mono" style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 800, display: 'block' }}>
-                    PASSENGER
-                  </span>
-                  <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.15rem', fontWeight: 900, color: '#000' }}>
-                    {formData.name.toUpperCase()}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="flight-mono" style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 800, display: 'block' }}>
-                    ORIGIN
-                  </span>
-                  <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.15rem', fontWeight: 900, color: '#000' }}>
-                    OOU NIGERIA
-                  </span>
-                </div>
-
-                <div>
-                  <span className="flight-mono" style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 800, display: 'block' }}>
-                    DESTINATION
-                  </span>
-                  <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.15rem', fontWeight: 900, color: 'var(--color-airline-red)' }}>
-                    THE FUTURE
-                  </span>
-                </div>
-
-                <div>
-                  <span className="flight-mono" style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 800, display: 'block' }}>
-                    DATE
-                  </span>
-                  <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.15rem', fontWeight: 900, color: '#000' }}>
-                    02 APR 2027
-                  </span>
-                </div>
-              </div>
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                gap: '1rem',
-                padding: '1.25rem',
-                background: '#F8FAFC',
-                borderRadius: '12px',
-                border: '2px solid #000000',
-                boxShadow: '3px 3px 0 #000000',
-                marginBottom: '1.5rem'
-              }}>
-                <div>
-                  <span className="flight-mono" style={{ fontSize: '0.62rem', color: '#64748B', fontWeight: 800 }}>
-                    GATE
-                  </span>
-                  <span className="flight-mono" style={{ fontSize: '0.95rem', fontWeight: 900, color: '#000', display: 'block' }}>
-                    GATE FT-02
-                  </span>
-                </div>
-
-                <div>
-                  <span className="flight-mono" style={{ fontSize: '0.62rem', color: '#64748B', fontWeight: 800 }}>
-                    SEAT
-                  </span>
-                  <span className="flight-mono" style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--color-airline-red)', display: 'block' }}>
-                    {formData.type === 'Pro' ? '01A PRIORITY' : '14F STANDARD'}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="flight-mono" style={{ fontSize: '0.62rem', color: '#64748B', fontWeight: 800 }}>
-                    CLASS
-                  </span>
-                  <span className="flight-mono" style={{ fontSize: '0.95rem', fontWeight: 900, color: '#000', display: 'block' }}>
-                    {formData.type === 'Pro' ? 'INDUSTRY VIP' : 'STUDENT PASS'}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="flight-mono" style={{ fontSize: '0.62rem', color: '#64748B', fontWeight: 800 }}>
-                    STATUS
-                  </span>
-                  <span className="flight-mono" style={{ fontSize: '0.95rem', fontWeight: 900, color: '#16A34A', display: 'block' }}>
-                    CONFIRMED
-                  </span>
-                </div>
-              </div>
-
-              {/* Barcode */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'stretch', height: '36px', gap: '2px' }}>
-                  {[2, 4, 1, 3, 1, 4, 2, 5, 1, 3, 2, 4, 1, 2, 4, 1, 3, 2, 5, 1, 4, 2, 1, 3].map((w, i) => (
-                    <span key={i} style={{ width: `${w * 2}px`, background: '#000000', opacity: i % 4 === 0 ? 0.4 : 1 }} />
-                  ))}
-                </div>
-                <span className="flight-mono" style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 700 }}>
-                  OOU-FT2027-SECURE-ENTRY
-                </span>
-              </div>
+              <FlightTicketCard
+                ticketId={ticketId}
+                name={formData.name.toUpperCase()}
+                email={formData.email}
+                ticketClass={formData.type}
+                price={formData.type === 'Pro' ? '₦50,000' : '₦0'}
+              />
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem' }}>
+              <button
+                type="button"
+                onClick={handleDownloadPng}
+                disabled={downloading}
+                className="flight-btn-red"
+                style={{ flex: 1, minWidth: '200px', padding: '0.95rem 1.25rem', justifyContent: 'center', fontSize: '0.9rem' }}
+              >
+                <ImageIcon size={18} />
+                {downloading ? 'PROCESSING...' : 'SAVE BOARDING PASS (.PNG)'}
+              </button>
+
               <button
                 type="button"
                 onClick={handleDownloadTicket}
                 disabled={downloading}
                 className="flight-btn-red"
-                style={{ flex: 1, padding: '1rem', justifyContent: 'center' }}
+                style={{
+                  flex: 1,
+                  minWidth: '200px',
+                  padding: '0.95rem 1.25rem',
+                  justifyContent: 'center',
+                  fontSize: '0.9rem',
+                  background: '#000000'
+                }}
               >
                 <Download size={18} />
-                {downloading ? 'GENERATING PDF...' : 'DOWNLOAD BOARDING PASS (.PDF)'}
+                {downloading ? 'PROCESSING...' : 'DOWNLOAD DOCUMENT (.PDF)'}
               </button>
 
               <button
                 type="button"
                 onClick={onClose}
                 className="flight-btn-outline"
-                style={{ padding: '1rem 2rem' }}
+                style={{ padding: '0.95rem 1.5rem', fontSize: '0.9rem' }}
               >
                 CLOSE
               </button>

@@ -184,27 +184,25 @@ export default function BoardingPassSection({ onRegister }) {
                 paddingBottom: '1.5rem',
                 marginBottom: '2rem'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                  <div style={{
-                    width: '38px',
-                    height: '38px',
-                    background: 'var(--color-airline-red)',
-                    borderRadius: '8px',
-                    border: '2px solid #000',
-                    boxShadow: '2px 2px 0 #000',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#FFF'
-                  }}>
-                    <Plane size={20} style={{ transform: 'rotate(-45deg)' }} />
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+                  <img
+                    src="/conference-logo.png"
+                    alt="OOU FutureTech"
+                    style={{
+                      height: '44px',
+                      width: 'auto',
+                      borderRadius: '8px',
+                      border: '2px solid #000000',
+                      boxShadow: '2px 2px 0 #000000',
+                      objectFit: 'contain'
+                    }}
+                  />
                   <div>
                     <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 950, fontSize: '1.2rem', color: '#000000', display: 'block', lineHeight: 1 }}>
-                      OOU FUTURETECH AIRLINES
+                      OOU FUTURETECH
                     </span>
                     <span className="flight-mono" style={{ fontSize: '0.68rem', color: 'var(--color-airline-red)', fontWeight: 800 }}>
-                      OFFICIAL ELECTRONIC BOARDING PASS
+                      FLIGHT EDITION • OFFICIAL BOARDING PASS
                     </span>
                   </div>
                 </div>

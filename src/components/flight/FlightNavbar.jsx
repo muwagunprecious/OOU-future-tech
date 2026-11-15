@@ -49,19 +49,18 @@ export default function FlightNavbar({ onRegister, onViewChange, currentView }) 
                 onViewChange('site');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }}
             >
-              <div style={{
-                width: '28px',
-                height: '28px',
-                background: '#000000',
-                borderRadius: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#FFFFFF'
-              }}>
-                <Plane size={16} style={{ transform: 'rotate(-45deg)' }} />
-              </div>
+              <img
+                src="/conference-logo.png"
+                alt="OOU FutureTech"
+                style={{
+                  height: '32px',
+                  width: 'auto',
+                  borderRadius: '6px',
+                  objectFit: 'contain'
+                }}
+              />
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 900, fontSize: '0.95rem', color: '#000000', lineHeight: 1 }}>
                   OOU FUTURETECH
@@ -130,12 +129,21 @@ export default function FlightNavbar({ onRegister, onViewChange, currentView }) 
             background: '#FFFFFF',
             border: '2px solid #000',
             borderRadius: '9999px',
-            padding: '0.5rem 1.2rem',
+            padding: '0.4rem 1.1rem',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.6rem'
+            gap: '0.65rem'
           }}>
-            <Plane size={18} color="#000" style={{ transform: 'rotate(-45deg)' }} />
+            <img
+              src="/conference-logo.png"
+              alt="OOU FutureTech"
+              style={{
+                height: '28px',
+                width: 'auto',
+                borderRadius: '4px',
+                objectFit: 'contain'
+              }}
+            />
             <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 900, fontSize: '0.9rem' }}>
               OOU FUTURETECH 2027
             </span>

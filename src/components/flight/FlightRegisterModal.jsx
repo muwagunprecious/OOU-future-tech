@@ -520,23 +520,22 @@ export default function FlightRegisterModal({
                 flexWrap: 'wrap',
                 gap: '1rem'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{
-                    width: '36px',
-                    height: '36px',
-                    background: 'var(--color-airline-red)',
-                    borderRadius: '8px',
-                    border: '2px solid #000',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#FFF'
-                  }}>
-                    <Plane size={18} style={{ transform: 'rotate(-45deg)' }} />
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                  <img
+                    src="/conference-logo.png"
+                    alt="OOU FutureTech"
+                    style={{
+                      height: '42px',
+                      width: 'auto',
+                      borderRadius: '8px',
+                      border: '2px solid #000',
+                      boxShadow: '2px 2px 0 #000',
+                      objectFit: 'contain'
+                    }}
+                  />
                   <div>
                     <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 950, fontSize: '1.15rem', color: '#000', display: 'block' }}>
-                      OOU FUTURETECH AIRLINES
+                      OOU FUTURETECH
                     </span>
                     <span className="flight-mono" style={{ fontSize: '0.68rem', color: 'var(--color-airline-red)', fontWeight: 800 }}>
                       FLIGHT FT2027 • OFFICIAL PASSENGER

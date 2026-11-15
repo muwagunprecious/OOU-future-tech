@@ -129,22 +129,41 @@ export default function FlightHero({ onRegister }) {
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.6rem',
-            background: 'var(--color-airline-red)',
-            color: '#FFFFFF',
-            fontFamily: 'var(--font-heading)',
-            fontSize: '0.92rem',
-            fontWeight: 950,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            padding: '0.4rem 1.1rem',
-            borderRadius: '6px',
-            border: '2px solid #000000',
-            boxShadow: '3px 3px 0 #000000',
-            marginBottom: '1.5rem'
+            gap: '1rem',
+            marginBottom: '1.75rem',
+            flexWrap: 'wrap'
           }}>
-            <Plane size={16} style={{ transform: 'rotate(-45deg)' }} />
-            <span>YOUR FUTURE IS BOARDING</span>
+            <img
+              src="/conference-logo.png"
+              alt="OOU FutureTech Conference Flight Edition"
+              style={{
+                height: '56px',
+                width: 'auto',
+                borderRadius: '8px',
+                border: '2px solid rgba(255, 255, 255, 0.2)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6)',
+                display: 'block'
+              }}
+            />
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.6rem',
+              background: 'var(--color-airline-red)',
+              color: '#FFFFFF',
+              fontFamily: 'var(--font-heading)',
+              fontSize: '0.92rem',
+              fontWeight: 950,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              padding: '0.45rem 1.15rem',
+              borderRadius: '6px',
+              border: '2px solid #000000',
+              boxShadow: '3px 3px 0 #000000'
+            }}>
+              <Plane size={16} style={{ transform: 'rotate(-45deg)' }} />
+              <span>YOUR FUTURE IS BOARDING</span>
+            </div>
           </div>
 
           {/* Giant Editorial Heading with Typewriter Effect on a Single Straight Line */}

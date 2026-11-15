@@ -22,21 +22,19 @@ export default function FlightFooter({ onViewChange, onAdmin }) {
           
           {/* Column 1: Brand & Flight Details */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.2rem' }}>
-              <div style={{
-                width: '36px',
-                height: '36px',
-                background: 'var(--color-airline-red)',
-                borderRadius: '8px',
-                border: '2px solid #000',
-                boxShadow: '2px 2px 0 #000',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#FFF'
-              }}>
-                <Plane size={18} style={{ transform: 'rotate(-45deg)' }} />
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', marginBottom: '1.2rem' }}>
+              <img
+                src="/conference-logo.png"
+                alt="OOU FutureTech"
+                style={{
+                  height: '46px',
+                  width: 'auto',
+                  borderRadius: '8px',
+                  border: '2px solid #000000',
+                  boxShadow: '3px 3px 0 #000000',
+                  objectFit: 'contain'
+                }}
+              />
               <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 950, letterSpacing: '-0.02em' }}>
                 OOU FUTURETECH
               </span>

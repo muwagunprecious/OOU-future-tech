@@ -5,23 +5,26 @@ export default function TheDestination() {
   const narrativeCards = [
     {
       num: '01',
-      title: 'The Demographic Epoch',
+      title: 'Youth Demographic Surge',
       headline: 'The World’s Youngest Workforce',
-      text: 'While aging populations reshape the industrialized world, Africa possesses the youngest demographic on earth. By preparing our university students today, we supply the digital architects who will engineer the systems of tomorrow.',
+      text: 'Africa possesses the youngest, most energetic talent pool on earth—the future architects of global tech.',
+      image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80',
       tag: 'DEMOGRAPHICS'
     },
     {
       num: '02',
-      title: 'The Shift in Global Value',
-      headline: 'From Raw Commodities to Cognitive Capital',
-      text: 'For centuries, African wealth was measured by physical minerals and oil extracted from beneath our feet. The 21st century inverts this formula: human intelligence, algorithmic innovation, and creative software are the highest-margin assets on the planet.',
+      title: 'Cognitive Capital',
+      headline: 'Code Over Raw Commodities',
+      text: 'Shifting from physical minerals to high-margin software, machine intelligence, and sovereign algorithms.',
+      image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80',
       tag: 'COGNITIVE CAPITAL'
     },
     {
       num: '03',
-      title: 'University as Foundry',
-      headline: 'Turning Campuses into Innovation Engines',
-      text: 'Higher education cannot remain passive theory. At OOU, we are intentionally linking academic rigor with venture building, industry apprenticeships, and real-world deployment so that graduates enter the marketplace as proven builders.',
+      title: 'Venture Foundry',
+      headline: 'Campus as an Innovation Engine',
+      text: 'Converting university lecture halls into venture foundries and enterprise software incubators.',
+      image: '/archives/archive-2026-auditorium-hall.png',
       tag: 'VENTURE FOUNDRY'
     }
   ];
@@ -128,16 +131,6 @@ export default function TheDestination() {
               It is the cognitive capital and creative code we engineer in the minds of our youth.
             </span>
           </p>
-
-          <p style={{
-            fontSize: '1.1rem',
-            color: '#CBD5E1',
-            lineHeight: 1.7,
-            maxWidth: '840px',
-            margin: 0
-          }}>
-            Global technology companies face chronic engineering shortages, while Africa’s vibrant student demographic represents the largest untapped talent reservoir in history. OOU FutureTech 2027 operates at this exact flight corridor—propelling campus intellect into international venture leadership.
-          </p>
         </div>
 
         {/* 3D High-Contrast White Cards Floating over Dark Airplane Background */}
@@ -155,7 +148,7 @@ export default function TheDestination() {
                 border: '3px solid #000000',
                 borderRadius: '1.75rem',
                 boxShadow: '8px 8px 0 var(--color-airline-red)',
-                padding: '2.5rem 2rem',
+                padding: '1.75rem 1.75rem 2rem 1.75rem',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -171,13 +164,53 @@ export default function TheDestination() {
               }}
             >
               <div>
+                {/* Visual Image Banner */}
+                {card.image && (
+                  <div style={{
+                    width: '100%',
+                    height: '180px',
+                    borderRadius: '1rem',
+                    overflow: 'hidden',
+                    border: '2px solid #000000',
+                    marginBottom: '1.25rem',
+                    position: 'relative'
+                  }}>
+                    <img
+                      src={card.image}
+                      alt={card.headline}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block'
+                      }}
+                      loading="lazy"
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      top: '8px',
+                      left: '8px',
+                      background: 'var(--color-airline-red)',
+                      color: '#FFFFFF',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.68rem',
+                      fontWeight: 900,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: '1.5px solid #000000'
+                    }}>
+                      {card.num} // {card.tag}
+                    </div>
+                  </div>
+                )}
+
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   borderBottom: '2px solid #E2E8F0',
-                  paddingBottom: '1rem',
-                  marginBottom: '1.5rem'
+                  paddingBottom: '0.75rem',
+                  marginBottom: '1rem'
                 }}>
                   <span style={{
                     fontFamily: 'var(--font-heading)',

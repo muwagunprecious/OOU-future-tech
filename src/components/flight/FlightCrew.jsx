@@ -9,7 +9,7 @@ export default function FlightCrew({ dynamicSpeakers, speakersMode = 'live', com
       name: 'Dr. Kunle Ade',
       title: 'Principal Security Architect',
       org: 'Defensive Cyber Command & OOU Fellow',
-      bio: 'Pioneering ethical cyber defense frameworks across West Africa. Advising academic institutions and enterprise platforms on cyber resilience.',
+      bio: 'Pioneering ethical cyber defense frameworks and enterprise infrastructure resilience.',
       image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=85&w=800'
     },
     {
@@ -18,7 +18,7 @@ export default function FlightCrew({ dynamicSpeakers, speakersMode = 'live', com
       name: 'Sarah Omotayo',
       title: 'Head of Product Design',
       org: 'Global Fintech Systems',
-      bio: 'Leading multi-currency user experience and digital consumer interfaces reaching over 4 million active African accounts.',
+      bio: 'Leading fintech user experience reaching over 4 million active accounts.',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=85&w=800'
     },
     {
@@ -27,7 +27,7 @@ export default function FlightCrew({ dynamicSpeakers, speakersMode = 'live', com
       name: 'Victor Ige',
       title: 'Staff Infrastructure Engineer',
       org: 'Distributed Cloud Labs',
-      bio: 'Core open-source contributor specializing in scalable microservices, Rust systems, and distributed database consistency across emerging regions.',
+      bio: 'Core open-source engineer specializing in distributed systems and cloud architecture.',
       image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=85&w=800'
     },
     {
@@ -36,7 +36,7 @@ export default function FlightCrew({ dynamicSpeakers, speakersMode = 'live', com
       name: 'Emerald Nwosu',
       title: 'Decentralized Systems Lead',
       org: 'Web3 Protocol Foundation',
-      bio: 'Architecting sovereign digital identity systems and zero-knowledge privacy protocols for cross-border African commerce.',
+      bio: 'Architecting sovereign digital identity and zero-knowledge protocol systems.',
       image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=85&w=800'
     }
   ];
@@ -97,11 +97,12 @@ export default function FlightCrew({ dynamicSpeakers, speakersMode = 'live', com
           <p style={{
             fontSize: '1.05rem',
             color: '#475569',
-            maxWidth: '520px',
+            maxWidth: '480px',
             margin: 0,
-            lineHeight: 1.6
+            lineHeight: 1.5,
+            fontWeight: 500
           }}>
-            Seasoned commanders of engineering, design, and venture building who will guide your trajectory towards global technology competence.
+            Pioneering engineers, founders, and designers commanding the Flight FT2027 deck.
           </p>
         </div>
 

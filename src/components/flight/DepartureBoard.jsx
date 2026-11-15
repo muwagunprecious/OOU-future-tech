@@ -6,7 +6,8 @@ export default function DepartureBoard() {
     {
       code: 'TRACK 01',
       title: 'DIGITAL INNOVATION',
-      desc: 'Scalable cloud infrastructure, sovereign African software platforms, and distributed engineering paradigms.',
+      desc: 'Cloud systems, sovereign African software platforms & distributed engineering.',
+      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=400&q=80',
       gate: 'GATE 01',
       status: 'BOARDING',
       statusType: 'active'
@@ -14,7 +15,8 @@ export default function DepartureBoard() {
     {
       code: 'TRACK 02',
       title: 'ARTIFICIAL INTELLIGENCE',
-      desc: 'Autonomous agents, localized LLMs, computational computer vision, and frontier machine intelligence.',
+      desc: 'Autonomous agents, localized LLMs & frontier machine learning.',
+      image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
       gate: 'GATE 02',
       status: 'ON SCHEDULE',
       statusType: 'confirmed'
@@ -22,7 +24,8 @@ export default function DepartureBoard() {
     {
       code: 'TRACK 03',
       title: 'FINANCIAL TECHNOLOGY',
-      desc: 'Cross-border liquidity, modern payment rails, open banking APIs, and financial sovereignty for emerging markets.',
+      desc: 'Cross-border liquidity, open banking APIs & digital finance rails.',
+      image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=400&q=80',
       gate: 'GATE 03',
       status: 'CONFIRMED',
       statusType: 'confirmed'
@@ -30,15 +33,17 @@ export default function DepartureBoard() {
     {
       code: 'TRACK 04',
       title: 'AGRICULTURAL TECHNOLOGY',
-      desc: 'Satellite data telemetry, predictive crop modeling, climate resilience, and algorithmic agri-supply chains.',
+      desc: 'Satellite telemetry, predictive crop modeling & algorithmic farming.',
+      image: 'https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=400&q=80',
       gate: 'GATE 04',
       status: 'ON SCHEDULE',
       statusType: 'confirmed'
     },
     {
       code: 'TRACK 05',
-      title: 'WEB3 AND EMERGING TECHNOLOGIES',
-      desc: 'Decentralized compute, zero-knowledge verifiable credentials, smart contract systems, and digital property rights.',
+      title: 'WEB3 & EMERGING TECH',
+      desc: 'Decentralized compute, zk-credentials & smart contract protocols.',
+      image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=400&q=80',
       gate: 'GATE 05',
       status: 'BOARDING',
       statusType: 'active'
@@ -46,7 +51,8 @@ export default function DepartureBoard() {
     {
       code: 'TRACK 06',
       title: 'CREATIVE ECONOMY',
-      desc: 'Digital product design, 3D visualization, interactive media, and global monetization channels for African creators.',
+      desc: 'Digital product design, 3D media & global creator monetization.',
+      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=400&q=80',
       gate: 'GATE 06',
       status: 'CONFIRMED',
       statusType: 'confirmed'
@@ -95,11 +101,12 @@ export default function DepartureBoard() {
           <p style={{
             fontSize: '1.05rem',
             color: '#475569',
-            maxWidth: '520px',
+            maxWidth: '480px',
             margin: 0,
-            lineHeight: 1.6
+            lineHeight: 1.5,
+            fontWeight: 500
           }}>
-            Your journey towards the future begins with understanding where we are going. Review our primary flight tracks and technological destinations.
+            Explore the 6 primary technological flight corridors accelerating African talent to global leadership.
           </p>
         </div>
 
@@ -141,24 +148,43 @@ export default function DepartureBoard() {
                   </span>
                 </div>
 
-                {/* Track Details */}
-                <div>
-                  <h3 style={{
-                    fontSize: 'clamp(1.2rem, 2vw, 1.55rem)',
-                    margin: '0 0 0.35rem 0',
-                    color: '#000000'
+                {/* Track Details with Thumbnail Image */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    minWidth: '64px',
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                    border: '2px solid #000000',
+                    boxShadow: '3px 3px 0 #000000',
+                    flexShrink: 0
                   }}>
-                    {item.title}
-                  </h3>
-                  <p style={{
-                    fontSize: '0.94rem',
-                    color: '#475569',
-                    margin: 0,
-                    lineHeight: 1.55,
-                    maxWidth: '850px'
-                  }}>
-                    {item.desc}
-                  </p>
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      loading="lazy"
+                    />
+                  </div>
+                  <div style={{ flex: '1 1 200px' }}>
+                    <h3 style={{
+                      fontSize: 'clamp(1.15rem, 1.8vw, 1.4rem)',
+                      margin: '0 0 0.25rem 0',
+                      color: '#000000',
+                      fontWeight: 900
+                    }}>
+                      {item.title}
+                    </h3>
+                    <p style={{
+                      fontSize: '0.92rem',
+                      color: '#475569',
+                      margin: 0,
+                      lineHeight: 1.45
+                    }}>
+                      {item.desc}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Status Indicator */}

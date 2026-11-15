@@ -8,8 +8,8 @@ export default function FlightItinerary() {
       stage: 'PASSENGER CHECK-IN',
       flightId: 'FT-CHK01',
       gate: 'MAIN CONCOURSE',
-      title: 'Passenger Manifest Verification & Boarding Kit Collection',
-      desc: 'Attendee badge accreditation, welcome kit distribution, networking coffee at the departure lounge, and opening media coverage.',
+      title: 'Accreditation & Welcome Kit Collection',
+      desc: 'Attendee badge verification, flight packs, and networking coffee in the departure lounge.',
       category: 'CHECK-IN'
     },
     {
@@ -17,8 +17,8 @@ export default function FlightItinerary() {
       stage: 'BOARDING BEGINS',
       flightId: 'FT-BRD02',
       gate: 'GATE FT-02',
-      title: 'Assembly & Pre-Flight Briefing',
-      desc: 'General assembly of delegates and students in OGD Hall. Opening ceremonial welcome address from the OOU Tech Community leadership.',
+      title: 'Pre-Flight Briefing & Delegate Assembly',
+      desc: 'General assembly of delegates and student builders in OGD Hall with opening remarks.',
       category: 'BOARDING'
     },
     {
@@ -27,7 +27,7 @@ export default function FlightItinerary() {
       flightId: 'FT-LCH03',
       gate: 'MAIN STAGE',
       title: 'Keynote Address — Africa’s Next Export: Talent',
-      desc: 'Official take-off with the Vice Chancellor of OOU and global technology visionaries on building Africa’s future engineering and creative workforce.',
+      desc: 'Official take-off with the Vice Chancellor and global technology visionaries.',
       category: 'KEYNOTE'
     },
     {
@@ -35,17 +35,17 @@ export default function FlightItinerary() {
       stage: 'IN-FLIGHT CONVERSATIONS',
       flightId: 'FT-CON04',
       gate: 'STAGE A',
-      title: 'Cruising Altitude: Building Global Tech from Africa',
-      desc: 'Fireside sessions with tech unicorn founders, executive engineers, and design leaders on navigating international remote careers and cross-border software architecture.',
+      title: 'Cruising Altitude: Building Global Tech',
+      desc: 'Fireside sessions with tech unicorn founders, lead engineers, and product executives.',
       category: 'IN-FLIGHT'
     },
     {
       time: '13:00 WAT',
-      stage: 'CONNECTING FLIGHTS: PANEL SESSIONS',
+      stage: 'CONNECTING FLIGHTS',
       flightId: 'FT-PNL05',
       gate: 'GATES 01–06',
-      title: 'Parallel Exploration Tracks',
-      desc: 'Concurrent breakout masterclasses across Artificial Intelligence, FinTech Rails, Web3 Infrastructure, and the Creative Economy.',
+      title: 'Parallel Exploration Masterclasses',
+      desc: 'Concurrent breakout tracks in Artificial Intelligence, FinTech, Web3, and Creative Design.',
       category: 'BREAKOUTS'
     },
     {
@@ -53,9 +53,27 @@ export default function FlightItinerary() {
       stage: 'ARRIVAL ANNOUNCEMENT',
       flightId: 'FT-ARR06',
       gate: 'MAIN STAGE',
-      title: 'Touchdown: Student Innovation Awards & Final Declaration',
-      desc: 'Startup pitch winners announcement, student innovation honors, venture incubator awards, and next phase launch for OOU FutureTech cohorts.',
+      title: 'Touchdown: Pitch Awards & Final Declaration',
+      desc: 'Startup pitch winners announcement, student innovation honors, and cohort grants.',
       category: 'ARRIVAL'
+    }
+  ];
+
+  const inFlightGallery = [
+    {
+      img: '/archives/archive-2026-keynote-speaker.jpg',
+      label: 'MAIN FLIGHT DECK',
+      sub: 'Keynote Address'
+    },
+    {
+      img: '/archives/archive-2026-auditorium-hall.png',
+      label: 'MAIN CONCOURSE',
+      sub: 'Delegate Assembly'
+    },
+    {
+      img: '/archives/archive-2026-press-conference.jpg',
+      label: 'VIP PRESS ROOM',
+      sub: 'Media Briefing'
     }
   ];
 
@@ -70,7 +88,7 @@ export default function FlightItinerary() {
           alignItems: 'flex-end',
           justifyContent: 'space-between',
           gap: '2rem',
-          marginBottom: '3.5rem'
+          marginBottom: '3rem'
         }}>
           <div>
             <div style={{
@@ -101,12 +119,67 @@ export default function FlightItinerary() {
           <p style={{
             fontSize: '1.05rem',
             color: '#475569',
-            maxWidth: '520px',
+            maxWidth: '480px',
             margin: 0,
-            lineHeight: 1.6
+            lineHeight: 1.5,
+            fontWeight: 500
           }}>
-            Review the sequenced stages of your journey. Timings reflect estimated flight duration and schedule checkpoints.
+            Follow the sequenced checkpoints of Flight FT2027 from morning boarding to touchdown awards.
           </p>
+        </div>
+
+        {/* Visual Live Concourse Image Strip */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+          gap: '1.5rem',
+          marginBottom: '3rem'
+        }}>
+          {inFlightGallery.map((photo, i) => (
+            <div
+              key={i}
+              style={{
+                borderRadius: '1.25rem',
+                border: '3px solid #000000',
+                boxShadow: '5px 5px 0 #000000',
+                overflow: 'hidden',
+                background: '#000000',
+                height: '200px',
+                position: 'relative'
+              }}
+            >
+              <img
+                src={photo.img}
+                alt={photo.label}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                  opacity: 0.92
+                }}
+                loading="lazy"
+              />
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                background: 'linear-gradient(transparent, rgba(0,0,0,0.85) 60%)',
+                padding: '1rem 1.25rem 0.85rem',
+                display: 'flex',
+                alignItems: 'baseline',
+                justifyContent: 'space-between'
+              }}>
+                <span className="flight-mono" style={{ color: '#FFFFFF', fontSize: '0.75rem', fontWeight: 900 }}>
+                  {photo.label}
+                </span>
+                <span className="flight-mono" style={{ color: 'var(--color-airline-red)', fontSize: '0.68rem', fontWeight: 800 }}>
+                  {photo.sub}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* 3D Timeline Cards */}

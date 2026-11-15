@@ -7,25 +7,23 @@ export default function AboutFlight() {
       flightNo: 'FT-0101',
       code: 'PILLAR 01',
       title: 'GLOBAL INTEGRATION',
-      headline: 'Connecting Students to Global Remote Tech',
-      text: 'Bridging the divide between academic curricula and international engineering teams hiring remote African software developers, UI/UX designers, and product leaders.',
+      headline: 'Silicon Valley & London Direct',
+      text: 'Direct remote engineering pipeline connecting campus software builders to global tech teams.',
+      image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80',
       routeOrigin: 'OOU / NIGERIA (LOS)',
-      routeDest: 'SILICON VALLEY & LONDON',
-      gate: 'GATE 01',
-      squawk: '2027-ALPHA',
-      status: 'BOARDING NOW',
+      routeDest: 'GLOBAL REMOTE',
+      status: 'BOARDING',
       statusColor: '#22C55E'
     },
     {
       flightNo: 'FT-0202',
       code: 'PILLAR 02',
-      title: 'LEGITIMATE TRAJECTORY',
-      headline: 'Dignified Opportunity vs. Cybercrime',
-      text: 'Supplying viable, high-income, and ethical career pathways in modern software engineering, AI, and cybersecurity to direct youth energy into global technological sovereignty.',
-      routeOrigin: 'CAMPUS CORRIDOR',
-      routeDest: 'ETHICAL AI & CYBER',
-      gate: 'GATE 02',
-      squawk: '2027-BRAVO',
+      title: 'FRONTIER TECH & AI',
+      headline: 'Ethical Sovereignty',
+      text: 'Viable, high-income engineering pathways in AI, Cloud Infrastructure, and Cybersecurity.',
+      image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80',
+      routeOrigin: 'CAMPUS',
+      routeDest: 'AI & CYBER',
       status: 'ON SCHEDULE',
       statusColor: '#38BDF8'
     },
@@ -33,25 +31,23 @@ export default function AboutFlight() {
       flightNo: 'FT-0303',
       code: 'PILLAR 03',
       title: 'VENTURE INCUBATION',
-      headline: 'Igniting Campus Entrepreneurship',
-      text: 'Equipping student builders with pitch training, venture seed grants, and tier-one investor networks to build scalable, venture-backed enterprise software companies.',
-      routeOrigin: 'CAMPUS BUILDERS',
+      headline: 'Campus Founders & Seed Grants',
+      text: 'Pitch training, equity-free grants, and investor networks to build venture-backed startups.',
+      image: '/archives/archive-2026-keynote-speaker.jpg',
+      routeOrigin: 'DORM LABS',
       routeDest: 'VENTURE CAPITAL',
-      gate: 'GATE 03',
-      squawk: '2027-CHARLIE',
-      status: 'CLEARED TAKEOFF',
+      status: 'CLEARED',
       statusColor: '#F59E0B'
     },
     {
       flightNo: 'FT-0404',
       code: 'PILLAR 04',
-      title: 'SOVEREIGN ECOSYSTEM',
-      headline: 'Transforming OOU into a Global Hub',
-      text: 'Establishing permanent institutional linkages between Olabisi Onabanjo University, multinational engineering firms, and tier-one technology enterprises across the globe.',
-      routeOrigin: 'OOU CAMPUS',
+      title: 'SOVEREIGN FOUNDRY',
+      headline: 'Africa’s Premier Tech Campus',
+      text: 'Permanent institutional linkages between OOU, global enterprises, and top tech founders.',
+      image: '/archives/archive-2026-crowd.png',
+      routeOrigin: 'OOU FOUNDRY',
       routeDest: 'GLOBAL LEADERSHIP',
-      gate: 'GATE 04',
-      squawk: '2027-DELTA',
       status: 'FINAL CALL',
       statusColor: 'var(--color-airline-red)'
     }
@@ -163,34 +159,52 @@ export default function AboutFlight() {
                 {/* Main Strip Body */}
                 <div className="flight-strip-body">
                   
-                  {/* Waypoint Trajectory Route */}
+                  {/* Visual High-Impact Card Image */}
                   <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    marginBottom: '1rem',
-                    padding: '0.45rem 0.85rem',
-                    background: '#F1F5F9',
-                    border: '1.5px solid #000000',
-                    borderRadius: '8px'
+                    height: '180px',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    border: '2px solid #000000',
+                    marginBottom: '1.2rem',
+                    position: 'relative'
                   }}>
-                    <span style={{ color: '#000000' }}>{flight.routeOrigin}</span>
-                    <span style={{ color: 'var(--color-airline-red)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <span>──✈──</span>
-                    </span>
-                    <span style={{ color: '#000000' }}>{flight.routeDest}</span>
+                    <img
+                      src={flight.image}
+                      alt={flight.title}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block'
+                      }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.65) 100%)'
+                    }} />
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '8px',
+                      left: '10px',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      color: '#FFFFFF',
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase'
+                    }}>
+                      {flight.routeOrigin} ──✈── {flight.routeDest}
+                    </div>
                   </div>
 
                   {/* Title & Headline */}
                   <h3 style={{
                     fontFamily: 'var(--font-heading)',
-                    fontSize: '1.5rem',
+                    fontSize: '1.45rem',
                     fontWeight: 950,
                     lineHeight: 1.15,
-                    margin: '0 0 0.4rem 0',
+                    margin: '0 0 0.35rem 0',
                     color: '#000000',
                     textTransform: 'uppercase'
                   }}>
@@ -199,10 +213,10 @@ export default function AboutFlight() {
 
                   <span style={{
                     fontFamily: 'var(--font-heading)',
-                    fontSize: '0.95rem',
+                    fontSize: '0.92rem',
                     fontWeight: 800,
                     color: 'var(--color-airline-red)',
-                    marginBottom: '0.75rem',
+                    marginBottom: '0.6rem',
                     display: 'block'
                   }}>
                     {flight.headline}
@@ -211,35 +225,12 @@ export default function AboutFlight() {
                   <p style={{
                     fontSize: '0.92rem',
                     color: '#475569',
-                    lineHeight: 1.6,
+                    lineHeight: 1.55,
                     margin: 0,
                     flexGrow: 1
                   }}>
                     {flight.text}
                   </p>
-
-                  {/* 4-Box Telemetry Matrix (Altitude, Speed, Gate, Squawk) */}
-                  <div className="flight-strip-telemetry-grid">
-                    <div className="flight-strip-telemetry-item">
-                      <span className="flight-strip-telemetry-label">ALTITUDE</span>
-                      <span className="flight-strip-telemetry-value">FL380</span>
-                    </div>
-
-                    <div className="flight-strip-telemetry-item">
-                      <span className="flight-strip-telemetry-label">AIRSPEED</span>
-                      <span className="flight-strip-telemetry-value">M 0.85</span>
-                    </div>
-
-                    <div className="flight-strip-telemetry-item">
-                      <span className="flight-strip-telemetry-label">GATE</span>
-                      <span className="flight-strip-telemetry-value">{flight.gate}</span>
-                    </div>
-
-                    <div className="flight-strip-telemetry-item">
-                      <span className="flight-strip-telemetry-label">SQUAWK</span>
-                      <span className="flight-strip-telemetry-value">{flight.squawk}</span>
-                    </div>
-                  </div>
 
                   {/* Strip Footer with ICAO Stamp */}
                   <div style={{

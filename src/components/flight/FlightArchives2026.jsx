@@ -16,7 +16,7 @@ export default function FlightArchives2026() {
       category: 'AUDITORIUM DECK',
       flightLog: 'LOG #01 • CAPACITY MANIFEST',
       date: 'MARCH 2026',
-      caption: 'The main university auditorium packed to the rafters with thousands of ambitious undergraduate engineers, designers, and innovators.'
+      caption: 'Over 2,000 undergraduate engineers and designers filling the main auditorium.'
     },
     {
       id: 'keynote-stage',
@@ -25,7 +25,7 @@ export default function FlightArchives2026() {
       category: 'KEYNOTE DISPATCH',
       flightLog: 'LOG #02 • MISSION PODIUM',
       date: 'MARCH 2026',
-      caption: 'Keynote address delivered at the digital podium on building technological self-reliance and digital economic sovereignty.'
+      caption: 'Keynote transmission on building technological self-reliance and digital sovereignty.'
     },
     {
       id: 'dignitary-patron',
@@ -34,7 +34,7 @@ export default function FlightArchives2026() {
       category: 'VIP FLIGHT SALON',
       flightLog: 'LOG #03 • EXECUTIVE PATRONAGE',
       date: 'MARCH 2026',
-      caption: 'Distinguished university governance, council members, and academic deans in attendance endorsing student tech talent.'
+      caption: 'University leadership and deans endorsing student tech innovation.'
     },
     {
       id: 'press-conference',
@@ -43,7 +43,7 @@ export default function FlightArchives2026() {
       category: 'MEDIA TOWER',
       flightLog: 'LOG #04 • BROADCAST AIRSPACE',
       date: 'MARCH 2026',
-      caption: 'Live television and broadcast press interviews (OGTV, PL9 News) documenting OOU FutureTech as Ogun State’s tech landmark.'
+      caption: 'National broadcast television documenting OOU FutureTech as Ogun State’s tech landmark.'
     },
     {
       id: 'hall-focus',
@@ -52,7 +52,7 @@ export default function FlightArchives2026() {
       category: 'PASSENGER CABIN',
       flightLog: 'LOG #05 • TIERED SECTORS',
       date: 'MARCH 2026',
-      caption: 'TETFund Auditorium halls packed with students attentively learning high-income tech skills, software engineering, and design.'
+      caption: 'Tiered auditorium halls packed with student builders in deep focus.'
     }
   ];
 
@@ -162,12 +162,12 @@ export default function FlightArchives2026() {
 
               <p style={{
                 fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+                fontSize: 'clamp(1rem, 1.8vw, 1.15rem)',
                 color: '#CBD5E1',
-                lineHeight: 1.6,
+                lineHeight: 1.5,
                 margin: 0
               }}>
-                Before we board Flight FT-2027, review the raw documented history of the inaugural OOU FutureTech 2026 conference. Over 2,000 students, academic leadership, state dignitaries, and national television converged to launch Africa’s tech frontier.
+                Documented moments from the inaugural OOU FutureTech 2026 conference where over 2,000 student builders converged.
               </p>
             </div>
 

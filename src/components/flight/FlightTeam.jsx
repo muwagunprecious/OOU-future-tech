@@ -32,42 +32,42 @@ export default function FlightTeam({ dynamicTeam }) {
     {
       name: 'ADEMUWAGUN MAYOKUN',
       role: 'CONVENER',
-      bio: 'Leading the institutional vision and ecosystem direction of OOU FutureTech, connecting campus builders with global technology leaders.',
+      bio: 'Leading the ecosystem vision and global tech partnerships of OOU FutureTech.',
       doorCode: 'DOOR 1L',
       dept: 'MISSION CONTROL'
     },
     {
       name: 'Oyindamola Deji-Agboola',
       role: 'Director of Alliance',
-      bio: 'Orchestrating cross-border corporate alliances, institutional sponsorship pipelines, and venture capital engagement.',
+      bio: 'Orchestrating strategic corporate alliances and venture engagement.',
       doorCode: 'DOOR 1R',
       dept: 'STRATEGIC ALLIANCE'
     },
     {
       name: 'Muritala Aminat',
       role: 'Program Director',
-      bio: 'Architecting conference flight tracks, curriculum milestones, technical workshops, and high-impact keynotes.',
+      bio: 'Directing flight tracks, technical workshops, and conference syllabus.',
       doorCode: 'DOOR 2L',
       dept: 'FLIGHT SYLLABUS'
     },
     {
       name: 'Temy Topsy',
       role: 'Director of Web3',
-      bio: 'Steering decentralized systems, blockchain architecture, smart contracts, and Web3 campus developer acceleration.',
+      bio: 'Steering decentralized protocols and Web3 campus developer acceleration.',
       doorCode: 'DOOR 2R',
       dept: 'DECENTRALIZED TECH'
     },
     {
       name: 'Usman Joseph',
       role: 'Director of Branding',
-      bio: 'Crafting the visual identity, brand communications, and creative direction of The Flight Edition campaign.',
+      bio: 'Directing the visual identity and creative brand communications.',
       doorCode: 'DOOR 3L',
       dept: 'CREATIVE DIRECTION'
     },
     {
       name: 'Oluwabukunmi Priscillia',
       role: 'Content Strategist',
-      bio: 'Directing media narratives, editorial outreach, press coverage, and ecosystem storytelling across Africa.',
+      bio: 'Leading media narratives, editorial outreach, and ecosystem storytelling.',
       doorCode: 'DOOR 3R',
       dept: 'COMMUNICATIONS'
     }
@@ -144,11 +144,12 @@ export default function FlightTeam({ dynamicTeam }) {
           <p style={{
             fontSize: '1.05rem',
             color: '#475569',
-            maxWidth: '520px',
+            maxWidth: '480px',
             margin: 0,
-            lineHeight: 1.6
+            lineHeight: 1.5,
+            fontWeight: 500
           }}>
-            The commanders, directors, and campus leaders orchestrating flight operations, event architecture, and corporate alliances for OOU FutureTech 2027.
+            The directors and campus leaders orchestrating flight operations and corporate alliances.
           </p>
         </div>
 

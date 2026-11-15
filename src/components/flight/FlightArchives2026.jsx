@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, X, Play, Pause } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 export default function FlightArchives2026() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
@@ -128,30 +128,8 @@ export default function FlightArchives2026() {
               </h2>
             </div>
 
-            {/* Navigation & Glide Controls */}
+            {/* Navigation Controls */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <button
-                type="button"
-                onClick={() => setIsPaused(!isPaused)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1.5px solid #334155',
-                  borderRadius: '9999px',
-                  color: '#FFFFFF',
-                  padding: '0.5rem 1rem',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.72rem',
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer'
-                }}
-              >
-                {isPaused ? <Play size={13} color="#22C55E" /> : <Pause size={13} color="var(--color-airline-red)" />}
-                <span>{isPaused ? 'RESUME GLIDE' : 'GLIDING EVERY 4S'}</span>
-              </button>
-
               <button
                 type="button"
                 onClick={handlePrev}

@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { toPng } from 'html-to-image';
-import { jsPDF } from 'jspdf';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import {
-  X, Plane, CheckCircle2, Download, AlertCircle, ArrowRight, ShieldCheck, Ticket, Image as ImageIcon
+  X, Plane, CheckCircle2, Clock, AlertCircle, ArrowRight, ShieldAlert, Sparkles, User, Mail, Phone, Briefcase, Code2, Palette, Globe
 } from 'lucide-react';
-import FlightTicketCard from './FlightTicketCard';
 
 export default function FlightRegisterModal({
   isOpen,
@@ -13,19 +10,18 @@ export default function FlightRegisterModal({
   initialType = 'Standard',
   isRegistrationOpen = true
 }) {
-  const ticketRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
+    category: 'Techie', // 'Founder' | 'Creative' | 'Techie' | 'Others'
     type: 'Standard',
     companyName: '',
-    whatsappNumber: '',
     products: ''
   });
   const [ticketId, setTicketId] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -33,9 +29,10 @@ export default function FlightRegisterModal({
       setFormData({
         name: '',
         email: '',
+        phone: '',
+        category: 'Techie',
         type: initialType || 'Standard',
         companyName: '',
-        whatsappNumber: '',
         products: ''
       });
       setIsSubmitted(false);
@@ -50,15 +47,25 @@ export default function FlightRegisterModal({
     setLoading(true);
     setError(null);
 
+    if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
+      setError('Please fill in your name, email address, and phone number.');
+      setLoading(false);
+      return;
+    }
+
     const generatedTicketId = `FT2027-${Math.floor(1000 + Math.random() * 9000)}`;
     setTicketId(generatedTicketId);
 
     try {
+      const cleanEmail = formData.email.trim().toLowerCase();
+      const cleanPhone = formData.phone.trim();
+      const cleanName = formData.name.trim();
+
       // Check for existing registration in Supabase
       const { data: existing, error: checkError } = await supabase
         .from('registrations')
         .select('email')
-        .eq('email', formData.email.trim().toLowerCase())
+        .eq('email', cleanEmail)
         .maybeSingle();
 
       if (checkError) {
@@ -66,55 +73,53 @@ export default function FlightRegisterModal({
       }
 
       if (existing) {
-        setError('This email is already registered on Flight FT2027. Each passenger may claim one boarding pass.');
+        setError('This email address already has a pending or confirmed application on Flight FT2027.');
         setLoading(false);
         return;
       }
 
-      // Insert registration
+      // Metadata with category, pending status, and phone
+      const productsPayload = JSON.stringify({
+        category: formData.category,
+        status: 'pending',
+        phone: cleanPhone,
+        travel_class: formData.type,
+        company: formData.companyName.trim() || null,
+        exhibit_details: formData.products.trim() || null,
+        submitted_at: new Date().toISOString()
+      });
+
+      const companyStatus = formData.companyName.trim()
+        ? `STATUS:PENDING • ${formData.companyName.trim()}`
+        : 'STATUS:PENDING';
+
+      // Insert registration into Supabase
       const { error: sbError } = await supabase
         .from('registrations')
         .insert([
           {
-            name: formData.name.trim(),
-            email: formData.email.trim().toLowerCase(),
+            name: cleanName,
+            email: cleanEmail,
             ticket_type: formData.type,
             ticket_id: generatedTicketId,
-            company_name: formData.type === 'Pro' ? formData.companyName : null,
-            whatsapp_number: formData.type === 'Pro' ? formData.whatsappNumber : null,
-            products: formData.type === 'Pro' ? formData.products : null
+            whatsapp_number: cleanPhone,
+            company_name: companyStatus,
+            products: productsPayload
           }
         ]);
 
       if (sbError) {
         console.error('Supabase error:', sbError);
         if (sbError.code === '23505') {
-          setError('This email has already reserved a seat.');
+          setError('This email has already submitted an application.');
         } else {
-          setError('Failed to record reservation. Please check your network or try again.');
+          setError('Failed to record reservation. Please check your connection and try again.');
         }
         setLoading(false);
         return;
       }
 
-      // Trigger email dispatch if server is operational
-      try {
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const apiBase = isLocal ? 'http://localhost:3001' : '';
-        await fetch(`${apiBase}/api/send-ticket`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: formData.email.trim().toLowerCase(),
-            name: formData.name.trim(),
-            ticketId: generatedTicketId,
-            type: formData.type
-          })
-        });
-      } catch (emailErr) {
-        console.warn('Email dispatch failed or offline:', emailErr);
-      }
-
+      // Application successfully logged as PENDING APPROVAL
       setIsSubmitted(true);
     } catch (err) {
       console.error('Registration error:', err);
@@ -124,71 +129,42 @@ export default function FlightRegisterModal({
     }
   };
 
-  const handleDownloadTicket = async () => {
-    if (!ticketRef.current) return;
-    setDownloading(true);
-    try {
-      const node = ticketRef.current;
-      const dataUrl = await toPng(node, {
-        quality: 1,
-        pixelRatio: 2,
-        backgroundColor: '#FFFFFF',
-        cacheBust: true,
-        width: node.scrollWidth,
-        height: node.scrollHeight
-      });
-
-      const img = new Image();
-      img.src = dataUrl;
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-
-      const pdf = new jsPDF({
-        orientation: img.width > img.height ? 'landscape' : 'portrait',
-        unit: 'px',
-        format: [img.width, img.height]
-      });
-
-      pdf.addImage(dataUrl, 'PNG', 0, 0, img.width, img.height);
-      pdf.save(`OOU-FutureTech-2027-BoardingPass-${formData.name.replace(/\s+/g, '-')}.pdf`);
-    } catch (err) {
-      console.error('Download ticket error:', err);
-      alert('Could not generate PDF download directly. Please take a screenshot of your boarding pass.');
-    } finally {
-      setDownloading(false);
+  const categories = [
+    {
+      id: 'Founder',
+      title: 'Founder',
+      desc: 'Building a startup, product or venture',
+      icon: Briefcase,
+      color: '#8B5CF6'
+    },
+    {
+      id: 'Creative',
+      title: 'Creative',
+      desc: 'UI/UX, 3D art, brand, audio/visual',
+      icon: Palette,
+      color: '#F59E0B'
+    },
+    {
+      id: 'Techie',
+      title: 'Techie',
+      desc: 'Software, AI, data, systems engineering',
+      icon: Code2,
+      color: '#10B981'
+    },
+    {
+      id: 'Others',
+      title: 'Others',
+      desc: 'Student, researcher, investor, ecosystem',
+      icon: Globe,
+      color: '#64748B'
     }
-  };
-
-  const handleDownloadPng = async () => {
-    if (!ticketRef.current) return;
-    setDownloading(true);
-    try {
-      const node = ticketRef.current;
-      const dataUrl = await toPng(node, {
-        quality: 1,
-        pixelRatio: 2,
-        backgroundColor: '#FFFFFF',
-        cacheBust: true
-      });
-
-      const link = document.createElement('a');
-      link.download = `OOU-FutureTech-2027-BoardingPass-${formData.name.replace(/\s+/g, '-')}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      console.error('Download PNG error:', err);
-      alert('Could not generate PNG download directly.');
-    } finally {
-      setDownloading(false);
-    }
-  };
+  ];
 
   return (
     <div style={{
       position: 'fixed',
       inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.75)',
+      backgroundColor: 'rgba(0, 0, 0, 0.78)',
       backdropFilter: 'blur(8px)',
       WebkitBackdropFilter: 'blur(8px)',
       display: 'flex',
@@ -204,7 +180,7 @@ export default function FlightRegisterModal({
         borderRadius: '1.75rem',
         boxShadow: 'clamp(6px, 1.5vw, 12px) clamp(6px, 1.5vw, 12px) 0 #000000',
         width: '100%',
-        maxWidth: isSubmitted ? '840px' : '560px',
+        maxWidth: isSubmitted ? '640px' : '580px',
         padding: 'clamp(1.25rem, 3.5vw, 2.5rem)',
         position: 'relative',
         margin: 'auto',
@@ -228,7 +204,8 @@ export default function FlightRegisterModal({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            zIndex: 10
           }}
           aria-label="Close modal"
         >
@@ -238,7 +215,7 @@ export default function FlightRegisterModal({
         {!isSubmitted ? (
           <div>
             {/* Header */}
-            <div style={{ marginBottom: '2rem' }}>
+            <div style={{ marginBottom: '1.75rem' }}>
               <div style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -252,26 +229,28 @@ export default function FlightRegisterModal({
               }}>
                 <span className="flight-status-dot" />
                 <span className="flight-mono" style={{ fontSize: '0.72rem', fontWeight: 800, color: '#000000' }}>
-                  PASSENGER BOOKING • FLIGHT FT2027
+                  ADMISSIONS MANIFEST • STRICTLY BY INVITATION
                 </span>
               </div>
               <h2 style={{
-                fontSize: 'clamp(1.75rem, 3.5vw, 2.3rem)',
+                fontSize: 'clamp(1.75rem, 3.5vw, 2.2rem)',
                 margin: '0 0 0.4rem 0',
-                color: '#000000'
+                color: '#000000',
+                fontFamily: 'var(--font-heading)'
               }}>
-                Reserve Your Seat
+                Request Your Invitation
               </h2>
-              <p style={{ fontSize: '0.95rem', color: '#64748B', margin: 0 }}>
-                Join Africa's next export of technology talent. Enter your passenger details to issue your official digital boarding pass.
+              <p style={{ fontSize: '0.92rem', color: '#64748B', margin: 0, lineHeight: 1.5 }}>
+                OOU FutureTech Flight Edition is a curated gathering. Enter your details below to apply for admissions clearance.
               </p>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+              {/* Full Name */}
               <div>
-                <label className="flight-mono" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000000', display: 'block', marginBottom: '6px' }}>
-                  FULL PASSENGER NAME *
+                <label className="flight-mono" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000000', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                  <User size={13} color="var(--color-airline-red)" /> FULL PASSENGER NAME *
                 </label>
                 <input
                   type="text"
@@ -287,7 +266,6 @@ export default function FlightRegisterModal({
                     boxShadow: '3px 3px 0 #000000',
                     borderRadius: '8px',
                     color: '#000000',
-                    fontFamily: 'var(--font-body)',
                     fontSize: '0.95rem',
                     fontWeight: 600,
                     outline: 'none',
@@ -296,9 +274,10 @@ export default function FlightRegisterModal({
                 />
               </div>
 
+              {/* Email Address */}
               <div>
-                <label className="flight-mono" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000000', display: 'block', marginBottom: '6px' }}>
-                  EMAIL ADDRESS *
+                <label className="flight-mono" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000000', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                  <Mail size={13} color="var(--color-airline-red)" /> EMAIL ADDRESS *
                 </label>
                 <input
                   type="email"
@@ -314,7 +293,6 @@ export default function FlightRegisterModal({
                     boxShadow: '3px 3px 0 #000000',
                     borderRadius: '8px',
                     color: '#000000',
-                    fontFamily: 'var(--font-body)',
                     fontSize: '0.95rem',
                     fontWeight: 600,
                     outline: 'none',
@@ -323,6 +301,90 @@ export default function FlightRegisterModal({
                 />
               </div>
 
+              {/* Phone / WhatsApp Number */}
+              <div>
+                <label className="flight-mono" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000000', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                  <Phone size={13} color="var(--color-airline-red)" /> PHONE / WHATSAPP NUMBER *
+                </label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="e.g. +234 812 345 6789"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '0.85rem 1rem',
+                    background: '#FFFFFF',
+                    border: '2px solid #000000',
+                    boxShadow: '3px 3px 0 #000000',
+                    borderRadius: '8px',
+                    color: '#000000',
+                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Category / Persona Selector */}
+              <div>
+                <label className="flight-mono" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000000', display: 'block', marginBottom: '6px' }}>
+                  WHAT BEST DESCRIBES YOU? *
+                </label>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '0.65rem'
+                }}>
+                  {categories.map((cat) => {
+                    const isSelected = formData.category === cat.id;
+                    const Icon = cat.icon;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, category: cat.id })}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '0.6rem',
+                          padding: '0.75rem 0.85rem',
+                          background: isSelected ? '#000000' : '#FFFFFF',
+                          color: isSelected ? '#FFFFFF' : '#000000',
+                          border: '2px solid #000000',
+                          boxShadow: isSelected ? '3px 3px 0 var(--color-airline-red)' : '2px 2px 0 #000000',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <div style={{
+                          padding: '0.35rem',
+                          borderRadius: '6px',
+                          background: isSelected ? 'var(--color-airline-red)' : '#F1F5F9',
+                          color: isSelected ? '#FFFFFF' : '#000000',
+                          flexShrink: 0
+                        }}>
+                          <Icon size={16} />
+                        </div>
+                        <div>
+                          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                            {cat.title}
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: isSelected ? '#CBD5E1' : '#64748B', lineHeight: 1.25, marginTop: '2px' }}>
+                            {cat.desc}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Class of Travel */}
               <div>
                 <label className="flight-mono" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000000', display: 'block', marginBottom: '6px' }}>
                   CLASS OF TRAVEL
@@ -330,13 +392,13 @@ export default function FlightRegisterModal({
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
-                  gap: '0.85rem'
+                  gap: '0.75rem'
                 }}>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: 'Standard' })}
                     style={{
-                      padding: '0.85rem',
+                      padding: '0.75rem',
                       background: formData.type === 'Standard' ? 'var(--color-airline-red)' : '#FFFFFF',
                       border: '2px solid #000000',
                       boxShadow: '3px 3px 0 #000000',
@@ -349,13 +411,13 @@ export default function FlightRegisterModal({
                       textAlign: 'center'
                     }}
                   >
-                    STUDENT PASS
+                    STUDENT PASS (FREE)
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: 'Pro' })}
                     style={{
-                      padding: '0.85rem',
+                      padding: '0.75rem',
                       background: formData.type === 'Pro' ? 'var(--color-airline-red)' : '#FFFFFF',
                       border: '2px solid #000000',
                       boxShadow: '3px 3px 0 #000000',
@@ -377,37 +439,12 @@ export default function FlightRegisterModal({
                 <>
                   <div>
                     <label className="flight-mono" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000000', display: 'block', marginBottom: '6px' }}>
-                      WHATSAPP NUMBER *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="+234..."
-                      value={formData.whatsappNumber}
-                      onChange={(e) => setFormData({ ...formData, whatsappNumber: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '0.85rem 1rem',
-                        background: '#FFFFFF',
-                        border: '2px solid #000000',
-                        boxShadow: '3px 3px 0 #000000',
-                        borderRadius: '8px',
-                        color: '#000000',
-                        fontSize: '0.95rem',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="flight-mono" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000000', display: 'block', marginBottom: '6px' }}>
                       COMPANY / STARTUP NAME *
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Acme Tech"
+                      placeholder="e.g. Acme Technologies"
                       value={formData.companyName}
                       onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                       style={{
@@ -431,8 +468,8 @@ export default function FlightRegisterModal({
                     </label>
                     <textarea
                       required
-                      rows={3}
-                      placeholder="Describe your tech products..."
+                      rows={2}
+                      placeholder="Briefly describe what tech products or services you plan to exhibit..."
                       value={formData.products}
                       onChange={(e) => setFormData({ ...formData, products: e.target.value })}
                       style={{
@@ -478,109 +515,145 @@ export default function FlightRegisterModal({
                 className="flight-btn-red"
                 style={{
                   width: '100%',
-                  padding: '1.1rem',
+                  padding: '1.05rem',
                   marginTop: '0.5rem',
-                  fontSize: '1rem',
+                  fontSize: '0.95rem',
                   opacity: loading ? 0.7 : 1,
                   justifyContent: 'center'
                 }}
               >
-                {loading ? 'ISSUING BOARDING PASS...' : 'CONFIRM & ISSUE BOARDING PASS'}
+                {loading ? 'SUBMITTING APPLICATION...' : 'SUBMIT APPLICATION FOR INVITATION'}
               </button>
             </form>
           </div>
         ) : (
-          /* Confirmation Boarding Pass */
-          <div>
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                background: '#DCFCE7',
-                color: '#166534',
-                border: '2px solid #000000',
-                boxShadow: '3px 3px 0 #000000',
-                padding: '0.5rem 1.4rem',
-                borderRadius: '9999px',
-                fontFamily: 'var(--font-heading)',
-                fontSize: '0.85rem',
-                fontWeight: 900,
-                marginBottom: '1rem'
-              }}>
-                <CheckCircle2 size={18} /> SEAT RESERVATION CONFIRMED
-              </div>
-              <h2 style={{
-                fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)',
-                margin: '0 0 0.35rem 0',
-                color: '#000000'
-              }}>
-                Your Boarding Pass is Issued
-              </h2>
-              <p style={{ fontSize: '0.95rem', color: '#64748B', margin: 0 }}>
-                Present this official credential at OGD Hall, OOU. Event date to be announced soon.
-              </p>
+          /* Confirmation Screen: Strictly by Invitation & Pending Approval */
+          <div style={{ textAlign: 'center', padding: '0.5rem 0' }}>
+            <div style={{
+              width: '68px',
+              height: '68px',
+              borderRadius: '50%',
+              background: '#FEF3C7',
+              border: '3px solid #D97706',
+              boxShadow: '4px 4px 0 #000000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.25rem auto'
+            }}>
+              <Clock size={34} color="#D97706" />
             </div>
 
-            {/* Printable Pass Container */}
-            <div
-              ref={ticketRef}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: '#FFFBEB',
+              border: '2px solid #D97706',
+              boxShadow: '2px 2px 0 #000000',
+              padding: '0.4rem 1rem',
+              borderRadius: '9999px',
+              color: '#B45309',
+              fontFamily: 'var(--font-heading)',
+              fontSize: '0.8rem',
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              marginBottom: '1.25rem'
+            }}>
+              <ShieldAlert size={15} /> STATUS: PENDING ADMISSION CLEARANCE
+            </div>
+
+            <h2 style={{
+              fontSize: 'clamp(1.6rem, 3.5vw, 2.1rem)',
+              margin: '0 0 0.75rem 0',
+              color: '#000000',
+              fontFamily: 'var(--font-heading)',
+              lineHeight: 1.2
+            }}>
+              Your Registration is Pending Approval
+            </h2>
+
+            {/* Crucial Banner Required by User */}
+            <div style={{
+              background: '#000000',
+              color: '#FFFFFF',
+              border: '2px solid #000000',
+              boxShadow: '4px 4px 0 var(--color-airline-red)',
+              borderRadius: '12px',
+              padding: '1rem 1.25rem',
+              margin: '0 auto 1.5rem auto',
+              textAlign: 'center'
+            }}>
+              <div className="flight-mono" style={{ fontSize: '0.75rem', color: 'var(--color-airline-red)', fontWeight: 800, letterSpacing: '0.1em', marginBottom: '4px' }}>
+                SECURITY & CAPACITY CLEARANCE
+              </div>
+              <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                THE EVENT IS STRICTLY BY INVITATION
+              </div>
+            </div>
+
+            <p style={{
+              fontSize: '0.95rem',
+              color: '#475569',
+              margin: '0 0 1.5rem 0',
+              lineHeight: 1.6,
+              maxWidth: '520px',
+              marginLeft: 'auto',
+              marginRight: 'auto'
+            }}>
+              Thank you for applying, <strong>{formData.name}</strong>. Due to limited auditorium seats and curated tracks for <strong>{formData.category}s</strong>, every reservation undergoes review by the flight admissions board.
+            </p>
+
+            {/* Application Summary Box */}
+            <div style={{
+              background: '#F8FAFC',
+              border: '2px solid #000000',
+              boxShadow: '3px 3px 0 #000000',
+              borderRadius: '12px',
+              padding: '1.25rem',
+              textAlign: 'left',
+              marginBottom: '1.75rem'
+            }}>
+              <div className="flight-mono" style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 800, marginBottom: '0.75rem' }}>
+                APPLICATION RECEIPT MANIFEST:
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', fontSize: '0.85rem' }}>
+                <div>
+                  <span style={{ color: '#64748B', fontSize: '0.75rem', display: 'block' }}>REFERENCE ID:</span>
+                  <span className="flight-mono" style={{ fontWeight: 900, color: 'var(--color-airline-red)' }}>{ticketId}</span>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B', fontSize: '0.75rem', display: 'block' }}>COHORT CATEGORY:</span>
+                  <span style={{ fontWeight: 800 }}>{formData.category.toUpperCase()}</span>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B', fontSize: '0.75rem', display: 'block' }}>EMAIL:</span>
+                  <span style={{ fontWeight: 700, wordBreak: 'break-all' }}>{formData.email}</span>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B', fontSize: '0.75rem', display: 'block' }}>PHONE / WHATSAPP:</span>
+                  <span style={{ fontWeight: 700 }}>{formData.phone}</span>
+                </div>
+              </div>
+              <div style={{ marginTop: '0.85rem', paddingTop: '0.85rem', borderTop: '1px dashed #CBD5E1', fontSize: '0.8rem', color: '#475569' }}>
+                📩 <strong>What happens next?</strong> As soon as the admin approves your registration in the dashboard, your verified <strong>Boarding Pass with QR code</strong> will be dispatched directly to your email address and WhatsApp.
+              </div>
+            </div>
+
+            {/* Return / Close Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="flight-btn-red"
               style={{
-                maxWidth: '780px',
-                margin: '0 auto 2rem auto',
-                padding: '4px',
-                backgroundColor: '#FFFFFF'
+                width: '100%',
+                padding: '1rem',
+                justifyContent: 'center',
+                fontSize: '0.95rem'
               }}
             >
-              <FlightTicketCard
-                ticketId={ticketId}
-                name={formData.name.toUpperCase()}
-                email={formData.email}
-                ticketClass={formData.type}
-                price={formData.type === 'Pro' ? '₦50,000' : '₦0'}
-              />
-            </div>
-
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem' }}>
-              <button
-                type="button"
-                onClick={handleDownloadPng}
-                disabled={downloading}
-                className="flight-btn-red"
-                style={{ flex: 1, minWidth: '200px', padding: '0.95rem 1.25rem', justifyContent: 'center', fontSize: '0.9rem' }}
-              >
-                <ImageIcon size={18} />
-                {downloading ? 'PROCESSING...' : 'SAVE BOARDING PASS (.PNG)'}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDownloadTicket}
-                disabled={downloading}
-                className="flight-btn-red"
-                style={{
-                  flex: 1,
-                  minWidth: '200px',
-                  padding: '0.95rem 1.25rem',
-                  justifyContent: 'center',
-                  fontSize: '0.9rem',
-                  background: '#000000'
-                }}
-              >
-                <Download size={18} />
-                {downloading ? 'PROCESSING...' : 'DOWNLOAD DOCUMENT (.PDF)'}
-              </button>
-
-              <button
-                type="button"
-                onClick={onClose}
-                className="flight-btn-outline"
-                style={{ padding: '0.95rem 1.5rem', fontSize: '0.9rem' }}
-              >
-                CLOSE
-              </button>
-            </div>
+              UNDERSTOOD • RETURN TO FLIGHT FT2027
+            </button>
           </div>
         )}
       </div>

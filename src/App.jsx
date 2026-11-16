@@ -2522,6 +2522,9 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     const [waitlistFilter, setWaitlistFilter] = useState('all'); // 'all' | 'test_done' | 'admitted'
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [approvalFilter, setApprovalFilter] = useState('all'); // 'all' | 'pending' | 'approved'
+    const [categoryFilter, setCategoryFilter] = useState('all'); // 'all' | 'Founder' | 'Creative' | 'Techie' | 'Others'
+    const [approvingId, setApprovingId] = useState(null);
     const [confirmingPitch, setConfirmingPitch] = useState(null); // { id, status }
 
     const COHORTS = ['Cohort 1', 'Cohort 2', 'Cohort 3', 'Cohort 4', 'Cohort 5'];
@@ -3127,6 +3130,147 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
         }
     };
 
+    const getAttendeeMetadata = (r) => {
+        let category = 'Techie';
+        let status = 'approved';
+        let phone = r.whatsapp_number || '';
+        if (r.products) {
+            try {
+                const p = typeof r.products === 'string' ? JSON.parse(r.products) : r.products;
+                if (p && typeof p === 'object') {
+                    if (p.category) category = p.category;
+                    if (p.status) status = p.status;
+                    if (p.phone && !phone) phone = p.phone;
+                } else if (typeof r.products === 'string' && ['Founder', 'Creative', 'Techie', 'Others'].includes(r.products)) {
+                    category = r.products;
+                }
+            } catch (e) {
+                if (typeof r.products === 'string' && ['Founder', 'Creative', 'Techie', 'Others'].includes(r.products)) {
+                    category = r.products;
+                }
+            }
+        }
+        if (r.company_name?.includes('STATUS:PENDING')) {
+            status = 'pending';
+        } else if (r.company_name?.includes('STATUS:APPROVED')) {
+            status = 'approved';
+        }
+        return { category, status, phone };
+    };
+
+    const handleApproveRegistration = async (attendee) => {
+        setApprovingId(attendee.id);
+        try {
+            const meta = getAttendeeMetadata(attendee);
+            let parsed = {};
+            try {
+                parsed = typeof attendee.products === 'string' ? JSON.parse(attendee.products) : (attendee.products || {});
+            } catch (e) {
+                parsed = {};
+            }
+
+            const updatedCategory = meta.category || 'Techie';
+            const updatedPhone = meta.phone || attendee.whatsapp_number || '';
+
+            const updatedProducts = JSON.stringify({
+                ...parsed,
+                category: updatedCategory,
+                phone: updatedPhone,
+                status: 'approved',
+                approved_at: new Date().toISOString()
+            });
+
+            const newCompanyName = attendee.company_name && attendee.company_name.includes('•')
+                ? `STATUS:APPROVED ${attendee.company_name.substring(attendee.company_name.indexOf('•'))}`
+                : 'STATUS:APPROVED';
+
+            const { error: sbErr } = await supabase
+                .from('registrations')
+                .update({
+                    company_name: newCompanyName,
+                    products: updatedProducts
+                })
+                .eq('id', attendee.id);
+
+            if (sbErr) throw sbErr;
+
+            // Trigger email API with boarding pass details
+            let emailSent = false;
+            try {
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const apiBase = isLocal ? 'http://localhost:3001' : '';
+                const res = await fetch(`${apiBase}/api/send-ticket`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: attendee.email,
+                        name: attendee.name,
+                        ticketId: attendee.ticket_id,
+                        type: attendee.ticket_type || 'Standard',
+                        category: updatedCategory,
+                        phone: updatedPhone,
+                        origin: window.location.origin
+                    })
+                });
+                if (res.ok) emailSent = true;
+            } catch (mailErr) {
+                console.warn('Mail dispatch warning:', mailErr);
+            }
+
+            // Update in-memory state for instant UI reflection
+            setRegistrations(prev => prev.map(r => {
+                if (r.id === attendee.id) {
+                    return {
+                        ...r,
+                        company_name: newCompanyName,
+                        products: updatedProducts
+                    };
+                }
+                return r;
+            }));
+
+            alert(`✅ Registration for ${attendee.name} has been APPROVED!\nTicket: ${attendee.ticket_id}\n${emailSent ? 'Official Boarding Pass email was dispatched.' : 'Email dispatch attempted.'}`);
+        } catch (err) {
+            console.error('Approval failed:', err);
+            alert(`Failed to approve registration: ${err.message || err}`);
+        } finally {
+            setApprovingId(null);
+        }
+    };
+
+    const handleResendTicketEmail = async (attendee) => {
+        setApprovingId(attendee.id);
+        try {
+            const meta = getAttendeeMetadata(attendee);
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiBase = isLocal ? 'http://localhost:3001' : '';
+            const res = await fetch(`${apiBase}/api/send-ticket`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: attendee.email,
+                    name: attendee.name,
+                    ticketId: attendee.ticket_id,
+                    type: attendee.ticket_type || 'Standard',
+                    category: meta.category,
+                    phone: meta.phone,
+                    origin: window.location.origin
+                })
+            });
+
+            if (res.ok) {
+                alert(`✅ Boarding pass ticket re-sent successfully to ${attendee.email}!`);
+            } else {
+                alert(`⚠️ Email request failed with status: ${res.status}`);
+            }
+        } catch (err) {
+            console.error('Resend failed:', err);
+            alert(`Error resending ticket: ${err.message || err}`);
+        } finally {
+            setApprovingId(null);
+        }
+    };
+
     const handleDeletePitch = async (id) => {
         if (confirm('Are you sure you want to delete this pitch?')) {
             const { error } = await supabase
@@ -3283,24 +3427,41 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     };
 
     const filteredRegs = registrations.filter(r => {
+        const meta = getAttendeeMetadata(r);
         const matchesSearch = r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             r.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            r.ticket_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (r.ticket_id && r.ticket_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (meta.phone && meta.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (r.company_name && r.company_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (r.products && r.products.toLowerCase().includes(searchTerm.toLowerCase()));
+            (meta.category && meta.category.toLowerCase().includes(searchTerm.toLowerCase()));
 
-        if (activeTab === 'standard') return matchesSearch && r.ticket_type === 'Standard';
-        if (activeTab === 'pro') return matchesSearch && r.ticket_type === 'Pro';
-        return matchesSearch;
+        let matchesTab = true;
+        if (activeTab === 'standard') matchesTab = r.ticket_type === 'Standard';
+        else if (activeTab === 'pro') matchesTab = r.ticket_type === 'Pro';
+        else if (activeTab === 'invitations') matchesTab = true;
+
+        const matchesApproval = approvalFilter === 'all' ? true : meta.status === approvalFilter;
+        const matchesCategory = categoryFilter === 'all' ? true : meta.category.toLowerCase() === categoryFilter.toLowerCase();
+
+        return matchesSearch && matchesTab && matchesApproval && matchesCategory;
     });
+
+    const pendingCount = registrations.filter(r => getAttendeeMetadata(r).status === 'pending').length;
+    const approvedCount = registrations.filter(r => getAttendeeMetadata(r).status === 'approved').length;
+    const foundersCount = registrations.filter(r => getAttendeeMetadata(r).category === 'Founder').length;
+    const creativesCount = registrations.filter(r => getAttendeeMetadata(r).category === 'Creative').length;
+    const techiesCount = registrations.filter(r => getAttendeeMetadata(r).category === 'Techie').length;
+    const othersCount = registrations.filter(r => getAttendeeMetadata(r).category === 'Others').length;
 
     const stats = {
         total: Math.max(registrations.length, totalStats.total),
         standard: Math.max(registrations.filter(r => r.ticket_type === 'Standard').length, totalStats.standard),
-        pro: Math.max(registrations.filter(r => r.ticket_type === 'Pro').length, totalStats.pro)
+        pro: Math.max(registrations.filter(r => r.ticket_type === 'Pro').length, totalStats.pro),
+        pending: pendingCount,
+        approved: approvedCount
     };
 
-    const TabButton = ({ id, label, icon: Icon }) => (
+    const TabButton = ({ id, label, icon: Icon, badge }) => (
         <button
             onClick={() => setActiveTab(id)}
             style={{
@@ -3314,6 +3475,18 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
             }}
         >
             <Icon size={16} /> {label}
+            {badge !== undefined && (
+                <span style={{
+                    background: activeTab === id ? 'var(--accent-r)' : '#000',
+                    color: '#fff',
+                    borderRadius: '9999px',
+                    padding: '0.15rem 0.5rem',
+                    fontSize: '0.65rem',
+                    fontWeight: 900
+                }}>
+                    {badge}
+                </span>
+            )}
         </button>
     );
 
@@ -3329,7 +3502,8 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                 </div>
 
                 {/* TABS */}
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
+                    <TabButton id="invitations" label="Flight Passes & Invitations" icon={Plane} badge={pendingCount > 0 ? `${pendingCount} PENDING` : undefined} />
                     <TabButton id="standard" label="Standard Passes" icon={Users} />
                     <TabButton id="pro" label="Stand Requests" icon={Users} />
                     <TabButton id="founders" label="Founders Club" icon={Rocket} />
@@ -3342,78 +3516,354 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                     <TabButton id="settings" label="Site Controls" icon={Zap} />
                 </div>
 
-                {(activeTab === 'standard' || activeTab === 'pro') && (
+                {(activeTab === 'invitations' || activeTab === 'standard' || activeTab === 'pro') && (
                     <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '4rem' }}>
-                            {[
-                                { label: 'Total Registrations', val: stats.total, color: 'var(--accent-r)' },
-                                { label: 'Standard Passes', val: stats.standard, color: '#000' },
-                                { label: 'Stand Requests', val: stats.pro, color: '#fff', bg: '#000' },
-                                { label: 'Pitches', val: totalStats.pitches, color: 'var(--accent-r)' }
-                            ].map((s, i) => (
-                                <div key={i} style={{ background: s.bg || '#fff', border: '3px solid #000', borderRadius: '1.5rem', padding: '1.5rem', boxShadow: '4px 4px 0 #000' }}>
-                                    <p style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', color: s.bg ? '#ccc' : '#71717a', marginBottom: '0.5rem' }}>{s.label}</p>
-                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '2.5rem', margin: 0, color: s.bg ? '#fff' : '#000' }}>{s.val}</h2>
+                        {/* Summary Metrics */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+                            <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '1.25rem', padding: '1.25rem', boxShadow: '4px 4px 0 #000' }}>
+                                <p style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', color: '#71717a', marginBottom: '0.4rem' }}>Total Applications</p>
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '2.2rem', margin: 0, color: '#000' }}>{stats.total}</h2>
+                            </div>
+
+                            <div style={{ background: '#FEF3C7', border: '3px solid #D97706', borderRadius: '1.25rem', padding: '1.25rem', boxShadow: '4px 4px 0 #000' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <p style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', color: '#B45309', margin: 0 }}>Pending Approval</p>
+                                    <span style={{ background: '#D97706', color: '#fff', fontSize: '0.65rem', fontWeight: 900, padding: '0.2rem 0.5rem', borderRadius: '9999px' }}>STRICTLY INVITATION</span>
                                 </div>
-                            ))}
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '2.2rem', margin: '0.4rem 0 0 0', color: '#92400E' }}>{pendingCount}</h2>
+                            </div>
+
+                            <div style={{ background: '#DCFCE7', border: '3px solid #16A34A', borderRadius: '1.25rem', padding: '1.25rem', boxShadow: '4px 4px 0 #000' }}>
+                                <p style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', color: '#166534', marginBottom: '0.4rem' }}>Approved Attendees</p>
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '2.2rem', margin: 0, color: '#15803D' }}>{approvedCount}</h2>
+                            </div>
+
+                            <div style={{ background: '#000', color: '#fff', border: '3px solid #000', borderRadius: '1.25rem', padding: '1.25rem', boxShadow: '4px 4px 0 var(--color-airline-red)' }}>
+                                <p style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', color: '#94A3B8', marginBottom: '0.4rem' }}>Industry Stands (Pro)</p>
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '2.2rem', margin: 0, color: '#fff' }}>{stats.pro}</h2>
+                            </div>
                         </div>
 
-                        <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '2rem', padding: '2rem', boxShadow: '8px 8px 0 #000' }}>
-                            <div style={{ marginBottom: '2rem' }}>
+                        {/* Control Box */}
+                        <div style={{ background: '#fff', border: '3px solid #000', borderRadius: '1.75rem', padding: '1.75rem', boxShadow: '8px 8px 0 #000' }}>
+                            {/* Search and Filters */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.75rem' }}>
                                 <input
                                     type="text"
                                     className="form-input"
-                                    placeholder="Search by name, email or ticket ID..."
+                                    placeholder="Search by name, email, phone number, ticket ID, or role..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.85rem 1.15rem',
+                                        fontSize: '0.95rem',
+                                        border: '2px solid #000',
+                                        borderRadius: '10px',
+                                        boxShadow: '3px 3px 0 #000',
+                                        outline: 'none',
+                                        boxSizing: 'border-box'
+                                    }}
                                 />
+
+                                {/* Filter Controls Row */}
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid #E2E8F0' }}>
+                                    {/* Status Filter */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        <span className="flight-mono" style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748B' }}>STATUS:</span>
+                                        {[
+                                            { id: 'all', label: `All (${registrations.length})` },
+                                            { id: 'pending', label: `⏳ Pending (${pendingCount})`, color: '#D97706' },
+                                            { id: 'approved', label: `✓ Approved (${approvedCount})`, color: '#16A34A' }
+                                        ].map(f => (
+                                            <button
+                                                key={f.id}
+                                                type="button"
+                                                onClick={() => setApprovalFilter(f.id)}
+                                                style={{
+                                                    padding: '0.4rem 0.85rem',
+                                                    borderRadius: '8px',
+                                                    border: '2px solid #000',
+                                                    background: approvalFilter === f.id ? '#000' : '#fff',
+                                                    color: approvalFilter === f.id ? '#fff' : (f.color || '#000'),
+                                                    fontFamily: 'Outfit',
+                                                    fontWeight: 900,
+                                                    fontSize: '0.72rem',
+                                                    cursor: 'pointer',
+                                                    boxShadow: approvalFilter === f.id ? 'none' : '2px 2px 0 #000'
+                                                }}
+                                            >
+                                                {f.label}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Category Filter */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        <span className="flight-mono" style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748B' }}>COHORT:</span>
+                                        {[
+                                            { id: 'all', label: 'All Roles' },
+                                            { id: 'Founder', label: `🚀 Founder (${foundersCount})` },
+                                            { id: 'Creative', label: `🎨 Creative (${creativesCount})` },
+                                            { id: 'Techie', label: `💻 Techie (${techiesCount})` },
+                                            { id: 'Others', label: `🌐 Others (${othersCount})` }
+                                        ].map(c => (
+                                            <button
+                                                key={c.id}
+                                                type="button"
+                                                onClick={() => setCategoryFilter(c.id)}
+                                                style={{
+                                                    padding: '0.4rem 0.85rem',
+                                                    borderRadius: '8px',
+                                                    border: '2px solid #000',
+                                                    background: categoryFilter.toLowerCase() === c.id.toLowerCase() ? '#000' : '#fff',
+                                                    color: categoryFilter.toLowerCase() === c.id.toLowerCase() ? '#fff' : '#000',
+                                                    fontFamily: 'Outfit',
+                                                    fontWeight: 900,
+                                                    fontSize: '0.72rem',
+                                                    cursor: 'pointer',
+                                                    boxShadow: categoryFilter.toLowerCase() === c.id.toLowerCase() ? 'none' : '2px 2px 0 #000'
+                                                }}
+                                            >
+                                                {c.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
 
                             {loading ? (
-                                <p style={{ textAlign: 'center', fontWeight: 700 }}>Loading attendees...</p>
+                                <p style={{ textAlign: 'center', fontWeight: 700, padding: '2rem 0' }}>Loading registrations & manifest...</p>
                             ) : (
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                         <thead>
                                             <tr style={{ textAlign: 'left', borderBottom: '3px solid #000' }}>
-                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Attendee / Company</th>
-                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Type</th>
-                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>ID</th>
-                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Date</th>
-                                                <th style={{ padding: '1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Actions</th>
+                                                <th style={{ padding: '0.85rem 1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Passenger / Contact</th>
+                                                <th style={{ padding: '0.85rem 1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Category</th>
+                                                <th style={{ padding: '0.85rem 1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Pass Class</th>
+                                                <th style={{ padding: '0.85rem 1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Boarding ID</th>
+                                                <th style={{ padding: '0.85rem 1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Status</th>
+                                                <th style={{ padding: '0.85rem 1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900 }}>Applied</th>
+                                                <th style={{ padding: '0.85rem 1rem', textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900, textAlign: 'right' }}>Admissions Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {filteredRegs.map((r, i) => (
-                                                <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <div style={{ fontWeight: 900 }}>{r.name}</div>
-                                                        <div style={{ fontSize: '0.8rem', color: '#71717a' }}>{r.email}</div>
-                                                        {r.whatsapp_number && <div style={{ fontSize: '0.8rem', color: '#25d366', fontWeight: 700 }}>WA: {r.whatsapp_number}</div>}
-                                                        {r.company_name && (
-                                                            <div style={{ fontSize: '0.75rem', color: '#000', fontWeight: 900, marginTop: '0.4rem', background: '#f4f4f5', padding: '0.3rem 0.6rem', borderRadius: '0.4rem', width: 'fit-content' }}>
-                                                                {r.company_name}
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <span style={{
-                                                            background: r.ticket_type === 'Pro' ? '#000' : 'var(--accent-r)',
-                                                            color: '#fff', padding: '0.2rem 0.6rem', borderRadius: '0.5rem', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase'
-                                                        }}>{r.ticket_type}</span>
-                                                    </td>
-                                                    <td style={{ padding: '1rem', fontFamily: 'monospace', fontWeight: 700 }}>{r.ticket_id}</td>
-                                                    <td style={{ padding: '1rem', fontSize: '0.8rem' }}>{new Date(r.created_at).toLocaleDateString()}</td>
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <button
-                                                            onClick={() => handleDeleteRegistration(r.id)}
-                                                            style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
+                                            {filteredRegs.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="7" style={{ padding: '3rem 1rem', textAlign: 'center', color: '#64748B', fontWeight: 700 }}>
+                                                        No passengers matching current filters.
                                                     </td>
                                                 </tr>
-                                            ))}
+                                            ) : (
+                                                filteredRegs.map((r, i) => {
+                                                    const meta = getAttendeeMetadata(r);
+                                                    const isPending = meta.status === 'pending';
+                                                    const isApproving = approvingId === r.id;
+
+                                                    // Badge color per category
+                                                    const categoryColors = {
+                                                        Founder: { bg: '#EDE9FE', color: '#6D28D9', border: '#8B5CF6' },
+                                                        Creative: { bg: '#FEF3C7', color: '#B45309', border: '#F59E0B' },
+                                                        Techie: { bg: '#D1FAE5', color: '#065F46', border: '#10B981' },
+                                                        Others: { bg: '#F1F5F9', color: '#334155', border: '#94A3B8' }
+                                                    };
+                                                    const catColor = categoryColors[meta.category] || categoryColors.Techie;
+
+                                                    return (
+                                                        <tr key={r.id || i} style={{ borderBottom: '1px solid #E2E8F0', background: isPending ? '#FFFDF5' : '#FFFFFF' }}>
+                                                            {/* Attendee Details & WhatsApp */}
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div style={{ fontWeight: 900, fontSize: '0.95rem', color: '#000' }}>{r.name}</div>
+                                                                <div style={{ fontSize: '0.8rem', color: '#64748B' }}>{r.email}</div>
+                                                                {meta.phone && (
+                                                                    <div style={{ marginTop: '0.35rem' }}>
+                                                                        <a
+                                                                            href={`https://wa.me/${meta.phone.replace(/[^0-9]/g, '')}`}
+                                                                            target="_blank"
+                                                                            rel="noreferrer"
+                                                                            style={{
+                                                                                display: 'inline-flex',
+                                                                                alignItems: 'center',
+                                                                                gap: '4px',
+                                                                                fontSize: '0.78rem',
+                                                                                color: '#15803D',
+                                                                                fontWeight: 800,
+                                                                                textDecoration: 'none'
+                                                                            }}
+                                                                            title="Direct WhatsApp link"
+                                                                        >
+                                                                            📱 WA: {meta.phone}
+                                                                        </a>
+                                                                    </div>
+                                                                )}
+                                                                {r.company_name && !r.company_name.startsWith('STATUS:') && (
+                                                                    <div style={{ fontSize: '0.75rem', color: '#000', fontWeight: 900, marginTop: '0.35rem', background: '#F1F5F9', padding: '0.2rem 0.5rem', borderRadius: '4px', width: 'fit-content' }}>
+                                                                        {r.company_name}
+                                                                    </div>
+                                                                )}
+                                                            </td>
+
+                                                            {/* Category */}
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <span style={{
+                                                                    background: catColor.bg,
+                                                                    color: catColor.color,
+                                                                    border: `1.5px solid ${catColor.border}`,
+                                                                    padding: '0.25rem 0.65rem',
+                                                                    borderRadius: '6px',
+                                                                    fontSize: '0.72rem',
+                                                                    fontWeight: 900,
+                                                                    textTransform: 'uppercase',
+                                                                    display: 'inline-block'
+                                                                }}>
+                                                                    {meta.category === 'Founder' && '🚀 '}
+                                                                    {meta.category === 'Creative' && '🎨 '}
+                                                                    {meta.category === 'Techie' && '💻 '}
+                                                                    {meta.category === 'Others' && '🌐 '}
+                                                                    {meta.category}
+                                                                </span>
+                                                            </td>
+
+                                                            {/* Travel Class */}
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <span style={{
+                                                                    background: r.ticket_type === 'Pro' ? '#000000' : 'var(--accent-r)',
+                                                                    color: '#FFFFFF',
+                                                                    padding: '0.25rem 0.6rem',
+                                                                    borderRadius: '6px',
+                                                                    fontSize: '0.68rem',
+                                                                    fontWeight: 900,
+                                                                    textTransform: 'uppercase',
+                                                                    display: 'inline-block'
+                                                                }}>
+                                                                    {r.ticket_type === 'Pro' ? 'STAND (PRO)' : 'STUDENT PASS'}
+                                                                </span>
+                                                            </td>
+
+                                                            {/* Ticket ID */}
+                                                            <td style={{ padding: '1rem', fontFamily: 'monospace', fontWeight: 800, fontSize: '0.85rem' }}>
+                                                                {r.ticket_id}
+                                                            </td>
+
+                                                            {/* Approval Status */}
+                                                            <td style={{ padding: '1rem' }}>
+                                                                {isPending ? (
+                                                                    <span style={{
+                                                                        background: '#FEF3C7',
+                                                                        color: '#B45309',
+                                                                        border: '1.5px solid #D97706',
+                                                                        padding: '0.3rem 0.65rem',
+                                                                        borderRadius: '6px',
+                                                                        fontSize: '0.72rem',
+                                                                        fontWeight: 900,
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '4px'
+                                                                    }}>
+                                                                        ⏳ PENDING INVITATION
+                                                                    </span>
+                                                                ) : (
+                                                                    <span style={{
+                                                                        background: '#DCFCE7',
+                                                                        color: '#15803D',
+                                                                        border: '1.5px solid #16A34A',
+                                                                        padding: '0.3rem 0.65rem',
+                                                                        borderRadius: '6px',
+                                                                        fontSize: '0.72rem',
+                                                                        fontWeight: 900,
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '4px'
+                                                                    }}>
+                                                                        ✓ APPROVED
+                                                                    </span>
+                                                                )}
+                                                            </td>
+
+                                                            {/* Registration Date */}
+                                                            <td style={{ padding: '1rem', fontSize: '0.8rem', color: '#64748B', whiteSpace: 'nowrap' }}>
+                                                                {r.created_at ? new Date(r.created_at).toLocaleDateString() : 'N/A'}
+                                                            </td>
+
+                                                            {/* Action Buttons */}
+                                                            <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                    {isPending ? (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleApproveRegistration(r)}
+                                                                            disabled={isApproving}
+                                                                            style={{
+                                                                                background: '#16A34A',
+                                                                                color: '#FFFFFF',
+                                                                                border: '2px solid #000000',
+                                                                                boxShadow: '2px 2px 0 #000000',
+                                                                                borderRadius: '6px',
+                                                                                padding: '0.45rem 0.85rem',
+                                                                                fontFamily: 'Outfit',
+                                                                                fontWeight: 900,
+                                                                                fontSize: '0.75rem',
+                                                                                cursor: isApproving ? 'not-allowed' : 'pointer',
+                                                                                opacity: isApproving ? 0.7 : 1,
+                                                                                display: 'inline-flex',
+                                                                                alignItems: 'center',
+                                                                                gap: '4px',
+                                                                                whiteSpace: 'nowrap'
+                                                                            }}
+                                                                        >
+                                                                            {isApproving ? 'DISPATCHING...' : '✓ APPROVE & SEND TICKET'}
+                                                                        </button>
+                                                                    ) : (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleResendTicketEmail(r)}
+                                                                            disabled={isApproving}
+                                                                            style={{
+                                                                                background: '#F1F5F9',
+                                                                                color: '#000000',
+                                                                                border: '1.5px solid #000000',
+                                                                                borderRadius: '6px',
+                                                                                padding: '0.4rem 0.75rem',
+                                                                                fontFamily: 'Outfit',
+                                                                                fontWeight: 800,
+                                                                                fontSize: '0.72rem',
+                                                                                cursor: isApproving ? 'not-allowed' : 'pointer',
+                                                                                display: 'inline-flex',
+                                                                                alignItems: 'center',
+                                                                                gap: '4px',
+                                                                                whiteSpace: 'nowrap'
+                                                                            }}
+                                                                            title="Re-send ticket email to attendee"
+                                                                        >
+                                                                            {isApproving ? 'SENDING...' : '✉ RESEND TICKET'}
+                                                                        </button>
+                                                                    )}
+
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleDeleteRegistration(r.id)}
+                                                                        style={{
+                                                                            background: '#FEE2E2',
+                                                                            color: '#DC2626',
+                                                                            border: '1.5px solid #DC2626',
+                                                                            padding: '0.45rem',
+                                                                            borderRadius: '6px',
+                                                                            cursor: 'pointer',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center'
+                                                                        }}
+                                                                        title="Delete Registration"
+                                                                    >
+                                                                        <Trash2 size={15} />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>

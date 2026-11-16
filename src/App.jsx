@@ -3493,12 +3493,127 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
     return (
         <div className="admin-dashboard-wrap" style={{ background: '#f8f8f8', minHeight: '100vh', padding: 'clamp(2rem, 5vw, 4rem) clamp(1rem, 3vw, 2rem)' }}>
             <div className="container" style={{ maxWidth: '1000px', padding: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
                         <h1 className="section-h2" style={{ margin: 0 }}>Terminal Access</h1>
-                        <p style={{ fontSize: '0.8rem', color: '#71717a', marginTop: '0.5rem' }}>Authenticated as Administrator • OOU Future Tech 2026</p>
+                        <p style={{ fontSize: '0.8rem', color: '#71717a', marginTop: '0.5rem' }}>Authenticated as Administrator • OOU Future Tech 2026/2027</p>
                     </div>
-                    <button onClick={onBack} className="btn-outline" style={{ padding: '0.6rem 1.2rem', fontSize: '0.8rem' }}>Back to Site</button>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <a
+                            href="/OOU_FutureTech_All_Attendees_and_Emails.xlsx"
+                            download="OOU_FutureTech_2026_All_Attendees_and_Emails.xlsx"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.45rem',
+                                background: '#16A34A',
+                                color: '#FFFFFF',
+                                border: '2px solid #000000',
+                                boxShadow: '3px 3px 0 #000000',
+                                borderRadius: '8px',
+                                padding: '0.6rem 1.1rem',
+                                fontFamily: 'Outfit',
+                                fontWeight: 900,
+                                fontSize: '0.78rem',
+                                textTransform: 'uppercase',
+                                textDecoration: 'none',
+                                cursor: 'pointer'
+                            }}
+                            title="Download full 2026 attendees database in Excel format"
+                        >
+                            <Download size={15} /> DOWNLOAD 2026 ATTENDEES (.XLSX)
+                        </a>
+                        <button onClick={onBack} className="btn-outline" style={{ padding: '0.6rem 1.2rem', fontSize: '0.8rem' }}>Back to Site</button>
+                    </div>
+                </div>
+
+                {/* Last Year Data Archive Banner */}
+                <div style={{
+                    background: '#FFFFFF',
+                    border: '3px solid #000000',
+                    boxShadow: '4px 4px 0 #000000',
+                    borderRadius: '1.25rem',
+                    padding: '1.15rem 1.5rem',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    marginBottom: '2rem'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{
+                            background: 'var(--color-airline-red)',
+                            color: '#FFFFFF',
+                            width: '42px',
+                            height: '42px',
+                            borderRadius: '10px',
+                            border: '2px solid #000000',
+                            boxShadow: '2px 2px 0 #000000',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                        }}>
+                            <Download size={20} />
+                        </div>
+                        <div>
+                            <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 900, fontSize: '0.95rem', textTransform: 'uppercase', color: '#000000' }}>
+                                Last Year (2026) Attendee Master Database
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                                All 2,000+ attendee records from the 2026 edition (names, emails, ticket IDs, and statuses) saved for reference.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                        <a
+                            href="/OOU_FutureTech_All_Attendees_and_Emails.xlsx"
+                            download="OOU_FutureTech_2026_All_Attendees_and_Emails.xlsx"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                background: '#16A34A',
+                                color: '#FFFFFF',
+                                border: '2px solid #000000',
+                                boxShadow: '2px 2px 0 #000000',
+                                borderRadius: '8px',
+                                padding: '0.55rem 0.95rem',
+                                fontFamily: 'Outfit',
+                                fontWeight: 900,
+                                fontSize: '0.75rem',
+                                textTransform: 'uppercase',
+                                textDecoration: 'none'
+                            }}
+                        >
+                            <Download size={13} /> EXCEL (.XLSX)
+                        </a>
+
+                        <a
+                            href="/OOU_FutureTech_All_Attendees_and_Emails.csv"
+                            download="OOU_FutureTech_2026_All_Attendees_and_Emails.csv"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                background: '#000000',
+                                color: '#FFFFFF',
+                                border: '2px solid #000000',
+                                boxShadow: '2px 2px 0 #000000',
+                                borderRadius: '8px',
+                                padding: '0.55rem 0.95rem',
+                                fontFamily: 'Outfit',
+                                fontWeight: 900,
+                                fontSize: '0.75rem',
+                                textTransform: 'uppercase',
+                                textDecoration: 'none'
+                            }}
+                        >
+                            <FileText size={13} /> CSV FILE
+                        </a>
+                    </div>
                 </div>
 
                 {/* TABS */}

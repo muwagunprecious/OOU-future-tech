@@ -13026,8 +13026,8 @@ const AdminLogin = ({ onLogin, onBack }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Default password - change this for production
-        if (password === 'admin2026') {
+        // Master password
+        if (password === 'admin2026' || password === 'admin2027') {
             onLogin();
         } else {
             setError('Invalid master password. Please try again.');
@@ -13357,7 +13357,12 @@ export default function App() {
     useEffect(() => {
         fetchCMSData();
         const path = window.location.pathname;
-        if (path === '/techwaitlist' || path === '/techwaitlist/' || path === '/waitlist' || path === '/waitlist/') {
+        const search = window.location.search;
+        if (path === '/admin' || path === '/admin/' || search.includes('admin')) {
+            localStorage.setItem('admin_redirect', 'admin');
+            setView('admin-login');
+            setShowOnboardingPopup(false);
+        } else if (path === '/techwaitlist' || path === '/techwaitlist/' || path === '/waitlist' || path === '/waitlist/') {
             setView('techwaitlist');
             setShowOnboardingPopup(false);
         } else if (path === '/academy' || path === '/academy/') {

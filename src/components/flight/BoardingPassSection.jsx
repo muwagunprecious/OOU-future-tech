@@ -27,8 +27,8 @@ export default function BoardingPassSection({ onRegister }) {
               background: '#FFFFFF',
               border: '2px solid #000000',
               boxShadow: '3px 3px 0 #000000',
-              borderRadius: '9999px',
-              padding: '0.4rem 1rem',
+              borderRadius: '0px',
+              padding: '0.45rem 1rem',
               marginBottom: '1.25rem'
             }}>
               <span className="flight-status-dot" />
@@ -57,7 +57,7 @@ export default function BoardingPassSection({ onRegister }) {
           </p>
         </div>
 
-        {/* 3D Class Selector & Personalizer Controls */}
+        {/* Neo-Brutalist Class Selector & Personalizer Controls */}
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -66,13 +66,13 @@ export default function BoardingPassSection({ onRegister }) {
           gap: '1.5rem',
           marginBottom: '2.5rem'
         }}>
-          {/* Class Switcher Pill Group */}
+          {/* Class Switcher Rectilinear Group */}
           <div style={{
             display: 'inline-flex',
             background: '#FFFFFF',
             padding: '4px',
-            borderRadius: '9999px',
-            border: '2px solid #000000',
+            borderRadius: '0px',
+            border: '3px solid #000000',
             boxShadow: '4px 4px 0 #000000'
           }}>
             <button
@@ -86,10 +86,10 @@ export default function BoardingPassSection({ onRegister }) {
                 fontWeight: 900,
                 letterSpacing: '0.04em',
                 padding: '0.65rem 1.4rem',
-                borderRadius: '9999px',
-                border: ticketClass === 'Standard' ? '1.5px solid #000' : 'none',
+                borderRadius: '0px',
+                border: ticketClass === 'Standard' ? '2px solid #000' : 'none',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.15s ease'
               }}
             >
               GENERAL PASS (STUDENT)
@@ -105,10 +105,10 @@ export default function BoardingPassSection({ onRegister }) {
                 fontWeight: 900,
                 letterSpacing: '0.04em',
                 padding: '0.65rem 1.4rem',
-                borderRadius: '9999px',
-                border: ticketClass === 'Pro' ? '1.5px solid #000' : 'none',
+                borderRadius: '0px',
+                border: ticketClass === 'Pro' ? '2px solid #000' : 'none',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.15s ease'
               }}
             >
               INDUSTRY & VIP STAND
@@ -127,16 +127,16 @@ export default function BoardingPassSection({ onRegister }) {
               placeholder="YOUR NAME"
               style={{
                 background: '#FFFFFF',
-                border: '2px solid #000000',
+                border: '3px solid #000000',
                 boxShadow: '3px 3px 0 #000000',
                 color: '#000000',
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.82rem',
+                fontSize: '0.85rem',
                 fontWeight: 700,
-                padding: '0.55rem 1rem',
-                borderRadius: '6px',
+                padding: '0.65rem 1rem',
+                borderRadius: '0px',
                 outline: 'none',
-                width: '180px'
+                width: '190px'
               }}
             />
           </div>

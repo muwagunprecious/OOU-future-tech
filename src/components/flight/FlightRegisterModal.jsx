@@ -177,8 +177,8 @@ export default function FlightRegisterModal({
       <div style={{
         background: '#FFFFFF',
         border: '3px solid #000000',
-        borderRadius: '1.75rem',
-        boxShadow: 'clamp(6px, 1.5vw, 12px) clamp(6px, 1.5vw, 12px) 0 #000000',
+        borderRadius: '0px',
+        boxShadow: '8px 8px 0 #000000',
         width: '100%',
         maxWidth: isSubmitted ? '640px' : '580px',
         padding: 'clamp(1.25rem, 3.5vw, 2.5rem)',
@@ -197,7 +197,7 @@ export default function FlightRegisterModal({
             background: '#FFFFFF',
             border: '2px solid #000000',
             boxShadow: '2px 2px 0 #000000',
-            borderRadius: '50%',
+            borderRadius: '0px',
             color: '#000000',
             width: '38px',
             height: '38px',
@@ -214,33 +214,40 @@ export default function FlightRegisterModal({
 
         {!isSubmitted ? (
           <div>
-            {/* Header */}
+            {/* Header (Academy Form Aesthetic) */}
             <div style={{ marginBottom: '1.75rem' }}>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                background: '#F1F5F9',
-                border: '1.5px solid #000000',
-                boxShadow: '2px 2px 0 #000000',
-                padding: '0.35rem 0.8rem',
-                borderRadius: '9999px',
-                marginBottom: '0.75rem'
-              }}>
-                <span className="flight-status-dot" />
-                <span className="flight-mono" style={{ fontSize: '0.72rem', fontWeight: 800, color: '#000000' }}>
-                  ADMISSIONS MANIFEST • STRICTLY BY INVITATION
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '0.85rem' }}>
+                <div style={{
+                  background: 'var(--color-airline-red)',
+                  color: '#FFFFFF',
+                  padding: '0.65rem',
+                  border: '2px solid #000000',
+                  borderRadius: '0px',
+                  boxShadow: '3px 3px 0 #000000',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Plane size={22} style={{ transform: 'rotate(-45deg)' }} />
+                </div>
+                <div>
+                  <h2 style={{
+                    fontSize: 'clamp(1.5rem, 3vw, 1.85rem)',
+                    margin: 0,
+                    color: '#000000',
+                    fontFamily: 'var(--font-heading)',
+                    textTransform: 'uppercase',
+                    fontWeight: 900
+                  }}>
+                    OOU FUTURETECH 2027
+                  </h2>
+                  <span className="flight-mono" style={{ color: 'var(--color-airline-red)', fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.08em' }}>
+                    ADMISSIONS MANIFEST // STRICTLY BY INVITATION
+                  </span>
+                </div>
               </div>
-              <h2 style={{
-                fontSize: 'clamp(1.75rem, 3.5vw, 2.2rem)',
-                margin: '0 0 0.4rem 0',
-                color: '#000000',
-                fontFamily: 'var(--font-heading)'
-              }}>
-                Request Your Invitation
-              </h2>
-              <p style={{ fontSize: '0.92rem', color: '#64748B', margin: 0, lineHeight: 1.5 }}>
+
+              <p style={{ fontSize: '0.92rem', color: '#475569', margin: 0, lineHeight: 1.5 }}>
                 OOU FutureTech Flight Edition is a curated gathering. Enter your details below to apply for admissions clearance.
               </p>
             </div>
@@ -262,9 +269,9 @@ export default function FlightRegisterModal({
                     width: '100%',
                     padding: '0.85rem 1rem',
                     background: '#FFFFFF',
-                    border: '2px solid #000000',
+                    border: '3px solid #000000',
                     boxShadow: '3px 3px 0 #000000',
-                    borderRadius: '8px',
+                    borderRadius: '0px',
                     color: '#000000',
                     fontSize: '0.95rem',
                     fontWeight: 600,
@@ -289,9 +296,9 @@ export default function FlightRegisterModal({
                     width: '100%',
                     padding: '0.85rem 1rem',
                     background: '#FFFFFF',
-                    border: '2px solid #000000',
+                    border: '3px solid #000000',
                     boxShadow: '3px 3px 0 #000000',
-                    borderRadius: '8px',
+                    borderRadius: '0px',
                     color: '#000000',
                     fontSize: '0.95rem',
                     fontWeight: 600,
@@ -316,9 +323,9 @@ export default function FlightRegisterModal({
                     width: '100%',
                     padding: '0.85rem 1rem',
                     background: '#FFFFFF',
-                    border: '2px solid #000000',
+                    border: '3px solid #000000',
                     boxShadow: '3px 3px 0 #000000',
-                    borderRadius: '8px',
+                    borderRadius: '0px',
                     color: '#000000',
                     fontSize: '0.95rem',
                     fontWeight: 600,
@@ -353,9 +360,9 @@ export default function FlightRegisterModal({
                           padding: '0.75rem 0.85rem',
                           background: isSelected ? '#000000' : '#FFFFFF',
                           color: isSelected ? '#FFFFFF' : '#000000',
-                          border: '2px solid #000000',
-                          boxShadow: isSelected ? '3px 3px 0 var(--color-airline-red)' : '2px 2px 0 #000000',
-                          borderRadius: '8px',
+                          border: '3px solid #000000',
+                          boxShadow: isSelected ? '4px 4px 0 var(--color-airline-red)' : '3px 3px 0 #000000',
+                          borderRadius: '0px',
                           cursor: 'pointer',
                           textAlign: 'left',
                           transition: 'all 0.15s ease'
@@ -363,9 +370,10 @@ export default function FlightRegisterModal({
                       >
                         <div style={{
                           padding: '0.35rem',
-                          borderRadius: '6px',
+                          borderRadius: '0px',
                           background: isSelected ? 'var(--color-airline-red)' : '#F1F5F9',
                           color: isSelected ? '#FFFFFF' : '#000000',
+                          border: '1.5px solid #000000',
                           flexShrink: 0
                         }}>
                           <Icon size={16} />
@@ -400,9 +408,9 @@ export default function FlightRegisterModal({
                     style={{
                       padding: '0.75rem',
                       background: formData.type === 'Standard' ? 'var(--color-airline-red)' : '#FFFFFF',
-                      border: '2px solid #000000',
+                      border: '3px solid #000000',
                       boxShadow: '3px 3px 0 #000000',
-                      borderRadius: '8px',
+                      borderRadius: '0px',
                       color: formData.type === 'Standard' ? '#FFFFFF' : '#000000',
                       fontFamily: 'var(--font-heading)',
                       fontSize: '0.82rem',
@@ -419,9 +427,9 @@ export default function FlightRegisterModal({
                     style={{
                       padding: '0.75rem',
                       background: formData.type === 'Pro' ? 'var(--color-airline-red)' : '#FFFFFF',
-                      border: '2px solid #000000',
+                      border: '3px solid #000000',
                       boxShadow: '3px 3px 0 #000000',
-                      borderRadius: '8px',
+                      borderRadius: '0px',
                       color: formData.type === 'Pro' ? '#FFFFFF' : '#000000',
                       fontFamily: 'var(--font-heading)',
                       fontSize: '0.82rem',
@@ -451,9 +459,9 @@ export default function FlightRegisterModal({
                         width: '100%',
                         padding: '0.85rem 1rem',
                         background: '#FFFFFF',
-                        border: '2px solid #000000',
+                        border: '3px solid #000000',
                         boxShadow: '3px 3px 0 #000000',
-                        borderRadius: '8px',
+                        borderRadius: '0px',
                         color: '#000000',
                         fontSize: '0.95rem',
                         outline: 'none',
@@ -476,9 +484,9 @@ export default function FlightRegisterModal({
                         width: '100%',
                         padding: '0.85rem 1rem',
                         background: '#FFFFFF',
-                        border: '2px solid #000000',
+                        border: '3px solid #000000',
                         boxShadow: '3px 3px 0 #000000',
-                        borderRadius: '8px',
+                        borderRadius: '0px',
                         color: '#000000',
                         fontSize: '0.95rem',
                         outline: 'none',
@@ -496,7 +504,7 @@ export default function FlightRegisterModal({
                   background: '#FEE2E2',
                   border: '2px solid #DC2626',
                   boxShadow: '3px 3px 0 #DC2626',
-                  borderRadius: '8px',
+                  borderRadius: '0px',
                   color: '#991B1B',
                   fontSize: '0.88rem',
                   fontWeight: 700,
@@ -550,9 +558,9 @@ export default function FlightRegisterModal({
               gap: '0.5rem',
               background: '#FFFBEB',
               border: '2px solid #D97706',
-              boxShadow: '2px 2px 0 #000000',
-              padding: '0.4rem 1rem',
-              borderRadius: '9999px',
+              boxShadow: '3px 3px 0 #000000',
+              padding: '0.45rem 1.1rem',
+              borderRadius: '0px',
               color: '#B45309',
               fontFamily: 'var(--font-heading)',
               fontSize: '0.8rem',
@@ -577,17 +585,17 @@ export default function FlightRegisterModal({
             <div style={{
               background: '#000000',
               color: '#FFFFFF',
-              border: '2px solid #000000',
-              boxShadow: '4px 4px 0 var(--color-airline-red)',
-              borderRadius: '12px',
-              padding: '1rem 1.25rem',
+              border: '3px solid #000000',
+              boxShadow: '6px 6px 0 var(--color-airline-red)',
+              borderRadius: '0px',
+              padding: '1.1rem 1.25rem',
               margin: '0 auto 1.5rem auto',
               textAlign: 'center'
             }}>
               <div className="flight-mono" style={{ fontSize: '0.75rem', color: 'var(--color-airline-red)', fontWeight: 800, letterSpacing: '0.1em', marginBottom: '4px' }}>
                 SECURITY & CAPACITY CLEARANCE
               </div>
-              <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+              <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.15rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                 THE EVENT IS STRICTLY BY INVITATION
               </div>
             </div>
@@ -604,38 +612,50 @@ export default function FlightRegisterModal({
               Thank you for applying, <strong>{formData.name}</strong>. Due to limited auditorium seats and curated tracks for <strong>{formData.category}s</strong>, every reservation undergoes review by the flight admissions board.
             </p>
 
-            {/* Application Summary Box */}
+            {/* Neo-brutalist Ticket Stub (Exact Academy Waitlist Aesthetic) */}
             <div style={{
-              background: '#F8FAFC',
-              border: '2px solid #000000',
-              boxShadow: '3px 3px 0 #000000',
-              borderRadius: '12px',
-              padding: '1.25rem',
+              border: '3px dashed #000000',
+              padding: '1.75rem 1.5rem',
+              position: 'relative',
+              background: '#FAFAFA',
+              marginBottom: '1.75rem',
               textAlign: 'left',
-              marginBottom: '1.75rem'
+              boxShadow: '4px 4px 0 #000000'
             }}>
-              <div className="flight-mono" style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 800, marginBottom: '0.75rem' }}>
-                APPLICATION RECEIPT MANIFEST:
+              <div style={{ position: 'absolute', top: '-13px', left: '-13px', width: '26px', height: '26px', background: '#FFFFFF', borderRadius: '50%', border: '3px solid #000000' }} />
+              <div style={{ position: 'absolute', top: '-13px', right: '-13px', width: '26px', height: '26px', background: '#FFFFFF', borderRadius: '50%', border: '3px solid #000000' }} />
+              <div style={{ position: 'absolute', bottom: '-13px', left: '-13px', width: '26px', height: '26px', background: '#FFFFFF', borderRadius: '50%', border: '3px solid #000000' }} />
+              <div style={{ position: 'absolute', bottom: '-13px', right: '-13px', width: '26px', height: '26px', background: '#FFFFFF', borderRadius: '50%', border: '3px solid #000000' }} />
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000000', paddingBottom: '0.85rem', marginBottom: '1rem' }}>
+                <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 900, fontSize: '1.05rem', textTransform: 'uppercase' }}>
+                  OOU FUTURETECH 2027
+                </span>
+                <span className="flight-mono" style={{ fontWeight: 900, fontSize: '0.95rem', color: 'var(--color-airline-red)' }}>
+                  {ticketId}
+                </span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', fontSize: '0.85rem' }}>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.85rem', fontSize: '0.85rem' }}>
                 <div>
-                  <span style={{ color: '#64748B', fontSize: '0.75rem', display: 'block' }}>REFERENCE ID:</span>
-                  <span className="flight-mono" style={{ fontWeight: 900, color: 'var(--color-airline-red)' }}>{ticketId}</span>
+                  <span style={{ color: '#666', fontSize: '0.75rem', display: 'block', textTransform: 'uppercase', fontWeight: 800 }}>PASSENGER NAME</span>
+                  <strong style={{ fontSize: '0.95rem' }}>{formData.name}</strong>
                 </div>
                 <div>
-                  <span style={{ color: '#64748B', fontSize: '0.75rem', display: 'block' }}>COHORT CATEGORY:</span>
-                  <span style={{ fontWeight: 800 }}>{formData.category.toUpperCase()}</span>
+                  <span style={{ color: '#666', fontSize: '0.75rem', display: 'block', textTransform: 'uppercase', fontWeight: 800 }}>CATEGORY</span>
+                  <strong style={{ fontSize: '0.95rem' }}>{formData.category.toUpperCase()}</strong>
                 </div>
                 <div>
-                  <span style={{ color: '#64748B', fontSize: '0.75rem', display: 'block' }}>EMAIL:</span>
-                  <span style={{ fontWeight: 700, wordBreak: 'break-all' }}>{formData.email}</span>
+                  <span style={{ color: '#666', fontSize: '0.75rem', display: 'block', textTransform: 'uppercase', fontWeight: 800 }}>EMAIL</span>
+                  <strong style={{ fontSize: '0.95rem', wordBreak: 'break-all' }}>{formData.email}</strong>
                 </div>
                 <div>
-                  <span style={{ color: '#64748B', fontSize: '0.75rem', display: 'block' }}>PHONE / WHATSAPP:</span>
-                  <span style={{ fontWeight: 700 }}>{formData.phone}</span>
+                  <span style={{ color: '#666', fontSize: '0.75rem', display: 'block', textTransform: 'uppercase', fontWeight: 800 }}>PHONE / WHATSAPP</span>
+                  <strong style={{ fontSize: '0.95rem' }}>{formData.phone}</strong>
                 </div>
               </div>
-              <div style={{ marginTop: '0.85rem', paddingTop: '0.85rem', borderTop: '1px dashed #CBD5E1', fontSize: '0.8rem', color: '#475569' }}>
+
+              <div style={{ marginTop: '1rem', paddingTop: '0.85rem', borderTop: '2px dashed #000000', fontSize: '0.82rem', color: '#475569' }}>
                 📩 <strong>What happens next?</strong> As soon as the admin approves your registration in the dashboard, your verified <strong>Boarding Pass with QR code</strong> will be dispatched directly to your email address and WhatsApp.
               </div>
             </div>

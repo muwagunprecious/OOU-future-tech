@@ -76,8 +76,8 @@ export default function FlightCrew({ dynamicSpeakers, speakersMode = 'live', com
               background: '#F1F5F9',
               border: '2px solid #000000',
               boxShadow: '3px 3px 0 #000000',
-              borderRadius: '9999px',
-              padding: '0.4rem 1rem',
+              borderRadius: '0px',
+              padding: '0.45rem 1rem',
               marginBottom: '1.25rem'
             }}>
               <span className="flight-status-dot" />
@@ -155,7 +155,7 @@ export default function FlightCrew({ dynamicSpeakers, speakersMode = 'live', com
                     fontWeight: 800,
                     letterSpacing: '0.08em',
                     padding: '0.2rem 0.65rem',
-                    borderRadius: '9999px',
+                    borderRadius: '0px',
                     whiteSpace: 'nowrap',
                     zIndex: 4,
                     border: '1px solid rgba(255,255,255,0.2)'
@@ -234,14 +234,14 @@ export default function FlightCrew({ dynamicSpeakers, speakersMode = 'live', com
           ))}
         </div>
 
-        {/* Bottom Box */}
+        {/* Bottom Box (Academy Neo-Brutalist Card) */}
         <div style={{
           marginTop: '3.5rem',
           padding: '1.5rem 2rem',
-          background: '#F8FAFC',
-          border: '2px solid #000000',
-          borderRadius: '1rem',
-          boxShadow: '4px 4px 0 #000000',
+          background: '#FFFFFF',
+          border: '3px solid #000000',
+          borderRadius: '0px',
+          boxShadow: '6px 6px 0 #000000',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',

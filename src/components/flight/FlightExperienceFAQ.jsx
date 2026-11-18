@@ -48,7 +48,7 @@ export default function FlightExperienceFAQ() {
               background: '#FFFFFF',
               border: '2px solid #000000',
               boxShadow: '3px 3px 0 #000000',
-              borderRadius: '9999px',
+              borderRadius: '0px',
               padding: '0.4rem 1rem',
               marginBottom: '1.25rem'
             }}>
@@ -90,7 +90,7 @@ export default function FlightExperienceFAQ() {
           <div style={{
             background: '#FFFFFF',
             border: '3px solid #000000',
-            borderRadius: '1.75rem',
+            borderRadius: '0px',
             boxShadow: '8px 8px 0 #000000',
             overflow: 'hidden'
           }}>
@@ -111,7 +111,7 @@ export default function FlightExperienceFAQ() {
                 fontSize: '0.7rem',
                 fontWeight: 900,
                 padding: '4px 10px',
-                borderRadius: '6px'
+                borderRadius: '0px',
               }}>
                 GATE FT-02 // DEPARTURE LOUNGE
               </div>
@@ -164,7 +164,7 @@ export default function FlightExperienceFAQ() {
                     background: '#FFFFFF',
                     border: '2px solid #000000',
                     boxShadow: isOpen ? '6px 6px 0 var(--color-airline-red)' : '4px 4px 0 #000000',
-                    borderRadius: '1.25rem',
+                    borderRadius: '0px',
                     overflow: 'hidden',
                     transition: 'all 0.2s ease'
                   }}

@@ -121,8 +121,8 @@ export default function FlightTeam({ dynamicTeam }) {
               background: '#FFFFFF',
               border: '2px solid #000000',
               boxShadow: '3px 3px 0 #000000',
-              borderRadius: '9999px',
-              padding: '0.4rem 1rem',
+              borderRadius: '0px',
+              padding: '0.45rem 1rem',
               marginBottom: '1.25rem'
             }}>
               <span className="flight-status-dot" />
@@ -196,7 +196,7 @@ export default function FlightTeam({ dynamicTeam }) {
                     background: isConvener ? '#000000' : 'transparent',
                     color: isConvener ? '#FFFFFF' : 'var(--color-airline-red)',
                     padding: isConvener ? '0.2rem 0.55rem' : '0',
-                    borderRadius: isConvener ? '4px' : '0',
+                    borderRadius: '0px',
                     fontWeight: 950,
                     fontSize: '0.68rem',
                     letterSpacing: '0.06em'
@@ -256,9 +256,9 @@ export default function FlightTeam({ dynamicTeam }) {
                         justifyContent: 'space-between',
                         background: 'var(--color-airline-red)',
                         color: '#FFFFFF',
-                        border: '2.5px solid #000000',
+                        border: '3px solid #000000',
                         boxShadow: '4px 4px 0 #000000',
-                        borderRadius: '12px',
+                        borderRadius: '0px',
                         padding: '0.65rem 1.15rem'
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
@@ -282,7 +282,7 @@ export default function FlightTeam({ dynamicTeam }) {
                           fontSize: '0.68rem',
                           fontWeight: 900,
                           padding: '0.22rem 0.6rem',
-                          borderRadius: '6px',
+                          borderRadius: '0px',
                           letterSpacing: '0.08em'
                         }}>
                           HEAD OF MISSION
@@ -299,7 +299,7 @@ export default function FlightTeam({ dynamicTeam }) {
                           color: '#000000',
                           border: '2px solid #000000',
                           boxShadow: '2.5px 2.5px 0 #000000',
-                          borderRadius: '8px',
+                          borderRadius: '0px',
                           padding: '0.35rem 0.85rem'
                         }}>
                           <span className="flight-mono" style={{
@@ -321,7 +321,7 @@ export default function FlightTeam({ dynamicTeam }) {
                           border: '1.5px solid #000000',
                           boxShadow: '1.5px 1.5px 0 #000000',
                           padding: '0.2rem 0.6rem',
-                          borderRadius: '9999px'
+                          borderRadius: '0px'
                         }}>
                           {member.dept}
                         </span>
@@ -379,12 +379,12 @@ export default function FlightTeam({ dynamicTeam }) {
           })}
         </div>
 
-        {/* Join Ground Crew Banner */}
+        {/* Join Ground Crew Banner (Academy Neo-Brutalist Card) */}
         <div style={{
           background: '#FFFFFF',
           border: '3px solid #000000',
-          borderRadius: '1.5rem',
-          boxShadow: '6px 6px 0 #000000',
+          borderRadius: '0px',
+          boxShadow: '8px 8px 0 #000000',
           padding: '2rem 2.5rem',
           display: 'flex',
           flexWrap: 'wrap',

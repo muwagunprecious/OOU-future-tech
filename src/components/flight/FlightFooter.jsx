@@ -29,7 +29,7 @@ export default function FlightFooter({ onViewChange, onAdmin }) {
                 style={{
                   height: '46px',
                   width: 'auto',
-                  borderRadius: '8px',
+                  borderRadius: '0px',
                   border: '2px solid #000000',
                   boxShadow: '3px 3px 0 #000000',
                   objectFit: 'contain'
@@ -56,7 +56,7 @@ export default function FlightFooter({ onViewChange, onAdmin }) {
               border: '1.5px solid #000',
               boxShadow: '2px 2px 0 #000',
               padding: '0.3rem 0.8rem',
-              borderRadius: '9999px',
+              borderRadius: '0px',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.72rem',
               fontWeight: 800,
@@ -129,6 +129,15 @@ export default function FlightFooter({ onViewChange, onAdmin }) {
             </span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '1.75rem' }}>
               <span
+                onClick={() => {
+                  onViewChange('awards');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                style={{ cursor: 'pointer', color: 'var(--color-airline-red)', fontSize: '0.92rem', fontWeight: 900 }}
+              >
+                The Altitude Awards 2027 🏆
+              </span>
+              <span
                 onClick={() => onViewChange('founders')}
                 style={{ cursor: 'pointer', color: '#475569', fontSize: '0.9rem', fontWeight: 700 }}
                 onMouseEnter={e => e.target.style.color = '#000'}
@@ -169,7 +178,7 @@ export default function FlightFooter({ onViewChange, onAdmin }) {
                   style={{
                     width: '38px',
                     height: '38px',
-                    borderRadius: '8px',
+                    borderRadius: '0px',
                     background: '#FFFFFF',
                     border: '2px solid #000000',
                     boxShadow: '3px 3px 0 #000000',

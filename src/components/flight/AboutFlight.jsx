@@ -73,7 +73,7 @@ export default function AboutFlight() {
             background: '#FFFFFF',
             border: '2px solid #000000',
             boxShadow: '3px 3px 0 #000000',
-            borderRadius: '9999px',
+            borderRadius: '0px',
             padding: '0.45rem 1.2rem',
             flexWrap: 'wrap'
           }}>
@@ -142,7 +142,7 @@ export default function AboutFlight() {
                     color: flight.statusColor,
                     background: '#111827',
                     padding: '0.2rem 0.55rem',
-                    borderRadius: '9999px',
+                    borderRadius: '0px',
                     border: `1px solid ${flight.statusColor}`
                   }}>
                     <span style={{
@@ -162,9 +162,9 @@ export default function AboutFlight() {
                   {/* Visual High-Impact Card Image */}
                   <div style={{
                     height: '180px',
-                    borderRadius: '12px',
+                    borderRadius: '0px',
                     overflow: 'hidden',
-                    border: '2px solid #000000',
+                    border: '3px solid #000000',
                     marginBottom: '1.2rem',
                     position: 'relative'
                   }}>
@@ -264,9 +264,9 @@ export default function AboutFlight() {
             Direct Airplane Imagery + In-Flight Tech Specs
             ========================================================================= */}
         <div style={{
-          background: '#F8FAFC',
+          background: '#FFFFFF',
           border: '3px solid #000000',
-          borderRadius: '2rem',
+          borderRadius: '0px',
           boxShadow: '8px 8px 0 #000000',
           padding: 'clamp(1.5rem, 4vw, 3.5rem)',
           marginBottom: '5rem',
@@ -332,7 +332,7 @@ export default function AboutFlight() {
                   fontSize: '0.7rem',
                   fontWeight: 800,
                   padding: '0.35rem 0.9rem',
-                  borderRadius: '9999px',
+                  borderRadius: '0px',
                   whiteSpace: 'nowrap'
                 }}>
                   SEAT 01A • THE EXPEDITION
@@ -360,9 +360,9 @@ export default function AboutFlight() {
               gap: '0.5rem',
               background: '#FFFFFF',
               border: '2px solid #000000',
-              boxShadow: '2px 2px 0 #000000',
-              borderRadius: '9999px',
-              padding: '0.35rem 0.9rem',
+              boxShadow: '3px 3px 0 #000000',
+              borderRadius: '0px',
+              padding: '0.4rem 1rem',
               marginBottom: '1rem'
             }}>
               <Plane size={14} color="var(--color-airline-red)" />
@@ -394,10 +394,10 @@ export default function AboutFlight() {
               
               <div style={{
                 background: '#FFFFFF',
-                border: '2px solid #000000',
-                borderRadius: '1rem',
-                boxShadow: '3px 3px 0 #000000',
-                padding: '1rem'
+                border: '3px solid #000000',
+                borderRadius: '0px',
+                boxShadow: '4px 4px 0 #000000',
+                padding: '1.15rem'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                   <Navigation size={16} color="var(--color-airline-red)" />
@@ -410,10 +410,10 @@ export default function AboutFlight() {
 
               <div style={{
                 background: '#FFFFFF',
-                border: '2px solid #000000',
-                borderRadius: '1rem',
-                boxShadow: '3px 3px 0 #000000',
-                padding: '1rem'
+                border: '3px solid #000000',
+                borderRadius: '0px',
+                boxShadow: '4px 4px 0 #000000',
+                padding: '1.15rem'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                   <Users size={16} color="var(--color-airline-red)" />
@@ -426,10 +426,10 @@ export default function AboutFlight() {
 
               <div style={{
                 background: '#FFFFFF',
-                border: '2px solid #000000',
-                borderRadius: '1rem',
-                boxShadow: '3px 3px 0 #000000',
-                padding: '1rem'
+                border: '3px solid #000000',
+                borderRadius: '0px',
+                boxShadow: '4px 4px 0 #000000',
+                padding: '1.15rem'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                   <Sparkles size={16} color="var(--color-airline-red)" />
@@ -442,10 +442,10 @@ export default function AboutFlight() {
 
               <div style={{
                 background: '#FFFFFF',
-                border: '2px solid #000000',
-                borderRadius: '1rem',
-                boxShadow: '3px 3px 0 #000000',
-                padding: '1rem'
+                border: '3px solid #000000',
+                borderRadius: '0px',
+                boxShadow: '4px 4px 0 #000000',
+                padding: '1.15rem'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                   <Shield size={16} color="var(--color-airline-red)" />
@@ -462,11 +462,11 @@ export default function AboutFlight() {
 
         </div>
 
-        {/* Verified Stats 3D Container (White/Slate with 8px hard shadow) */}
+        {/* Verified Stats 3D Container (White with 8px hard shadow, Academy Form style) */}
         <div style={{
           background: '#FFFFFF',
           border: '3px solid #000000',
-          borderRadius: '2rem',
+          borderRadius: '0px',
           boxShadow: '8px 8px 0 #000000',
           padding: 'clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.5rem)',
           display: 'grid',
@@ -552,12 +552,12 @@ export default function AboutFlight() {
           </div>
         </div>
 
-        {/* Download Prospectus 3D Box */}
+        {/* Download Prospectus Neo-Brutalist Box (Academy Form Style) */}
         <div style={{
           background: '#FFFFFF',
           border: '3px solid #000000',
-          borderRadius: '1.5rem',
-          boxShadow: '6px 6px 0 #000000',
+          borderRadius: '0px',
+          boxShadow: '8px 8px 0 #000000',
           padding: 'clamp(1.75rem, 3.5vw, 2.5rem)',
           display: 'flex',
           flexWrap: 'wrap',

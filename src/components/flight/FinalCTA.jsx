@@ -28,7 +28,7 @@ export default function FinalCTA({ onRegister }) {
           backgroundPosition: 'center',
           color: '#FFFFFF',
           border: '3px solid #000000',
-          borderRadius: '2.5rem',
+          borderRadius: '0px',
           boxShadow: '12px 12px 0 var(--color-airline-red)',
           padding: 'clamp(4rem, 7vw, 6.5rem) clamp(1.5rem, 4vw, 4rem)',
           textAlign: 'center',
@@ -65,7 +65,7 @@ export default function FinalCTA({ onRegister }) {
               border: '2px solid #000000',
               boxShadow: '4px 4px 0 var(--color-airline-red)',
               padding: '0.5rem 1.4rem',
-              borderRadius: '9999px',
+              borderRadius: '0px',
               marginBottom: '2rem'
             }}>
               <Plane size={16} color="var(--color-airline-red)" style={{ transform: 'rotate(-45deg)' }} />

@@ -98,8 +98,8 @@ export default function FlightItinerary() {
               background: '#FFFFFF',
               border: '2px solid #000000',
               boxShadow: '3px 3px 0 #000000',
-              borderRadius: '9999px',
-              padding: '0.4rem 1rem',
+              borderRadius: '0px',
+              padding: '0.45rem 1rem',
               marginBottom: '1.25rem'
             }}>
               <span className="flight-status-dot" />
@@ -139,9 +139,9 @@ export default function FlightItinerary() {
             <div
               key={i}
               style={{
-                borderRadius: '1.25rem',
+                borderRadius: '0px',
                 border: '3px solid #000000',
-                boxShadow: '5px 5px 0 #000000',
+                boxShadow: '6px 6px 0 #000000',
                 overflow: 'hidden',
                 background: '#000000',
                 height: '200px',
@@ -229,7 +229,7 @@ export default function FlightItinerary() {
                     background: '#F1F5F9',
                     border: '1.5px solid #000',
                     padding: '0.15rem 0.5rem',
-                    borderRadius: '4px',
+                    borderRadius: '0px',
                     fontWeight: 700
                   }}>
                     {item.flightId}
@@ -270,7 +270,7 @@ export default function FlightItinerary() {
                   color: '#000000',
                   background: '#FFFFFF',
                   padding: '0.4rem 0.9rem',
-                  borderRadius: '9999px',
+                  borderRadius: '0px',
                   border: '2px solid #000000',
                   boxShadow: '2px 2px 0 #000000',
                   display: 'inline-block'

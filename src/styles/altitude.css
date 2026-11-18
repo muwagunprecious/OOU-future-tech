@@ -1,0 +1,350 @@
+/* ==========================================================================
+   THE ALTITUDE AWARDS 2027 — MASTER DESIGN SYSTEM
+   High Contrast • Minimalist Luxury • Aviation Editorial Aesthetic
+   ========================================================================== */
+
+:root {
+  --alt-primary-bg: #08090C;
+  --alt-secondary-bg: #14171F;
+  --alt-surface: #1C202A;
+  --alt-red: #E31B2B;
+  --alt-red-bright: #FF3B4D;
+  --alt-gold: #FFD700;
+  --alt-gold-light: #FFE066;
+  --alt-text: #FFFFFF;
+  --alt-secondary-text: #E2E8F0; /* High contrast bright slate */
+  --alt-muted: #94A3B8;          /* Clear legible secondary text */
+  --alt-border: rgba(255, 255, 255, 0.22);
+  --alt-border-strong: rgba(255, 255, 255, 0.35);
+  --alt-border-gold: rgba(255, 215, 0, 0.6);
+  
+  --font-display: 'Space Grotesk', -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+/* Master Page Root */
+.altitude-root {
+  background-color: var(--alt-primary-bg);
+  color: var(--alt-text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Container */
+.altitude-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
+  box-sizing: border-box;
+}
+
+/* Sections */
+.altitude-section {
+  padding: clamp(4rem, 6vw, 6rem) 0;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Typography Hierarchy - High Contrast */
+.altitude-heading {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: #FFFFFF;
+}
+
+.altitude-subhead {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--alt-gold);
+  text-transform: uppercase;
+}
+
+.altitude-mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+.altitude-text-red {
+  color: var(--alt-red-bright);
+}
+
+.altitude-text-gold {
+  color: var(--alt-gold);
+}
+
+/* Glow Backgrounds */
+.altitude-hero-glow {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  width: clamp(350px, 60vw, 800px);
+  height: clamp(350px, 60vw, 800px);
+  background: radial-gradient(circle, rgba(227, 27, 43, 0.22) 0%, rgba(255, 215, 0, 0.14) 40%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.altitude-flight-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: 1;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+}
+
+/* Badges - High Contrast */
+.altitude-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.altitude-tag-red {
+  background: rgba(227, 27, 43, 0.2);
+  border: 1.5px solid var(--alt-red-bright);
+  color: #FFFFFF;
+}
+
+.altitude-tag-gold {
+  background: rgba(255, 215, 0, 0.15);
+  border: 1.5px solid var(--alt-gold);
+  color: var(--alt-gold);
+}
+
+/* Buttons - Bold High Contrast */
+.altitude-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  border: none;
+  font-size: 0.88rem;
+}
+
+.altitude-btn-primary {
+  background-color: var(--alt-red);
+  color: #FFFFFF !important;
+  border: 1.5px solid var(--alt-red);
+  box-shadow: 0 4px 18px rgba(227, 27, 43, 0.45);
+}
+
+.altitude-btn-primary:hover {
+  background-color: #C91422;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(227, 27, 43, 0.65);
+}
+
+.altitude-btn-outline {
+  background-color: transparent;
+  color: #FFFFFF !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+}
+
+.altitude-btn-outline:hover {
+  border-color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.altitude-btn-ghost {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.altitude-btn-ghost:hover {
+  border-color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Category Filter Pills */
+.altitude-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  color: #E2E8F0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.altitude-pill:hover {
+  color: #FFFFFF;
+  border-color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.altitude-pill.active {
+  background: var(--alt-red);
+  color: #FFFFFF;
+  border-color: var(--alt-red);
+  box-shadow: 0 0 16px rgba(227, 27, 43, 0.5);
+}
+
+/* Cards - High Contrast Borders & Background */
+.altitude-card {
+  background: var(--alt-secondary-bg);
+  border: 1.5px solid var(--alt-border);
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+
+.altitude-card:hover {
+  border-color: var(--alt-gold);
+  transform: translateY(-3px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 215, 0, 0.18);
+}
+
+/* Inputs & Form Elements - Clear High Contrast */
+.altitude-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.altitude-input,
+.altitude-select,
+.altitude-textarea {
+  width: 100%;
+  padding: 0.95rem 1.25rem;
+  background: #0C0F14;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 0.96rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.altitude-input:focus,
+.altitude-select:focus,
+.altitude-textarea:focus {
+  border-color: var(--alt-gold);
+  background: #11151E;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.3);
+}
+
+.altitude-input::placeholder,
+.altitude-textarea::placeholder {
+  color: #94A3B8;
+}
+
+.altitude-select option {
+  background: #14171F;
+  color: #FFFFFF;
+}
+
+.altitude-error {
+  color: #FF4D5E;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  margin-top: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Spinner */
+.altitude-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: altitudeSpin 0.7s linear infinite;
+}
+
+@keyframes altitudeSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Modals */
+.altitude-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 5, 8, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  overflow-y: auto;
+}
+
+.altitude-modal-content {
+  background: #14171F;
+  border: 2px solid var(--alt-gold);
+  border-radius: 16px;
+  max-width: 960px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 40px rgba(255, 215, 0, 0.2);
+  animation: altitudeModalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes altitudeModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

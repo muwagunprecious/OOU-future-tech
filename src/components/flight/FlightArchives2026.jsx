@@ -97,7 +97,7 @@ export default function FlightArchives2026() {
             gap: '0.65rem',
             background: 'rgba(215, 25, 32, 0.15)',
             border: '2px solid var(--color-airline-red)',
-            borderRadius: '9999px',
+            borderRadius: '0px',
             padding: '0.45rem 1.15rem',
             marginBottom: '1.25rem'
           }}>
@@ -219,7 +219,8 @@ export default function FlightArchives2026() {
                 <div style={{
                   position: 'relative',
                   height: 'clamp(240px, 42vw, 420px)',
-                  borderRadius: '1.5rem',
+                  borderRadius: '0px',
+                  border: '3px solid #000000',
                   overflow: 'hidden',
                   backgroundColor: '#0F172A'
                 }}>
@@ -266,7 +267,7 @@ export default function FlightArchives2026() {
               style={{
                 width: idx === currentIndex ? '32px' : '10px',
                 height: '8px',
-                borderRadius: '9999px',
+                borderRadius: '0px',
                 background: idx === currentIndex ? 'var(--color-airline-red)' : '#334155',
                 border: 'none',
                 cursor: 'pointer',
@@ -332,7 +333,8 @@ export default function FlightArchives2026() {
 
             {/* Modal Photo */}
             <div style={{
-              borderRadius: '1.25rem',
+              borderRadius: '0px',
+              border: '3px solid #FFFFFF',
               overflow: 'hidden',
               boxShadow: '0 20px 60px rgba(0, 0, 0, 0.9)',
               maxHeight: '85vh',

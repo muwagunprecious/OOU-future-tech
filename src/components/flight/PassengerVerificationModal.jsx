@@ -80,7 +80,7 @@ export default function PassengerVerificationModal({ onClose }) {
         style={{
           background: '#FFFFFF',
           border: '3px solid #000000',
-          borderRadius: '1.75rem',
+          borderRadius: '0px',
           boxShadow: '12px 12px 0 var(--color-airline-red)',
           maxWidth: '560px',
           width: '100%',
@@ -150,7 +150,7 @@ export default function PassengerVerificationModal({ onClose }) {
             fontSize: '0.75rem',
             fontWeight: 900,
             padding: '0.35rem 1rem',
-            borderRadius: '9999px',
+            borderRadius: '0px',
             border: '2px solid #000000',
             marginBottom: '0.75rem',
             letterSpacing: '0.06em'
@@ -185,8 +185,9 @@ export default function PassengerVerificationModal({ onClose }) {
         }}>
           <div style={{
             background: '#F8FAFC',
-            border: '2px solid #000000',
-            borderRadius: '1rem',
+            border: '3px solid #000000',
+            borderRadius: '0px',
+            boxShadow: '4px 4px 0 #000000',
             padding: '1.25rem 1.5rem',
             marginBottom: '1.5rem'
           }}>

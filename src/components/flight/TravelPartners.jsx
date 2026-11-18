@@ -64,8 +64,8 @@ export default function TravelPartners({ dynamicPartners }) {
               background: '#F1F5F9',
               border: '2px solid #000000',
               boxShadow: '3px 3px 0 #000000',
-              borderRadius: '9999px',
-              padding: '0.4rem 1rem',
+              borderRadius: '0px',
+              padding: '0.45rem 1rem',
               marginBottom: '1.25rem'
             }}>
               <span className="flight-status-dot" />
@@ -204,13 +204,13 @@ export default function TravelPartners({ dynamicPartners }) {
           ))}
         </div>
 
-        {/* 3D Aircraft Hangar & Sponsorship Concourse */}
+        {/* Neo-Brutalist Aircraft Hangar & Sponsorship Concourse (Academy Form Aesthetic) */}
         <div style={{
           border: '3px solid #000000',
           background: '#070709',
           color: '#FFFFFF',
-          borderRadius: '2rem',
-          boxShadow: '10px 10px 0 var(--color-airline-red)',
+          borderRadius: '0px',
+          boxShadow: '8px 8px 0 var(--color-airline-red)',
           padding: 'clamp(2rem, 4vw, 4rem)',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
@@ -238,8 +238,8 @@ export default function TravelPartners({ dynamicPartners }) {
               color: '#FFFFFF',
               border: '2px solid #FFFFFF',
               boxShadow: '3px 3px 0 #FFFFFF',
-              padding: '0.35rem 0.9rem',
-              borderRadius: '9999px',
+              padding: '0.4rem 1rem',
+              borderRadius: '0px',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.72rem',
               fontWeight: 800,

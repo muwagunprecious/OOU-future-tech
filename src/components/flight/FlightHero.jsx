@@ -139,9 +139,9 @@ export default function FlightHero({ onRegister }) {
               style={{
                 height: '56px',
                 width: 'auto',
-                borderRadius: '8px',
-                border: '2px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6)',
+                borderRadius: '0px',
+                border: '3px solid #000000',
+                boxShadow: '4px 4px 0 #000000',
                 display: 'block'
               }}
             />
@@ -156,10 +156,10 @@ export default function FlightHero({ onRegister }) {
               fontWeight: 950,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
-              padding: '0.45rem 1.15rem',
-              borderRadius: '6px',
-              border: '2px solid #000000',
-              boxShadow: '3px 3px 0 #000000'
+              padding: '0.5rem 1.2rem',
+              borderRadius: '0px',
+              border: '3px solid #000000',
+              boxShadow: '4px 4px 0 #000000'
             }}>
               <Plane size={16} style={{ transform: 'rotate(-45deg)' }} />
               <span>YOUR FUTURE IS BOARDING</span>
@@ -249,12 +249,12 @@ export default function FlightHero({ onRegister }) {
           </div>
         </div>
 
-        {/* 3D Flight Information Panel (White card with 8px hard shadow) */}
+        {/* Neo-brutalist Flight Information Panel (Matching Academy Form Box) */}
         <div style={{
           background: '#FFFFFF',
           border: '3px solid #000000',
-          borderRadius: '1.5rem',
-          boxShadow: '8px 8px 0 var(--color-airline-red)',
+          borderRadius: '0px',
+          boxShadow: '8px 8px 0 #000000',
           padding: '2rem 2.5rem',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
@@ -307,9 +307,9 @@ export default function FlightHero({ onRegister }) {
               gap: '0.5rem',
               background: '#DCFCE7',
               border: '2px solid #000000',
-              boxShadow: '2px 2px 0 #000000',
-              padding: '0.35rem 0.8rem',
-              borderRadius: '9999px',
+              boxShadow: '3px 3px 0 #000000',
+              padding: '0.4rem 0.9rem',
+              borderRadius: '0px',
               fontWeight: 800,
               fontSize: '0.82rem',
               color: '#15803D'

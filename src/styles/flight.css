@@ -1,7 +1,8 @@
 /* ==========================================================================
    OOU FUTURETECH 2027 — THE FLIGHT EDITION
-   Neo-Brutalist 3D & Cinematic Aviation Design System
-   White Canvas + Cinematic Black Airplane Chapters + 3D Hard Shadows
+   Neo-Brutalist Architectural Design System (Academy Waitlist Aesthetic)
+   High-Contrast Stark White Canvas + 3px Solid Black Borders + 8px Hard Shadows
+   Sharp Rectilinear Shapes + Red Accent Badges + Dashed Ticket Geometry
    ========================================================================== */
 
 :root {
@@ -14,22 +15,29 @@
   --color-airline-red: #D71920;
   --color-red-hover: #b8141a;
   
-  --color-text-primary: #0A0A0A;
+  --color-text-primary: #000000;
   --color-text-secondary: #334155;
   --color-text-muted: #64748B;
   
-  --border-3d: 2px solid #000000;
+  --border-3d: 3px solid #000000;
   --border-3d-thick: 3px solid #000000;
+  --border-3d-thin: 2px solid #000000;
   
   --shadow-3d-sm: 3px 3px 0 #000000;
-  --shadow-3d-md: 5px 5px 0 #000000;
-  --shadow-3d-lg: 8px 8px 0 #000000;
-  --shadow-3d-xl: 12px 12px 0 #000000;
+  --shadow-3d-md: 4px 4px 0 #000000;
+  --shadow-3d-lg: 6px 6px 0 #000000;
+  --shadow-3d-xl: 8px 8px 0 #000000;
   --shadow-3d-red: 6px 6px 0 var(--color-airline-red);
   
-  --font-heading: 'Outfit', 'Space Grotesk', -apple-system, sans-serif;
+  --font-heading: 'Outfit', -apple-system, sans-serif;
   --font-body: 'Inter', -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Academy Aesthetic Radius Defaults: Crisp, Rectilinear Neo-Brutalist Architecture */
+  --radius-card: 0px;
+  --radius-btn: 0px;
+  --radius-badge: 0px;
+  --radius-subtle: 0px;
 }
 
 /* Base Wrapper */
@@ -56,16 +64,16 @@
 .flight-edition h5,
 .flight-edition h6 {
   font-family: var(--font-heading);
-  font-weight: 950;
+  font-weight: 900;
   letter-spacing: -0.03em;
-  line-height: 1.08;
+  line-height: 1.1;
   color: var(--color-jet-black);
   text-transform: uppercase;
 }
 
 .flight-mono {
   font-family: var(--font-mono);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -91,19 +99,19 @@
 
 /* Standard White Section */
 .flight-section {
-  padding: clamp(5rem, 8vw, 8rem) 0;
+  padding: clamp(4.5rem, 7vw, 7.5rem) 0;
   position: relative;
   border-bottom: 3px solid #000000;
   background-color: #FFFFFF;
 }
 
 .flight-section.alt-bg {
-  background-color: var(--color-bg-subtle);
+  background-color: #FAFAFA;
 }
 
-/* Dramatic Cinematic Black Aviation Section */
+/* Cinematic Black Aviation Section */
 .flight-section-black {
-  padding: clamp(6rem, 10vw, 9rem) 0;
+  padding: clamp(5rem, 8vw, 8rem) 0;
   position: relative;
   background-color: #070709;
   color: #FFFFFF;
@@ -123,7 +131,7 @@
 .flight-ticker-bar {
   background: #FFFFFF;
   color: #000000;
-  border-bottom: 2px solid #000000;
+  border-bottom: 3px solid #000000;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 800;
@@ -151,8 +159,8 @@
 }
 
 .flight-status-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   background-color: var(--color-airline-red);
   border-radius: 50%;
   display: inline-block;
@@ -184,7 +192,7 @@
   100% { transform: translateX(-50%); }
 }
 
-/* 3D Neo-Brutalist Buttons */
+/* Neo-Brutalist Buttons (Academy Form Shape) */
 .flight-btn-red {
   display: inline-flex;
   align-items: center;
@@ -193,23 +201,24 @@
   background-color: var(--color-airline-red);
   color: #FFFFFF !important;
   font-family: var(--font-heading);
-  font-size: 0.95rem;
-  font-weight: 950;
+  font-size: 1rem;
+  font-weight: 900;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 0.9rem 2rem;
-  border-radius: 9999px;
-  border: var(--border-3d);
-  box-shadow: var(--shadow-3d-md);
+  padding: 1rem 2rem;
+  border-radius: var(--radius-btn);
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0 #000000;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s ease;
   text-decoration: none;
+  box-sizing: border-box;
 }
 
 .flight-btn-red:hover {
   background-color: var(--color-red-hover);
-  transform: translate(-3px, -3px);
-  box-shadow: var(--shadow-3d-lg);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #000000;
 }
 
 .flight-btn-outline {
@@ -220,26 +229,27 @@
   background-color: #FFFFFF;
   color: #000000 !important;
   font-family: var(--font-heading);
-  font-size: 0.95rem;
-  font-weight: 950;
+  font-size: 1rem;
+  font-weight: 900;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 0.9rem 2rem;
-  border-radius: 9999px;
-  border: var(--border-3d);
-  box-shadow: var(--shadow-3d-md);
+  padding: 1rem 2rem;
+  border-radius: var(--radius-btn);
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0 #000000;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s ease;
   text-decoration: none;
+  box-sizing: border-box;
 }
 
 .flight-btn-outline:hover {
   background-color: #F8FAFC;
-  transform: translate(-3px, -3px);
-  box-shadow: var(--shadow-3d-lg);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #000000;
 }
 
-/* 3D Capsule Navigation */
+/* Neo-Brutalist Navigation Bar (Academy Rectangular Style) */
 .flight-navbar {
   position: fixed;
   top: 45px;
@@ -247,17 +257,17 @@
   right: 0;
   z-index: 110;
   transition: all 0.3s ease;
-  padding: 0.8rem 0;
+  padding: 0.75rem 0;
 }
 
 .flight-navbar.scrolled {
   top: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 2px solid #000000;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  padding: 0.6rem 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 3px solid #000000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 0.55rem 0;
 }
 
 .flight-nav-inner {
@@ -268,32 +278,32 @@
 
 .flight-nav-brand {
   background: #FFFFFF;
-  border: var(--border-3d);
-  border-radius: 9999px;
-  padding: 0.6rem 1.4rem;
+  border: 2px solid #000000;
+  border-radius: var(--radius-badge);
+  padding: 0.55rem 1.15rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  box-shadow: var(--shadow-3d-sm);
+  box-shadow: 3px 3px 0 #000000;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.15s ease;
 }
 
 .flight-nav-brand:hover {
   transform: translate(-2px, -2px);
-  box-shadow: var(--shadow-3d-md);
+  box-shadow: 4px 4px 0 #000000;
 }
 
 .flight-nav-menu-pill {
   display: none;
   background: #FFFFFF;
-  border: var(--border-3d);
-  border-radius: 9999px;
-  padding: 0.65rem 2rem;
+  border: 2px solid #000000;
+  border-radius: var(--radius-badge);
+  padding: 0.65rem 1.75rem;
   align-items: center;
-  gap: 2rem;
-  box-shadow: var(--shadow-3d-sm);
+  gap: 1.75rem;
+  box-shadow: 3px 3px 0 #000000;
 }
 
 @media (min-width: 992px) {
@@ -304,8 +314,8 @@
 
 .flight-nav-menu-pill a {
   font-family: var(--font-heading);
-  font-size: 0.82rem;
-  font-weight: 950;
+  font-size: 0.8rem;
+  font-weight: 900;
   color: #000000;
   text-decoration: none;
   text-transform: uppercase;
@@ -321,15 +331,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   background: #FFFFFF;
-  border: var(--border-3d);
-  border-radius: 50%;
-  box-shadow: var(--shadow-3d-sm);
+  border: 2px solid #000000;
+  border-radius: var(--radius-badge);
+  box-shadow: 3px 3px 0 #000000;
   color: #000000;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.15s ease;
 }
 
 .flight-mobile-toggle:hover {
@@ -342,28 +352,28 @@
   }
 }
 
-/* 3D Neo-Brutalist Boarding Pass */
+/* Neo-Brutalist Boarding Pass Container (Academy Form Style) */
 .flight-pass-3d {
   background: #FFFFFF;
-  border: var(--border-3d-thick);
-  border-radius: 2rem;
-  box-shadow: var(--shadow-3d-xl);
+  border: 3px solid #000000;
+  border-radius: var(--radius-card);
+  box-shadow: 8px 8px 0 #000000;
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .flight-pass-3d:hover {
-  box-shadow: 16px 16px 0 #000000;
+  box-shadow: 12px 12px 0 #000000;
 }
 
 /* Perforation Notches */
 .flight-pass-3d-notch-top,
 .flight-pass-3d-notch-bottom {
   position: absolute;
-  width: 34px;
-  height: 34px;
-  background: #F8FAFC;
+  width: 28px;
+  height: 28px;
+  background: #FFFFFF;
   border: 3px solid #000000;
   border-radius: 50%;
   z-index: 10;
@@ -371,18 +381,18 @@
 
 @media (min-width: 900px) {
   .flight-pass-3d-notch-top {
-    top: -17px;
+    top: -14px;
     right: 320px;
   }
   .flight-pass-3d-notch-bottom {
-    bottom: -17px;
+    bottom: -14px;
     right: 320px;
   }
   .flight-pass-3d-perforation {
     position: absolute;
-    top: 17px;
-    bottom: 17px;
-    right: 335px;
+    top: 14px;
+    bottom: 14px;
+    right: 333px;
     width: 2px;
     border-right: 3px dashed #000000;
   }
@@ -390,36 +400,36 @@
 
 @media (max-width: 899px) {
   .flight-pass-3d-notch-top {
-    left: -17px;
+    left: -14px;
     top: 66%;
   }
   .flight-pass-3d-notch-bottom {
-    right: -17px;
+    right: -14px;
     top: 66%;
   }
   .flight-pass-3d-perforation {
     position: absolute;
-    left: 17px;
-    right: 17px;
+    left: 14px;
+    right: 14px;
     top: 66%;
     height: 2px;
     border-bottom: 3px dashed #000000;
   }
 }
 
-/* 3D Airport Departure Board */
+/* Neo-Brutalist Departure Board Container (Academy Form Style) */
 .flight-dep-board-3d {
   background: #FFFFFF;
-  border: var(--border-3d-thick);
-  border-radius: 1.75rem;
-  box-shadow: var(--shadow-3d-xl);
+  border: 3px solid #000000;
+  border-radius: var(--radius-card);
+  box-shadow: 8px 8px 0 #000000;
   overflow: hidden;
 }
 
 .flight-dep-header-3d {
   background: #000000;
   color: #FFFFFF;
-  padding: 1.4rem 2rem;
+  padding: 1.25rem 1.75rem;
   border-bottom: 3px solid #000000;
   display: flex;
   align-items: center;
@@ -433,10 +443,10 @@
   grid-template-columns: 90px 1fr auto;
   gap: 1.5rem;
   align-items: center;
-  padding: 1.6rem 2rem;
+  padding: 1.4rem 1.75rem;
   border-bottom: 2px solid #000000;
   background: #FFFFFF;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .flight-dep-row-3d:nth-child(even) {
@@ -459,15 +469,15 @@
   }
 }
 
-/* Status Badges */
+/* Status Badges (Academy Shape) */
 .flight-status-badge-3d {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0.95rem;
-  border-radius: 9999px;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-subtle);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   background: #FFFFFF;
@@ -481,15 +491,15 @@
   color: #FFFFFF;
 }
 
-/* 3D Speaker Cards - Airplane Cabin Window Design */
+/* Speaker / Flight Crew Cards (Academy Waitlist Architecture) */
 .flight-crew-card-3d,
 .speaker-window-card {
   background: #FFFFFF;
-  border: var(--border-3d-thick);
-  border-radius: 2.25rem;
-  box-shadow: var(--shadow-3d-lg);
+  border: 3px solid #000000;
+  border-radius: var(--radius-card);
+  box-shadow: 8px 8px 0 #000000;
   overflow: hidden;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -497,57 +507,40 @@
 
 .flight-crew-card-3d:hover,
 .speaker-window-card:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: 12px 12px 0 var(--color-airline-red);
+  transform: translate(-3px, -3px);
+  box-shadow: 10px 10px 0 var(--color-airline-red);
 }
 
-/* Outer Airplane Window Bezel */
+/* Speaker Window Bezel */
 .speaker-window-bezel {
-  padding: 1.5rem 1.5rem 1rem 1.5rem;
-  background: #F1F5F9;
-  border-bottom: var(--border-3d-thick);
+  padding: 1.25rem 1.25rem 0.75rem 1.25rem;
+  background: #F8FAFC;
+  border-bottom: 3px solid #000000;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* Window Shade Slider Notch */
 .speaker-window-notch {
-  width: 44px;
-  height: 6px;
+  width: 36px;
+  height: 5px;
   background: #CBD5E1;
   border: 1.5px solid #000000;
-  border-radius: 9999px;
-  margin-bottom: 0.75rem;
+  border-radius: 2px;
+  margin-bottom: 0.65rem;
 }
 
-/* Authentic Airplane Window Frame */
 .flight-crew-img-wrap-3d,
 .speaker-window-portal {
   width: 100%;
-  aspect-ratio: 1 / 1.18;
+  aspect-ratio: 1 / 1.15;
   position: relative;
   overflow: hidden;
   border: 3px solid #000000;
-  border-radius: 72px;
+  border-radius: 4px;
   background: #000000;
-  box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.25), 3px 3px 0 #000000;
-}
-
-/* Inner Glass Sheen / Reflection */
-.speaker-window-glass {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.1) 38%, transparent 55%, rgba(0, 0, 0, 0.25) 100%);
-  pointer-events: none;
-  z-index: 3;
-  transition: opacity 0.3s ease;
-}
-
-.flight-crew-card-3d:hover .speaker-window-glass,
-.speaker-window-card:hover .speaker-window-glass {
-  opacity: 0.65;
+  box-shadow: 3px 3px 0 #000000;
 }
 
 .flight-crew-img-3d,
@@ -556,47 +549,47 @@
   height: 100%;
   object-fit: cover;
   filter: grayscale(100%);
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s ease;
 }
 
 .flight-crew-card-3d:hover .flight-crew-img-3d,
 .speaker-window-card:hover .speaker-window-img {
   filter: grayscale(0%);
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .flight-crew-badge-3d,
 .speaker-window-badge {
   position: absolute;
-  top: 1.25rem;
-  left: 1.25rem;
+  top: 1rem;
+  left: 1rem;
   z-index: 4;
   background: #FFFFFF;
   color: var(--color-airline-red);
   font-family: var(--font-mono);
   font-weight: 800;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  padding: 0.35rem 0.85rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  padding: 0.3rem 0.75rem;
   border: 2px solid #000000;
-  box-shadow: 2.5px 2.5px 0 #000000;
-  border-radius: 9999px;
+  box-shadow: 2px 2px 0 #000000;
+  border-radius: var(--radius-subtle);
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
-/* 3D Partner Pills */
+/* Partner Cards (Academy Form Shape) */
 .flight-partner-pill-3d {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.8rem;
-  border: 2px solid #000000;
+  padding: 1rem 1.6rem;
+  border: 3px solid #000000;
   background: #FFFFFF;
-  border-radius: 9999px;
-  box-shadow: var(--shadow-3d-sm);
-  transition: all 0.25s ease;
+  border-radius: var(--radius-btn);
+  box-shadow: 4px 4px 0 #000000;
+  transition: all 0.2s ease;
 }
 
 .flight-partner-pill-3d:hover {
@@ -609,10 +602,10 @@
   width: 100%;
   max-width: 440px;
   aspect-ratio: 1 / 1.35;
-  border-radius: 120px;
+  border-radius: var(--radius-card);
   border: 4px solid #000000;
-  box-shadow: 12px 12px 0 #000000;
-  background: #F1F5F9;
+  box-shadow: 8px 8px 0 #000000;
+  background: #F8FAFC;
   padding: 12px;
   position: relative;
   overflow: hidden;
@@ -621,38 +614,28 @@
 .airplane-window-inner {
   width: 100%;
   height: 100%;
-  border-radius: 108px;
+  border-radius: var(--radius-subtle);
   border: 2px solid #000000;
   overflow: hidden;
   position: relative;
 }
 
-.airplane-window-glass {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(0,0,0,0.15) 100%);
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ==========================================================================
-   Airplane Exit / Boarding Door Component (Team Member Cards)
-   ========================================================================== */
+/* Team Door Cards (Academy Form Shape) */
 .airplane-door-card {
   background: #FFFFFF;
   border: 3px solid #000000;
-  border-radius: 28px;
+  border-radius: var(--radius-card);
   box-shadow: 8px 8px 0 #000000;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
   position: relative;
 }
 
 .airplane-door-card:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: 12px 12px 0 var(--color-airline-red);
+  transform: translate(-3px, -3px);
+  box-shadow: 10px 10px 0 var(--color-airline-red);
 }
 
 .airplane-door-header {
@@ -671,7 +654,6 @@
   z-index: 3;
 }
 
-/* Upper Box: Image Covers the Entire Upper Area */
 .airplane-door-image-box {
   width: 100%;
   height: 300px;
@@ -686,34 +668,12 @@
   height: 100%;
   object-fit: cover;
   object-position: top center;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.3s ease;
   display: block;
 }
 
 .airplane-door-card:hover .airplane-door-cover-img {
-  transform: scale(1.05);
-}
-
-/* Aviation Overlays on the Image */
-.airplane-door-image-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, transparent 40%, rgba(0, 0, 0, 0.75) 100%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.airplane-door-glass-sheen {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.08) 35%, transparent 60%);
-  pointer-events: none;
-  z-index: 2;
-  transition: opacity 0.3s ease;
-}
-
-.airplane-door-card:hover .airplane-door-glass-sheen {
-  opacity: 0.8;
+  transform: scale(1.04);
 }
 
 .airplane-door-latch-badge {
@@ -728,30 +688,10 @@
   color: #000000;
   border: 2px solid #000000;
   box-shadow: 2px 2px 0 #000000;
-  border-radius: 9999px;
-  padding: 0.25rem 0.75rem;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 850;
-  letter-spacing: 0.06em;
-}
-
-.airplane-door-ops-badge {
-  position: absolute;
-  bottom: 0.85rem;
-  left: 0.85rem;
-  z-index: 3;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: #000000;
-  color: #FFFFFF;
-  border: 1.5px solid #FFFFFF;
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
-  border-radius: 6px;
+  border-radius: var(--radius-subtle);
   padding: 0.25rem 0.65rem;
   font-family: var(--font-mono);
-  font-size: 0.66rem;
+  font-size: 0.65rem;
   font-weight: 850;
   letter-spacing: 0.06em;
 }
@@ -764,13 +704,13 @@
   background: var(--color-airline-red);
   color: #FFFFFF;
   border: 2px solid #000000;
-  box-shadow: 3px 3px 0 #000000;
-  border-radius: 9999px;
-  padding: 0.35rem 0.95rem;
+  box-shadow: 2px 2px 0 #000000;
+  border-radius: var(--radius-subtle);
+  padding: 0.35rem 0.85rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  font-weight: 950;
-  letter-spacing: 0.1em;
+  font-weight: 900;
+  letter-spacing: 0.08em;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -790,24 +730,22 @@
   border-bottom: 2px solid #000000;
 }
 
-/* ==========================================================================
-   Aircraft Tail Fin / Fleet Alliance Cards (Travel Partners)
-   ========================================================================== */
+/* Travel Partners Cards (Academy Form Style) */
 .airplane-partner-card {
   background: #FFFFFF;
   border: 3px solid #000000;
-  border-radius: 36px 8px 24px 24px;
+  border-radius: var(--radius-card);
   box-shadow: 6px 6px 0 #000000;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
   position: relative;
 }
 
 .airplane-partner-card:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: 10px 10px 0 var(--color-airline-red);
+  transform: translate(-3px, -3px);
+  box-shadow: 8px 8px 0 var(--color-airline-red);
 }
 
 .airplane-partner-header {
@@ -836,7 +774,7 @@
 .airplane-partner-nacelle {
   width: 58px;
   height: 58px;
-  border-radius: 16px;
+  border-radius: var(--radius-subtle);
   border: 2.5px solid #000000;
   box-shadow: 3px 3px 0 #000000;
   background: #F8FAFC;
@@ -845,18 +783,18 @@
   justify-content: center;
   flex-shrink: 0;
   overflow: hidden;
-  transition: transform 0.25s ease;
+  transition: transform 0.2s ease;
 }
 
 .airplane-partner-card:hover .airplane-partner-nacelle {
-  transform: scale(1.08) rotate(-4deg);
+  transform: scale(1.05);
   box-shadow: 3px 3px 0 var(--color-airline-red);
 }
 
 .airplane-partner-footer {
   padding: 0.65rem 1.5rem;
   background: #F8FAFC;
-  border-top: 2px dashed #CBD5E1;
+  border-top: 2px dashed #000000;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -865,24 +803,22 @@
   font-weight: 800;
 }
 
-/* ==========================================================================
-   ATC Electronic Flight Progress Strip (FPS) & Flight Manifest Cards
-   ========================================================================== */
+/* Flight Progress Strip Cards (Academy Form Style) */
 .flight-strip-card {
   background: #FFFFFF;
   border: 3px solid #000000;
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   box-shadow: 6px 6px 0 #000000;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
   position: relative;
 }
 
 .flight-strip-card:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: 10px 10px 0 var(--color-airline-red);
+  transform: translate(-3px, -3px);
+  box-shadow: 8px 8px 0 var(--color-airline-red);
 }
 
 .flight-strip-header {
@@ -915,7 +851,7 @@
   background: #F8FAFC;
   border: 2px solid #000000;
   box-shadow: 2px 2px 0 #000000;
-  border-radius: 12px;
+  border-radius: var(--radius-subtle);
   padding: 0.85rem 1rem;
   margin-top: 1.5rem;
 }
@@ -955,7 +891,7 @@
   border: 2px solid var(--color-airline-red);
   color: var(--color-airline-red);
   background: #FFF5F5;
-  border-radius: 6px;
+  border-radius: var(--radius-subtle);
   padding: 0.25rem 0.65rem;
   font-family: var(--font-mono);
   font-size: 0.66rem;
@@ -965,13 +901,13 @@
   transform: rotate(-1.5deg);
 }
 
-/* Air Traffic Control Radar Command Deck */
+/* Radar Deck */
 .flight-atc-console {
   background: #000000;
   color: #FFFFFF;
   border: 3.5px solid #000000;
-  border-radius: 2rem;
-  box-shadow: 12px 12px 0 var(--color-airline-red);
+  border-radius: var(--radius-card);
+  box-shadow: 8px 8px 0 var(--color-airline-red);
   overflow: hidden;
   margin-bottom: 4rem;
   position: relative;
@@ -979,51 +915,27 @@
 
 @media (max-width: 640px) {
   .flight-atc-console {
-    border-radius: 1.25rem;
-    box-shadow: 6px 6px 0 var(--color-airline-red);
+    box-shadow: 5px 5px 0 var(--color-airline-red);
   }
 }
 
-@media (max-width: 992px) {
-  .ascent-board-row {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-    padding: 1.5rem;
-  }
-}
-
-.ascent-board-table-header {
-  display: grid;
-  grid-template-columns: 120px 1fr 200px 90px 160px;
-  gap: 1.5rem;
-  padding: 0.85rem 2rem;
-  background: #040406;
-  border-bottom: 2px solid #1E293B;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 800;
-  color: #94A3B8;
-  letter-spacing: 0.1em;
-}
-
-@media (max-width: 992px) {
-  .ascent-board-table-header {
-    display: none !important;
-  }
-}
-
-/* Itinerary Card Component */
+/* Itinerary Card Component (Academy Form Style) */
 .flight-itinerary-card {
   background: #FFFFFF;
   border: 3px solid #000000;
-  border-radius: 1.5rem;
-  box-shadow: 5px 5px 0 #000000;
-  padding: clamp(1.25rem, 3vw, 2.25rem);
+  border-radius: var(--radius-card);
+  box-shadow: 6px 6px 0 #000000;
+  padding: clamp(1.25rem, 3vw, 2rem);
   display: grid;
   grid-template-columns: minmax(140px, 200px) 1fr auto;
   gap: 1.75rem;
   align-items: center;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
+}
+
+.flight-itinerary-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 #000000;
 }
 
 @media (max-width: 768px) {
@@ -1033,9 +945,61 @@
   }
 }
 
-/* ==========================================================================
-   Comprehensive Mobile Optimization Suite (Smartphones & Tablets)
-   ========================================================================== */
+/* Neo-Brutalist Form Inputs & Boxes (Academy Standard) */
+.flight-form-input {
+  width: 100%;
+  padding: 1rem;
+  border: 3px solid #000000;
+  outline: none;
+  background: #FFFFFF;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  border-radius: var(--radius-card);
+  box-sizing: border-box;
+  box-shadow: 3px 3px 0 #000000;
+  transition: box-shadow 0.15s ease;
+}
+
+.flight-form-input:focus {
+  box-shadow: 5px 5px 0 var(--color-airline-red);
+}
+
+/* Red Icon Header Badge (Matching Academy Terminal Badge) */
+.flight-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-airline-red);
+  color: #FFFFFF;
+  padding: 0.75rem;
+  border: 2px solid #000000;
+  border-radius: var(--radius-badge);
+  box-shadow: 3px 3px 0 #000000;
+  flex-shrink: 0;
+}
+
+/* Dashed Ticket Stub Container (Academy Ticket Stub Signature) */
+.flight-ticket-stub-dashed {
+  border: 3px dashed #000000;
+  padding: 2rem 1.5rem;
+  position: relative;
+  background: #FAFAFA;
+  box-shadow: 4px 4px 0 #000000;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.flight-ticket-stub-notch {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  background: #FFFFFF;
+  border: 3px solid #000000;
+  border-radius: 50%;
+  z-index: 5;
+}
+
+/* Mobile Optimizations */
 @media (max-width: 768px) {
   .flight-hero-radar-nav {
     display: none !important;
@@ -1073,49 +1037,14 @@
     --shadow-3d-md: 4px 4px 0 #000000;
   }
 
-  /* Compact Airport Board on mobile */
-  .ascent-flight-board {
-    box-shadow: 6px 6px 0 var(--color-airline-red);
-    border-radius: 1.25rem;
-    margin-bottom: 3.5rem;
-  }
-
-  .ascent-board-header {
-    padding: 1rem;
-    font-size: 0.7rem;
-  }
-
-  .ascent-board-announcement {
-    padding: 1.5rem 1rem;
-  }
-
-  .ascent-board-row {
-    padding: 1.25rem 1rem;
-    gap: 0.85rem;
-  }
-
-  /* Mobile card radii and image sizing */
-  .airplane-door-card,
-  .speaker-window-card,
-  .airplane-partner-card {
-    border-radius: 20px;
-    box-shadow: 5px 5px 0 #000000 !important;
-  }
-
   .airplane-door-image-box {
     height: 250px;
   }
 
-  .flight-pass-3d {
-    border-radius: 1.25rem;
-    box-shadow: 6px 6px 0 #000000;
-  }
-
-  /* Prevent button squishing */
   .flight-btn-red,
   .flight-btn-outline {
-    padding: 0.8rem 1.4rem;
-    font-size: 0.88rem;
+    padding: 0.9rem 1.6rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -1125,13 +1054,7 @@
   }
 
   .flight-navbar-action-btn {
-    padding: 0.45rem 0.85rem !important;
+    padding: 0.5rem 0.9rem !important;
     font-size: 0.72rem !important;
-  }
-}
-
-@media (max-width: 380px) {
-  .flight-navbar-action-btn {
-    display: none !important;
   }
 }

@@ -80,8 +80,8 @@ export default function DepartureBoard() {
               background: '#F1F5F9',
               border: '2px solid #000000',
               boxShadow: '3px 3px 0 #000000',
-              borderRadius: '9999px',
-              padding: '0.4rem 1rem',
+              borderRadius: '0px',
+              padding: '0.45rem 1rem',
               marginBottom: '1.25rem'
             }}>
               <span className="flight-status-dot" />
@@ -154,9 +154,9 @@ export default function DepartureBoard() {
                     width: '64px',
                     height: '64px',
                     minWidth: '64px',
-                    borderRadius: '10px',
+                    borderRadius: '0px',
                     overflow: 'hidden',
-                    border: '2px solid #000000',
+                    border: '3px solid #000000',
                     boxShadow: '3px 3px 0 #000000',
                     flexShrink: 0
                   }}>

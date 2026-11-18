@@ -36,8 +36,8 @@ export default function FlightTicketCard({
         margin: '0 auto',
         backgroundColor: '#FFFFFF',
         border: '3px solid #000000',
-        borderRadius: '1.25rem',
-        boxShadow: '10px 10px 0 #000000',
+        borderRadius: '0px',
+        boxShadow: '8px 8px 0 #000000',
         overflow: 'hidden',
         ...style
       }}
@@ -78,7 +78,7 @@ export default function FlightTicketCard({
               style={{
                 height: '46px',
                 width: 'auto',
-                borderRadius: '6px',
+                borderRadius: '0px',
                 border: '2px solid #000000',
                 boxShadow: '2px 2px 0 #000000',
                 objectFit: 'contain',
@@ -298,7 +298,7 @@ export default function FlightTicketCard({
             style={{
               background: '#FFFFFF',
               padding: '6px',
-              borderRadius: '8px',
+              borderRadius: '0px',
               border: '2px solid #000000',
               boxShadow: '3px 3px 0 #000000',
               display: 'inline-flex',

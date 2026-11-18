@@ -17,6 +17,8 @@ export default function AnnouncementTicker() {
             <span style={{ color: '#CBD5E1' }}>/</span>
             <span style={{ fontWeight: 700 }}>STATUS: BOARDING OPEN</span>
             <span style={{ color: '#CBD5E1' }}>/</span>
+            <span style={{ color: '#FFD700', fontWeight: 800 }}>🏆 THE ALTITUDE AWARDS 2027: NOMINATIONS NOW OPEN</span>
+            <span style={{ color: '#CBD5E1' }}>/</span>
           </div>
         ))}
       </div>

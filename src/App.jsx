@@ -14,6 +14,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import FlightEditionHomepage from './components/flight/FlightEditionHomepage';
 import FlightRegisterModal from './components/flight/FlightRegisterModal';
+import AltitudeAwardsLanding from './components/awards/AltitudeAwardsLanding';
+import AltitudeAdminTab from './components/awards/AltitudeAdminTab';
 import './styles/flight.css';
 
 /* ───────────────────────────────────────────
@@ -3628,6 +3630,7 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                     <TabButton id="speakers" label="Speakers CMS" icon={Mic} />
                     <TabButton id="team" label="Team CMS" icon={Users} />
                     <TabButton id="fta-control" label="FTA Control" icon={BookOpen} />
+                    <TabButton id="altitude-awards" label="Altitude Awards" icon={Award} />
                     <TabButton id="settings" label="Site Controls" icon={Zap} />
                 </div>
 
@@ -6357,6 +6360,10 @@ const AdminDashboard = ({ onBack, onRefresh, isRegistrationOpen, isEventTagsOpen
                         </div>
                     );
                 })()}
+
+                {activeTab === 'altitude-awards' && (
+                    <AltitudeAdminTab />
+                )}
             </div >
         </div >
     );
@@ -13477,6 +13484,9 @@ export default function App() {
             localStorage.setItem('admin_redirect', 'admin');
             setView('admin-login');
             setShowOnboardingPopup(false);
+        } else if (path === '/awards' || path === '/awards/' || path === '/altitude' || path === '/altitude/' || search.includes('awards') || search.includes('altitude')) {
+            setView('awards');
+            setShowOnboardingPopup(false);
         } else if (path === '/techwaitlist' || path === '/techwaitlist/' || path === '/waitlist' || path === '/waitlist/') {
             setView('techwaitlist');
             setShowOnboardingPopup(false);
@@ -13573,6 +13583,21 @@ export default function App() {
                     dynamicSpeakers={dynamicSpeakers}
                     dynamicPartners={dynamicPartners}
                     dynamicTeam={dynamicTeam}
+                />
+            </>
+        );
+    }
+
+    if (view === 'awards') {
+        return (
+            <>
+                <GlobalStyle />
+                <AltitudeAwardsLanding
+                    onBackToConference={() => {
+                        setView('site');
+                        window.history.pushState({}, '', '/');
+                        window.scrollTo(0, 0);
+                    }}
                 />
             </>
         );

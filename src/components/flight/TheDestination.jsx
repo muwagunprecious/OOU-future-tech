@@ -87,9 +87,9 @@ export default function TheDestination() {
             background: 'rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(10px)',
             border: '2px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '3px 3px 0 var(--color-airline-red)',
-            borderRadius: '9999px',
-            padding: '0.45rem 1.2rem',
+            boxShadow: '4px 4px 0 var(--color-airline-red)',
+            borderRadius: '0px',
+            padding: '0.5rem 1.25rem',
             marginBottom: '1.5rem'
           }}>
             <Plane size={15} color="var(--color-airline-red)" style={{ transform: 'rotate(-45deg)' }} />
@@ -146,7 +146,7 @@ export default function TheDestination() {
               style={{
                 background: '#FFFFFF',
                 border: '3px solid #000000',
-                borderRadius: '1.75rem',
+                borderRadius: '0px',
                 boxShadow: '8px 8px 0 var(--color-airline-red)',
                 padding: '1.75rem 1.75rem 2rem 1.75rem',
                 display: 'flex',
@@ -169,9 +169,9 @@ export default function TheDestination() {
                   <div style={{
                     width: '100%',
                     height: '180px',
-                    borderRadius: '1rem',
+                    borderRadius: '0px',
                     overflow: 'hidden',
-                    border: '2px solid #000000',
+                    border: '3px solid #000000',
                     marginBottom: '1.25rem',
                     position: 'relative'
                   }}>
@@ -196,7 +196,7 @@ export default function TheDestination() {
                       fontSize: '0.68rem',
                       fontWeight: 900,
                       padding: '2px 8px',
-                      borderRadius: '4px',
+                      borderRadius: '0px',
                       border: '1.5px solid #000000'
                     }}>
                       {card.num} // {card.tag}
@@ -228,7 +228,7 @@ export default function TheDestination() {
                     background: '#F1F5F9',
                     border: '1.5px solid #000000',
                     padding: '0.25rem 0.65rem',
-                    borderRadius: '9999px'
+                    borderRadius: '0px'
                   }}>
                     {card.tag}
                   </span>
@@ -277,8 +277,8 @@ export default function TheDestination() {
           background: 'rgba(0, 0, 0, 0.75)',
           backdropFilter: 'blur(16px)',
           border: '3px solid #FFFFFF',
-          borderRadius: '2rem',
-          boxShadow: '10px 10px 0 var(--color-airline-red)',
+          borderRadius: '0px',
+          boxShadow: '8px 8px 0 var(--color-airline-red)',
           padding: '2.5rem 2rem',
           color: '#FFFFFF'
         }}>
@@ -307,7 +307,7 @@ export default function TheDestination() {
               color: '#000000',
               border: '2px solid #000000',
               boxShadow: '3px 3px 0 var(--color-airline-red)',
-              borderRadius: '9999px',
+              borderRadius: '0px',
               padding: '0.45rem 1.25rem',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.75rem',
@@ -322,7 +322,7 @@ export default function TheDestination() {
           <div style={{
             background: '#070709',
             border: '2px solid rgba(255,255,255,0.2)',
-            borderRadius: '1.25rem',
+            borderRadius: '0px',
             padding: '1.75rem 2rem',
             display: 'flex',
             flexWrap: 'wrap',

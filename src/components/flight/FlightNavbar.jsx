@@ -17,6 +17,7 @@ export default function FlightNavbar({ onRegister, onViewChange, currentView }) 
     { label: 'ABOUT', href: '#about' },
     { label: 'DESTINATION', href: '#destination' },
     { label: 'DEPARTURES', href: '#departures' },
+    { label: 'ALTITUDE AWARDS', href: '#altitude', isActionView: 'awards' },
     { label: 'FLIGHT CREW', href: '#flight-crew' },
     { label: 'ITINERARY', href: '#itinerary' },
     { label: 'TEAM', href: '#team' },
@@ -24,12 +25,19 @@ export default function FlightNavbar({ onRegister, onViewChange, currentView }) 
     { label: '2026 ARCHIVES', href: '#archives' },
   ];
 
-  const handleNavClick = (e, href) => {
+  const handleNavClick = (e, item) => {
+    if (item.isActionView) {
+      e.preventDefault();
+      onViewChange(item.isActionView);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setMobileOpen(false);
+      return;
+    }
     if (currentView !== 'site') {
       e.preventDefault();
       onViewChange('site');
       setTimeout(() => {
-        const el = document.querySelector(href);
+        const el = document.querySelector(item.href);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }, 150);
     }
@@ -57,7 +65,7 @@ export default function FlightNavbar({ onRegister, onViewChange, currentView }) 
                 style={{
                   height: '32px',
                   width: 'auto',
-                  borderRadius: '6px',
+                  borderRadius: '0px',
                   objectFit: 'contain'
                 }}
               />
@@ -77,7 +85,8 @@ export default function FlightNavbar({ onRegister, onViewChange, currentView }) 
                 <a
                   key={item.label}
                   href={item.href}
-                  onClick={(e) => handleNavClick(e, item.href)}
+                  onClick={(e) => handleNavClick(e, item)}
+                  style={item.isActionView ? { color: 'var(--color-airline-red)', fontWeight: 900 } : {}}
                 >
                   {item.label}
                 </a>
@@ -127,9 +136,10 @@ export default function FlightNavbar({ onRegister, onViewChange, currentView }) 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{
             background: '#FFFFFF',
-            border: '2px solid #000',
-            borderRadius: '9999px',
-            padding: '0.4rem 1.1rem',
+            border: '3px solid #000',
+            borderRadius: '0px',
+            boxShadow: '4px 4px 0 #000',
+            padding: '0.45rem 1.1rem',
             display: 'flex',
             alignItems: 'center',
             gap: '0.65rem'
@@ -140,7 +150,7 @@ export default function FlightNavbar({ onRegister, onViewChange, currentView }) 
               style={{
                 height: '28px',
                 width: 'auto',
-                borderRadius: '4px',
+                borderRadius: '0px',
                 objectFit: 'contain'
               }}
             />
@@ -153,11 +163,12 @@ export default function FlightNavbar({ onRegister, onViewChange, currentView }) 
             type="button"
             onClick={() => setMobileOpen(false)}
             style={{
-              width: '44px',
-              height: '44px',
+              width: '42px',
+              height: '42px',
               background: '#FFFFFF',
-              border: '2px solid #000',
-              borderRadius: '50%',
+              border: '3px solid #000',
+              borderRadius: '0px',
+              boxShadow: '3px 3px 0 #000',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -174,7 +185,7 @@ export default function FlightNavbar({ onRegister, onViewChange, currentView }) 
               <li key={item.label}>
                 <a
                   href={item.href}
-                  onClick={(e) => handleNavClick(e, item.href)}
+                  onClick={(e) => handleNavClick(e, item)}
                   style={{
                     fontFamily: 'var(--font-heading)',
                     fontSize: '1.6rem',
